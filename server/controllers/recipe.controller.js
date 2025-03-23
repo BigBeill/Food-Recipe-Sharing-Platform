@@ -26,6 +26,29 @@ exports.data = async (req, res) => {
    }
 }
 
+exports.find = async (req, res) => {
+   
+   const queryErrors = validationResult(req);
+   if (!queryErrors.isEmpty()) { return res.status(400).json({ error: queryErrors.array() }); }
+
+   const { title, ingredients, limit, skip } = req.query;
+
+   try {
+      let query = {}
+      if (title) { query.title = {$regex: new RegExp(title, 'i')} }
+      if (ingredients) { query.ingredients = {$all: ingredients.split(',')} }
+      const data = await recipes.find(query)
+      .limit(limit)
+      .skip(skip);
+
+      return res.status(200).json({ message: "recipes found", payload: data });
+   }
+   catch (error) {
+      console.error(error);
+      return res.status(500).json({ error: "server failed to find recipes" });
+   }
+}
+
 exports.packageIncoming = async (req, res, next) => {
 
    const bodyErrors = validationResult(req);

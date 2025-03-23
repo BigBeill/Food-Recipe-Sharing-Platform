@@ -5,6 +5,7 @@ import { faCircleCheck } from '@fortawesome/free-regular-svg-icons';
 
 import Notebook from '../components/Notebook';
 import PageObject from '../interfaces/PageObject';
+import RecipeObject from '../interfaces/RecipeObject';
 import IngredientObject from '../interfaces/IngredientObject';
 import RecipePreview from '../components/notebookPages/RecipePreview';
 import axios from '../api/axios';
@@ -13,12 +14,16 @@ export default function Home() {
 
    const [searchParams, setSearchParams] = useSearchParams();
 
+   const pageNumber: number = Number(searchParams.get('pageNumber')) || 1;
+
    const [recipeName, setRecipeName] = useState<string>('');
    const [ingredientList, setIngredientList] = useState<IngredientObject[]>([]);
-   const [pageNumber, setPageNumber] = useState<number>(1);
+
+   const [recipes, setRecipes] = useState<RecipeObject[]>([]);
 
    useEffect(() => {
-
+      axios({method: 'get', url: `recipe/find?limit=${pageNumber == 1 ? 1 : 2}&skip=${pageNumber == 1 ? 0 : ((pageNumber - 1) * 2) - 1 }`})
+      .then(response => { setRecipes(response); });
    }, [searchParams])
 
    function handleSubmit() {
@@ -29,15 +34,29 @@ export default function Home() {
       setSearchParams(searchParams => ({...searchParams, pageNumber: newPage}));
    }
 
-   const pageList: PageObject[] = [{
-      content: MainPage,
-      props: {
-         recipeName,
-         setRecipeName,
-         ingredientList,
-         setIngredientList
-      }
-   }]
+   let pageList: PageObject[] = [];
+
+   if (pageNumber == 1) {
+      pageList = [{
+         content: MainPage,
+         props: {
+            recipeName,
+            setRecipeName,
+            ingredientList,
+            setIngredientList,
+            handleSubmit
+         }
+      }];
+   }
+
+   recipes.forEach((recipe) => {
+      pageList.push({
+         content: RecipePreview,
+         props: {
+            recipe
+         }
+      });
+   });
 
    return <Notebook pageList={pageList} parentPageNumber={pageNumber} requestNewPage={handlePageChange}/>
 }
