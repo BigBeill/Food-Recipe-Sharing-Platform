@@ -2,5 +2,9 @@ node_modules
 .env
 .DS_Store
 junk
-foodData_USDA
 certificates
+
+
+
+foodData_USDA
+foodData_USDA_setup.txt

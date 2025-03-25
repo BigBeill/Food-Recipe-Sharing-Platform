@@ -1,8 +1,37 @@
-# Client component explanations
-This section of the documentation gives a in depth description of each component file inside the client, as well as information on how to use them. \
-Folder path: client/src/components
+# Program Overview
+Hi, my name is Mackenzie Neill, im a COIS student at trent university and this is a personal project im working on to practice my web development skills outside of course material. This has been a lot of fun and has taught me a lot about web development, cybersecurity, and server management. This project has also helped me develop good coding habits to improve my codes readability. If you have any questions about the project (personal or professional), or just some recommendations for me to improve my code please feel free to email me at mackenzie.neill.359@gmail.com!
 
-## Notebook.jsx
+## General overview
+Author: Mackenzie Neill \
+Start date: December 15th, 2023
+
+Frontend framework: React (typescript) \
+Backend framework: Node js \
+Server frameworks: MongoDB and PostgreSQL
+
+## Security features
+- HTTPS connection
+- HTTP only for all cookies
+- client data sanitization (cookies, query, params, and body)
+
+### User authentication
+- using JSON web tokens
+- Access token that lasts 15 min
+- Refresh token that lasts 30 days
+
+### password protection features
+Client side:
+- password masking
+- user must enter their password twice to verify they entered it correctly
+- (to be done) add minimum password retirements
+
+Server side:
+- salted passwords
+- hashed passwords
+
+## Notebook.jsx explanation 
+location: (client/src/components/Notebook.jsx)
+
 there are 3 crucial parts of notebook that anyone using the component should be aware of:
 - blank space
    - the space on each page that is left empty, that will be filled in by the component calling notebook
