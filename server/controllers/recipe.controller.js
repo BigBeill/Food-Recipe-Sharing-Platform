@@ -1,8 +1,13 @@
 const { createRecipeSchema } = require("../library/validSchemaUtils");
 const recipes = require("../models/recipe");
 const users = require("../models/user");
-const { validationResult } = require("express-validator");
 
+// IMPORTANT: go to server/routes/recipe.router.js for a more detailed explanations
+
+/*
+returns all data associated with a given recipe id
+@route: GET /recipe/data
+*/
 exports.data = async (req, res) => {
    const { _id } = req.query
 
@@ -26,10 +31,15 @@ exports.data = async (req, res) => {
    }
 }
 
+
+
+
+
+/*
+finds a list of recipes in the database that match the query parameters
+@route: GET /recipe/find
+*/
 exports.find = async (req, res) => {
-   
-   const queryErrors = validationResult(req);
-   if (!queryErrors.isEmpty()) { return res.status(400).json({ error: queryErrors.array() }); }
 
    const { title, ingredients, limit, skip } = req.query;
 
@@ -49,10 +59,15 @@ exports.find = async (req, res) => {
    }
 }
 
-exports.packageIncoming = async (req, res, next) => {
 
-   const bodyErrors = validationResult(req);
-   if (!bodyErrors.isEmpty()) { return res.status(400).json({ error: bodyErrors.array() }); }
+
+
+
+/*
+packages the data from the incoming request into a recipe schema
+@route: n/a
+*/
+exports.packageIncoming = async (req, res, next) => {
 
    // make sure user is signed in
    if(!req.user) return res.status(401).json({ error: 'user not signed in' });
@@ -75,6 +90,10 @@ exports.packageIncoming = async (req, res, next) => {
    });
 }
 
+/*
+adds a new recipe to the database
+@route: POST /recipe/edit
+*/
 exports.add = async (req, res) => {
    try {
       // create new recipe and save to database
@@ -94,6 +113,10 @@ exports.add = async (req, res) => {
    }
 }
 
+/*
+changes the contents of an existing recipe in the database
+@route: PUT /recipe/edit
+*/
 exports.update = async (req, res) => {
    const { _id } = req.body;
 
@@ -110,7 +133,7 @@ exports.update = async (req, res) => {
       // update recipe in database
       await recipes.updateOne({_id: req.body._id}, {$set: req.recipeSchema})
       
-      return res.status(200).json({ message: 'recipe saved successfully' });
+      return res.status(201).json({ message: 'recipe saved successfully' });
    }
 
    // handle any errors caused by the controller

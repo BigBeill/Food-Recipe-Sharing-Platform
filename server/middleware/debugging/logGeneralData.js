@@ -7,7 +7,7 @@ function logGeneralData (req, res, next) {
   const formattedTime = gmt4Time.toISOString().replace('T', ' ').substring(0, 19);
 
   // log some general information to console for debugging
-  console.log("\n\n\n\n\n" + "\x1b[31m%s\x1b[0m", "CALL TO SERVER RECEIVED!");
+  console.log("\n" + "\x1b[31m%s\x1b[0m", "CALL TO SERVER RECEIVED!");
   console.log();
   console.log("time of request: "+ "\x1b[35m%s\x1b[0m", formattedTime);
   console.log("active user:", !!req.user);

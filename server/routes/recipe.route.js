@@ -2,13 +2,12 @@ const router = require("express").Router();
 const recipeController = require("../controllers/recipe.controller");
 const recipes = require("../models/recipe");
 const { body, query } = require("express-validator");
-const { validateNoExtraFields } = require("../library/sanitationUtils");
-const recipe = require("../models/recipe");
+const { validateNoExtraFields, runValidation } = require("../library/sanitationUtils");
 
 
 
 /*
------------- /data routes ------------
+------------ /data route ------------
 
 One method type:
    GET - returns recipe data
@@ -28,7 +27,7 @@ router.get('/data', recipeController.data);
 
 
 /*
----------- /list routes ------------
+---------- /list route ------------
 One method type:
    GET - returns recipe data
 
@@ -55,38 +54,6 @@ router.get('/list', async (req, res) => {
 
 
 
-
-
-
-/*
----------- /paginatedList routes ------------
-*/
-
-router.get('/paginatedList', async (req, res) => {
-   
-   const page = parseInt(req.query.page)
-   const size = parseInt(req.query.size)
-   const number = parseInt(req.query.number) || 1
-
-   if (!page) { return res.status(400).json({ error: "page not provided" })}
-   if (!size) { return res.status(400).json({ error: "size not provided" })}
-
-   const skip = page * size
-
-   let pageList = []
-
-   try {
-      for (let index = 0; index <= number; index = 0) {
-         const recipeList = await ingredients.find().skip(skip + (size * index)).limit(size)
-         pageList.push(recipeList)
-      }
-   }
-   catch {
-      return res.status(500).json({ error: "server failed to find recipes" })
-   }
-
-   return res.status(200).json( pageList )
-});
 
 
 
@@ -124,15 +91,17 @@ method returns:
    count: int (if count is true)
 */
 
-router.route('/find',
+router.get('/find',
    [
       query("title").optional().isString().isLength({ min: 3, max: 90 }).withMessage("title must be a string between 3 and 100 characters"),
       query("ingredients").optional().isArray().withMessage("ingredients must be an array"),
       query("limit").optional().isInt({ min: 1, max: 90 }).toInt().withMessage("limit must be an integer between 1 and 90"),
       query("skip").optional().isInt({ min: 0, max: 900 }).toInt().withMessage("skip must be an integer between 0 and 900"),
       validateNoExtraFields(["title", "ingredients", "limit", "skip"], "query")
-   ],
-recipeController.find);
+   ], 
+   runValidation,
+   recipeController.find
+);
 
 
 
@@ -180,6 +149,7 @@ router.route('/edit',
       body("recipeId").optional().isString().isLength({ min: 24, max: 24 }).withMessage("recipeId must be a string of 24 characters"),
       validateNoExtraFields(["title", "description", "image", "ingredients", "instructions", "recipeId"], "body")
    ],
+   runValidation
 )
 .all(recipeController.packageIncoming)
 .post(recipeController.add)

@@ -26,6 +26,7 @@ const corsOptions = {
 
 //setup server
 const app = express();
+app.use((req, res, next) => {console.log("\n\n\n"); next();}); // split up request logs
 app.use(cors(corsOptions));
 app.use(express.static('public'));
 app.use(bodyParser.urlencoded({limit: '10mb', extended: false}));
