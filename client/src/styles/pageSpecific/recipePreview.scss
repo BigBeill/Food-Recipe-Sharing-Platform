@@ -1,6 +1,43 @@
-.recipeReviewPage {
+.recipePreviewPage {
    width: 100%;
    height: 100%;
    display: grid;
-   grid-template-columns: 1fr 12rem;
+   gap: 0.3rem;
+   grid-template-columns: calc(100% - 12.3rem) 12rem;
+   grid-template-rows: 12rem 6rem calc(100% - 18.6rem);
+   grid-template-areas: "titleContainer image" "description description" "ingredients nutrientInformation";
+
+   .titleContainer {
+      grid-area: titleContainer;
+      width: 100%;
+      height: 100%;
+   }
+
+   .image{
+      grid-area: image;
+      width: 12rem;
+      height: 12rem;
+      box-sizing: border-box;
+      font-size: 7.2rem;
+      background-color: white;
+      border: 0.03rem solid black;
+   }
+
+   .description {
+      grid-area: description;
+      width: 100%;
+      height: 100%;
+   }
+
+   .ingredients {
+      grid-area: ingredients;
+      width: 100%;
+      height: 100%;
+   }
+
+   .nutrientInformation {
+      grid-area: nutrientInformation;
+      width: 100%;
+      height: 100%;
+   }
 }

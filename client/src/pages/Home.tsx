@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCircleCheck } from '@fortawesome/free-regular-svg-icons';
+import { faCircleCheck, faCircleXmark } from '@fortawesome/free-regular-svg-icons';
 
 import Notebook from '../components/Notebook';
 import PageObject from '../interfaces/PageObject';
@@ -136,9 +136,16 @@ function MainPage({recipeName, setRecipeName, ingredientList, setIngredientList,
             </div>
          </div>
 
-         <ul className='displayList'>
+         <ul className='displayList '>
             {ingredientList.map((ingredient, index) => (
-               <li key={index}> {ingredient.foodDescription} </li>
+               <li key={index} className='listItemContainer'>
+                  <div className='itemOptions'>
+                     <FontAwesomeIcon icon={faCircleXmark} style={{color: "#575757",}} onClick={() => removeIngredient(index)} />
+                  </div>
+                  <div className='listItem'> 
+                     <p>{ingredient.foodDescription}</p>
+                  </div>
+               </li>
             ))}
          </ul>
 
