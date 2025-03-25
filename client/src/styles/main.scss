@@ -214,6 +214,8 @@ input[type=number] {
 .growingText{
   margin: 0rem !important;
   padding: 0rem !important;
-  width: auto !important;
+  max-width: 100% !important;
+  width: max-content !important;
   display: inline-block !important;
+  text-wrap: wrap !important;
 }

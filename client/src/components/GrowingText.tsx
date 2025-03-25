@@ -31,14 +31,14 @@ function GrowingText({ text, parentDiv }: GrowingTextProps) {
 
   function adjustFontSize() {
     if (textRef.current && parentDiv.current) {
-      textRef.current.style.fontSize = `1rem`;
-      const newWidth = parentDiv.current.clientWidth / textRef.current.scrollWidth;
-      const newHeight = parentDiv.current.clientHeight / textRef.current.scrollHeight;
-      if (newWidth < newHeight) {
-        textRef.current.style.fontSize = `${newWidth}rem`;
-      } else {
-        textRef.current.style.fontSize = `${newHeight}rem`;
+      let fontSize = 1.2;
+      textRef.current.style.fontSize = `${fontSize}rem`;
+      while (textRef.current.scrollHeight < parentDiv.current.scrollHeight) {
+        fontSize += 0.1;
+        textRef.current.style.fontSize = `${fontSize}rem`;
       }
+      fontSize -= 0.1;
+      textRef.current.style.fontSize = `${fontSize}rem`;
     }
   }
 
