@@ -22,7 +22,7 @@ export default function Home() {
    const [recipes, setRecipes] = useState<RecipeObject[]>([]);
 
    useEffect(() => {
-      axios({method: 'get', url: `recipe/find?limit=${pageNumber == 1 ? 1 : 2}&skip=${pageNumber == 1 ? 0 : ((pageNumber - 1) * 2) - 1 }`})
+      axios({method: 'get', url: `recipe/find?limit=${pageNumber == 1 ? 1 : 2}&skip=${pageNumber == 1 ? 0 : (pageNumber - 2) }`})
       .then(response => { setRecipes(response); });
    }, [searchParams])
 
