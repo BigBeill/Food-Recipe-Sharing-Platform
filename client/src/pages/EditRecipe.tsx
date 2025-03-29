@@ -182,7 +182,7 @@ interface IngredientPageProps {
 function IngredientPage ({ingredientList, setIngredientList}: IngredientPageProps) {
 
   // define useStates
-  const [newIngredient, setNewIngredient] = useState<IngredientObject>({foodId:"", foodDescription:"", measureId:"", unit:"", amount: null});
+  const [newIngredient, setNewIngredient] = useState<IngredientObject>({foodId:"", foodDescription:"", portion: { measureId:"", measureDescription:"", amount: null } });
   const [conversionFactorsAvailable, setConversionFactorsAvailable] = useState<{measureId: string, unit: string}[]>([{ measureId: '1489', unit: 'g' }])
   const [ingredientsAvailable, setIngredientsAvailable] = useState<IngredientObject[]>([])
   const [availableId, setAvailableId] = useState<number>(ingredientList.length)
@@ -213,10 +213,10 @@ function IngredientPage ({ingredientList, setIngredientList}: IngredientPageProp
   }
 
   function addIngredient () {
-    if (!newIngredient.foodId || !newIngredient.unit || !newIngredient.amount) return
+    if (!newIngredient.foodId || !newIngredient.portion?.measureDescription || !newIngredient.portion?.measureDescription) { return }
     setIngredientList([...ingredientList, {id: availableId, content: newIngredient} ]);
     setAvailableId( availableId+1 );
-    setNewIngredient({foodId:"", foodDescription:"", unit:"", amount: null});
+    setNewIngredient({foodId: "", foodDescription: "", portion: { measureId: "", measureDescription: "", amount: null }});
   }
 
   function removeIngredient (index: number) {
@@ -237,18 +237,20 @@ function IngredientPage ({ingredientList, setIngredientList}: IngredientPageProp
               <FontAwesomeIcon icon={faCircleXmark} style={{color: "#575757",}} onClick={() => removeIngredient(index)} />
             </div>
             <div className='listItem'>
-              <p>{item.content.amount} {item.content.unit} of [{item.content.foodDescription}]</p>
+              { item.content.portion ?
+                <p>{item.content.portion.amount} {item.content.portion.measureDescription} of [{item.content.foodDescription}]</p>
+              : null }
             </div>
           </Reorder.Item>
         ))}
       </Reorder.Group>
 
       {/* add new ingredient section */}
-      <div className='textInput shared additionalMargin'>
+      <div className='textInput shared additionalMargin'> 
         <label>New Ingredient</label>
         <div className='inputs'>
-          <input type='number' value={newIngredient.amount ?? ''} onChange={(event) => setNewIngredient({...newIngredient, amount: event.target.value})} placeholder='Amount'/>
-          <select value={newIngredient.unit} onChange={(event) => setNewIngredient({...newIngredient, measureId: event.target.options[event.target.selectedIndex].id, unit: event.target.value})} >
+          <input type='number'  placeholder='Amount' value={newIngredient.portion?.amount ?? ''} onChange={(event) => setNewIngredient({...newIngredient, portion: { measureId: newIngredient.portion?.measureId || "", measureDescription: newIngredient.portion?.measureDescription || "", amount: event.target.value }})}/>
+          <select value={newIngredient.portion?.measureDescription} onChange={(event) => setNewIngredient({...newIngredient, portion: { measureId: event.target.options[event.target.selectedIndex].id, measureDescription: event.target.value, amount: newIngredient.portion?.amount || null }})} >
             <option value="" disabled hidden className='light'>Units</option>
             {conversionFactorsAvailable.map((conversionFactor, index) => (
               <option key={index} id={conversionFactor.measureId}>{conversionFactor.unit}</option>

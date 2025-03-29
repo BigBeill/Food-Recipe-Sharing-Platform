@@ -19,7 +19,12 @@ export default function RecipePreview({ recipe }: RecipePreviewProps) {
          <p className="image">🍗</p>
          <p className="description">{recipe.description}</p>
          <div className="ingredients">
-
+            <p>Ingredients:</p>
+            <ul>
+               {recipe.ingredients.map((ingredient, index) => (
+                     <li key={index}>{ingredient.portion?.amount} {ingredient.portion?.measureDescription} of {ingredient.foodDescription}</li>
+               ))}
+            </ul>
          </div>
          <div className="nutritionInformation">
 

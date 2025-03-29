@@ -1,4 +1,5 @@
 const { createRecipeSchema } = require("../library/validSchemaUtils");
+const recipeUtils = require("../library/recipeUtils");
 const recipes = require("../models/recipe");
 const users = require("../models/user");
 
@@ -11,17 +12,17 @@ returns all data associated with a given recipe id
 exports.data = async (req, res) => {
    const { _id } = req.query
 
-   if (!_id) return res.status(400).json({error: "_id not provided"});
+   if (!_id) return res.status(400).json({ error: "_id not provided" });
 
    try {
       // find recipe in database
-      const data = await recipes.findOne({ _id:_id })
+      const data = await recipes.findOne({ _id: _id })
 
       // return error if recipe does not exist
-      if(!data) return res.status(404).json({ error: "recipe with _id does not exist in database"});
+      if (!data) return res.status(404).json({ error: "recipe with _id does not exist in database" });
 
       //return recipe data to client
-      return res.status(200).json({ message: "recipe found", payload: data})
+      return res.status(200).json({ message: "recipe found", payload: data })
    }
 
    // handle any errors caused by the controller
@@ -30,8 +31,6 @@ exports.data = async (req, res) => {
       return res.status(500).json({ error: "server failed to find recipe" });
    }
 }
-
-
 
 
 
@@ -70,24 +69,21 @@ packages the data from the incoming request into a recipe schema
 exports.packageIncoming = async (req, res, next) => {
 
    // make sure user is signed in
-   if(!req.user) return res.status(401).json({ error: 'user not signed in' });
+   if (!req.user) { return res.status(401).json({ error: 'user not signed in' }); }
 
-   createRecipeSchema(req.body, req.user._id)
-   .then((response) => {
-      req.recipeSchema = response;
+   let recipe = req.body;
+   if (!recipe.owner) { recipe.owner = req.user._id; }
+
+   try {
+      const recipeObject = await recipeUtils.verifyObject(recipe, false);
+      req.recipeObject = recipeObject;
       next();
-   })
-   .catch((error) => {
-      try {
-         // attempt to send detailed error back to client
-         return res.status(error.status).json({ error: error.message});
-      }
-      catch (error) {
-         // if server failed to send detailed error, send generic error to client
-         console.error(error);
-         return res.status(500).json({ error: "server failed to provide valid error response" });
-      }
-   });
+   }
+   catch (error) {
+      console.log("\x1b[31m%s\x1b[0m", "recipe.controller.packageIncoming failed... unable to create recipe object");
+      console.error(error);
+      return res.status(500).json({ error: 'server failed to convert provided data into a recipe object' })
+   }
 }
 
 /*
@@ -97,19 +93,19 @@ adds a new recipe to the database
 exports.add = async (req, res) => {
    try {
       // create new recipe and save to database
-      const newRecipe = await new recipes(req.recipeSchema)
-      .save();
+      const newRecipe = await new recipes(req.recipeObject)
+         .save();
 
       // add recipe to user's ownedRecipes list in database
-      await users.updateOne({_id: req.user._id}, { $push: { ownedRecipes: newRecipe._id } })
+      await users.updateOne({ _id: req.user._id }, { $push: { ownedRecipes: newRecipe._id } })
 
       return res.status(201).json({ message: 'new recipe created' });
    }
-
    // handle any errors caused by the controller
    catch (error) {
+      console.log("\x1b[31m%s\x1b[0m", "recipe.controller.add failed... unable to save recipeObject to database");
       console.error(error);
-      return res.status(500).json({ error: 'server failed to create new recipe' });
+      return res.status(500).json({ error: 'server failed to save new recipe in the database' });
    }
 }
 
@@ -118,26 +114,29 @@ changes the contents of an existing recipe in the database
 @route: PUT /recipe/edit
 */
 exports.update = async (req, res) => {
-   const { _id } = req.body;
 
-   // check if recipe id was provided
-   if (!_id) return res.status(400).json({ error: 'no recipe id provided' });
+   // check if recipe _id was provided
+   if (!req.body._id) return res.status(400).json({ error: 'recipe _id was provided' });
+
+   // grab recipe objet from req and attach _id to it
+   const recipeObject = { ...req.recipeObject, _id: req.body._id };
 
    try {
       // find recipe being updated in database
-      const recipe = await recipes.findOne({_id: req.body._id})
+      const recipe = await recipes.findOne({ _id: recipeObject._id });
 
       // make sure current user is the owner of found recipe
-      if (!recipe.owner == req.user) return res.status(401).json({ error: 'current user is not the owner of the recipe' });
+      if (!recipe.owner == req.user) { return res.status(401).json({ error: 'current user is not the owner of the recipe' }); }
 
       // update recipe in database
-      await recipes.updateOne({_id: req.body._id}, {$set: req.recipeSchema})
-      
+      await recipes.updateOne({ _id: req.body._id }, { $set: req.recipeSchema });
+
       return res.status(201).json({ message: 'recipe saved successfully' });
    }
 
    // handle any errors caused by the controller
    catch (error) {
+      console.log("\x1b[31m%s\x1b[0m", "recipe.controller.update failed... unable to save recipeObject to database");
       console.error(error);
       return res.status(500).json({ error: 'server failed to update recipe' });
    }

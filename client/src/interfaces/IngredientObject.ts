@@ -1,6 +1,11 @@
 export default interface IngredientObject {
    foodId: string;
    foodDescription: string;
+   portion?: {
+      measureId: string;
+      measureDescription: string;
+      amount: string | null;
+   }
    nutrition?: {
       calories: number;
       fat: number;
@@ -12,7 +17,4 @@ export default interface IngredientObject {
       sugar: number;
       protein: number;
    }
-   measureId?: string;
-   unit?: string;
-   amount?: string | null;
 }

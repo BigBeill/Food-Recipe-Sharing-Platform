@@ -146,8 +146,8 @@ router.route('/edit',
       body("image").isString().isLength({ min: 0, max: 90 }).withMessage("image must be a string between 3 and 900 characters"),
       body("ingredients").isArray().withMessage("ingredients must be an array"),
       body("instructions").isArray().withMessage("instructions must be an array"),
-      body("recipeId").optional().isString().isLength({ min: 24, max: 24 }).withMessage("recipeId must be a string of 24 characters"),
-      validateNoExtraFields(["title", "description", "image", "ingredients", "instructions", "recipeId"], "body")
+      body("_id").optional().isString().isLength({ min: 24, max: 24 }).withMessage("_id must be a string of 24 characters"),
+      validateNoExtraFields(["title", "description", "image", "ingredients", "instructions", "_id"], "body")
    ],
    runValidation
 )

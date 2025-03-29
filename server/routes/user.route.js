@@ -20,7 +20,7 @@ route will:
 router.get("/info/:userId?",
     [
         param("userId").optional().isString().isLength({ min: 24, max: 24 }).withMessage("userId must be a string of 24 characters"),
-        validateNoExtraFields(["userId"], "params")
+        validateNoExtraFields(["userId"], "param")
     ],
 userController.info);
 
@@ -47,7 +47,7 @@ returns:
 router.get("/defineRelationship/:userId",
     [
         param("userId").isString().isLength({ min: 24, max: 24 }).withMessage("userId must be a string of 24 characters"),
-        validateNoExtraFields(["userId"], "params")
+        validateNoExtraFields(["userId"], "param")
     ],
 userController.defineRelationship);
 

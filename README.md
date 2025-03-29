@@ -9,6 +9,11 @@ Frontend framework: React (typescript) \
 Backend framework: Node js \
 Server frameworks: MongoDB and PostgreSQL
 
+
+
+
+
+
 ## Security features
 - HTTPS connection
 - HTTP only for all cookies
@@ -28,6 +33,98 @@ Client side:
 Server side:
 - salted passwords
 - hashed passwords
+
+
+
+
+
+
+## Custom JSON object structures
+Any JSON object being sent from the server to the client should follow one of these patterns
+
+### foodGroupObject
+```js
+{
+   foodGroupId: number, //primary key
+   foodGroupName: string
+}
+```
+
+###  ingredientObject
+```js
+{
+   foodId: number, //primary key
+   foodDescription: string,
+   portion?: {
+      measureId: number,
+      measureDescription: string,
+      amount: number
+   },
+   nutrition?: {
+      calories: number,
+      fat: number,
+      cholesterol: number,
+      sodium: number,
+      potassium: number,
+      carbohydrates: number,
+      fibre: number,
+      sugar: number,
+      protein: number
+   }
+}
+```
+
+### recipeObject
+```js
+{
+   _id: mongoose.SchemaTypes.ObjectId,
+   owner: mongoose.SchemaTypes.ObjectId,
+   title: string,
+   description: string,
+   image: string, // to be changed
+   ingredients: [ ingredientObject ], // must include portion and nutrient field 
+   instructions: [ string ],
+   nutrition: {
+      calories: number,
+      fat: number,
+      cholesterol: number,
+      sodium: number,
+      potassium: number,
+      carbohydrates: number,
+      fiber: number,
+      sugar: number,
+      protein: number
+   }
+}
+```
+
+### userObject
+```js
+{
+   _id: mongoose.SchemaTypes.ObjectId,
+   username: string,
+   email: string,
+   bio: string,
+   relationship?: {
+      _id: mongoose.SchemaTypes.ObjectId,
+      type: number
+   }
+}
+```
+
+### userFolderObject
+```js
+{
+   _id: mongoose.SchemaTypes.ObjectId,
+   folders: [ userFolderObject ] || [ mongoose.SchemaTypes.Object ],
+   users: [ userObject ] || [ mongoose.SchemaTypes.object ]
+}
+```
+
+
+
+
+
 
 ## Notebook.jsx explanation 
 location: (client/src/components/Notebook.jsx)

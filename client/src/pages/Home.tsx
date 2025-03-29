@@ -13,7 +13,6 @@ import axios from '../api/axios';
 export default function Home() {
 
    const [searchParams, setSearchParams] = useSearchParams();
-
    const pageNumber: number = Number(searchParams.get('pageNumber')) || 1;
 
    const [recipeName, setRecipeName] = useState<string>('');
