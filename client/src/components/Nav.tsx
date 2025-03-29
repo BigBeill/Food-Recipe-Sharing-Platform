@@ -1,5 +1,5 @@
 // external imports
-import React, { useState, useEffect, useRef} from 'react'
+import { useState, useEffect, useRef} from 'react'
 
 // internal imports
 import '../styles/componentSpecific/nav.scss'
@@ -12,7 +12,7 @@ interface NavProps {
     userData: UserObject
 }
 
-function Nav({userData}) {
+function Nav({userData}: NavProps) {
     const [open, setOpen] = useState<boolean>(false);
     const navRef = useRef<HTMLDivElement>(null);
     

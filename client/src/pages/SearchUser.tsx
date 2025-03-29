@@ -22,7 +22,6 @@ export default function SearchUser() {
    const [totalCount, setTotalCount] = useState<number>(0);
 
    function submitSearch() {
-      setUsers([]);
       document.getElementById("root")?.scrollTo({ top: 0, behavior: "auto" });
       let params: { _id?: string, username?: string, email?: string } = {};
       if (_id) params._id = _id;
