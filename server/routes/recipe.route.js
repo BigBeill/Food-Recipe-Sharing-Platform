@@ -1,59 +1,34 @@
 const router = require("express").Router();
 const recipeController = require("../controllers/recipe.controller");
 const recipes = require("../models/recipe");
-const { body, query } = require("express-validator");
+const { body, query, param } = require("express-validator");
 const { validateNoExtraFields, runValidation } = require("../library/sanitationUtils");
 
 
-
 /*
------------- /data route ------------
+------------ /getObject route ------------
 
 One method type:
-   GET - returns recipe data
+   GET - returns a completed recipe object
 
-Requires 1 argument from url:
-   _id: mongoDB objectId (recipe id)
+Requires 1 argument from param:
+   recipeId: integer
 
 Method 'GET' description:
-   finds all data in database associated with the recipe that has id matching req.query.id
+   builds a completed recipe object using data provided in the request
+   returns the competed recipe object
 
 Method 'GET' returns:
    json object containing recipe data
 */
-
-router.get('/data', recipeController.data);
-
-
-
-/*
----------- /list route ------------
-One method type:
-   GET - returns recipe data
-
-Optionally takes 2 arguments from url:
-   name: string
-   amount: int (if missing then assume 1)
-
-*/
-
-router.get('/list', async (req, res) => {
-
-   const title = req.query.title || '';
-   const amount = parseInt(req.query.amount, 10) || 20;
-
-   try {
-      let query = {}
-      if (title != '') { query = { title: {$regex: new RegExp(title, 'i')}}}
-      const data = await recipes.find(query).limit(amount)
-      return res.status(200).json(data)
-   } catch {
-      res.status(500).json({ message: "failed to collect recipes from database" });
-   }
-});
-
-
-
+router.get("getObject/:recipeId",
+   [
+      param("recipeId").toInt().isInt({ min: 1 }).withMessage("recipeId must be a positive integer"),
+      validateNoExtraFields(["recipeId"], "param")
+   ],
+   runValidation,
+   recipeController.getObject
+);
 
 
 
@@ -94,9 +69,14 @@ method returns:
 router.get('/find',
    [
       query("title").optional().isString().isLength({ min: 3, max: 90 }).withMessage("title must be a string between 3 and 100 characters"),
-      query("ingredients").optional().isArray().withMessage("ingredients must be an array"),
-      query("limit").optional().isInt({ min: 1, max: 90 }).toInt().withMessage("limit must be an integer between 1 and 90"),
-      query("skip").optional().isInt({ min: 0, max: 900 }).toInt().withMessage("skip must be an integer between 0 and 900"),
+      query("ingredients").optional().isArray().withMessage("ingredients must be an array")
+      .custom((ingredients) => {
+         ingredients.map((ingredient) => { return Number(ingredient); })
+         if (!ingredients.every((ingredient) => { return Number.isInteger(ingredient); })) { throw new Error("ingredients must be an array of integers"); }
+         else { return true; }
+      }),
+      query("limit").optional().toInt().isInt({ min: 1, max: 90 }).withMessage("limit must be an integer between 1 and 90"),
+      query("skip").optional().toInt().isInt({ min: 0, max: 900 }).withMessage("skip must be an integer between 0 and 900"),
       validateNoExtraFields(["title", "ingredients", "limit", "skip"], "query")
    ], 
    runValidation,

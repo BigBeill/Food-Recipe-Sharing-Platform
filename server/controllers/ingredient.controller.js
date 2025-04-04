@@ -1,8 +1,41 @@
 const postgresConnection = require('../config/postgres');
-const { ingredientNutrition, conversionFactorList, ingredientListNutrition } = require('../library/canadianNutrientFileUtils');
+const { conversionFactorList } = require('../library/canadianNutrientFileUtils');
+const ingredientUtils = require('../library/ingredientUtils');
 
 
+/*
+takes an ingredients id and converts it into a ingredientObject
+@route: GET /ingredient/getObject/:foodId/:measureId?/:amount?
+*/
+exports.getObject = async (req, res) => {
 
+   const { foodId, measureId, amount } = req.params;
+
+   // create object containing foodId field
+   let skipPortion = true;
+   let recipe = {
+      foodId,
+   };
+
+   // add extra fields to recipe object if they are provided
+   if (measureId &&  amount) {
+      skipPortion = false;
+      recipe.portion = {
+         measureId,
+         amount
+      };
+   }
+
+   try {
+      const ingredientObject = await ingredientUtils.verifyObject(recipe, skipPortion);
+      return res.status(200).json({ message: 'returning ingredientObject', payload: ingredientObject });
+   }
+   catch (error) {
+      console.log("\x1b[31m%s\x1b[0m", "ingredient.controller.getObject failed... unable to create ingredient object");
+      console.error(error);
+      return res.status(500).json({ error: 'server failed to convert provided data into a recipe object' });
+   }
+}
 
 
 

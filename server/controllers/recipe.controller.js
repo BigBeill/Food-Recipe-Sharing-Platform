@@ -1,34 +1,30 @@
-const { createRecipeSchema } = require("../library/validSchemaUtils");
 const recipeUtils = require("../library/recipeUtils");
 const recipes = require("../models/recipe");
 const users = require("../models/user");
 
 // IMPORTANT: go to server/routes/recipe.router.js for a more detailed explanations
 
+
+
 /*
-returns all data associated with a given recipe id
-@route: GET /recipe/data
+
 */
-exports.data = async (req, res) => {
-   const { _id } = req.query
+exports.getObject = async (req, res) => {
+   
+   const { recipeId } = req.params;
 
-   if (!_id) return res.status(400).json({ error: "_id not provided" });
-
-   try {
-      // find recipe in database
-      const data = await recipes.findOne({ _id: _id })
-
-      // return error if recipe does not exist
-      if (!data) return res.status(404).json({ error: "recipe with _id does not exist in database" });
-
-      //return recipe data to client
-      return res.status(200).json({ message: "recipe found", payload: data })
+   const recipe = {
+      _id: recipeId
    }
 
-   // handle any errors caused by the controller
+   try {
+      const recipeObject = await recipeUtils.verifyObject(recipe, true);
+      return res.status(200).json({ message: "recipe object created", payload: recipeObject });
+   }
    catch (error) {
+      console.log("\x1b[31m%s\x1b[0m", "recipe.controller.getObject failed... unable to create recipe object");
       console.error(error);
-      return res.status(500).json({ error: "server failed to find recipe" });
+      return res.status(500).json({ error: 'server failed to convert provided data into a recipe object' })
    }
 }
 
@@ -41,20 +37,30 @@ finds a list of recipes in the database that match the query parameters
 exports.find = async (req, res) => {
 
    const { title, ingredients, limit, skip } = req.query;
+   let recipeData = [];
 
    try {
       let query = {}
-      if (title) { query.title = {$regex: new RegExp(title, 'i')} }
-      if (ingredients) { query.ingredients = {$all: ingredients.split(',')} }
-      const data = await recipes.find(query)
+      if (title) { query.title = { $regex: new RegExp(title, 'i') } }
+      if (ingredients) { query.ingredients = { $all: ingredients.split(',') } }
+      recipeData = await recipes.find(query)
       .limit(limit)
       .skip(skip);
-
-      return res.status(200).json({ message: "recipes found", payload: data });
    }
    catch (error) {
+      console.log("\x1b[31m%s\x1b[0m", "recipe.controller.find failed... unable to fetch recipes from database");
       console.error(error);
       return res.status(500).json({ error: "server failed to find recipes" });
+   }
+
+   try {
+      const recipeObjects = await Promise.all(recipeData.map((recipe) => { return recipeUtils.verifyObject(recipe); }));
+      return res.status(200).json({ message: "recipes found", payload: recipeObjects });
+   }
+   catch (error) {
+      console.log("\x1b[31m%s\x1b[0m", "recipe.controller.find failed... unable to verify recipe objects before sending to client");
+      console.error(error);
+      return res.status(500).json({ error: "server failed to verify recipe objects" });
    }
 }
 
