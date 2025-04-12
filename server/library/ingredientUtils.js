@@ -32,10 +32,10 @@ async function verifyObject (ingredient, includeNutrition = true) {
    // check if food description is present
    if (!ingredient.foodDescription) { 
       try {
-      const query = `SELECT fooddescription FROM foodname WHERE foodid = $1 LIMIT 1`;
+      const query = `SELECT food_description FROM food_name WHERE food_id = $1 LIMIT 1`;
       const values = [ingredient.foodId];
       const data = await postgresConnection.query(query, values);
-      ingredientObject.foodDescription = data.rows[0].fooddescription;
+      ingredientObject.foodDescription = data.rows[0].food_description;
       }
       catch (error) {
          console.log('failed to collect foodDescription from database for ingredient:', ingredient);
@@ -58,10 +58,10 @@ async function verifyObject (ingredient, includeNutrition = true) {
    // check if measureDescription is present, if not attach it
    if (!ingredientObject.portion.measureDescription) {
       try {
-         const query = `SELECT measuredescription FROM measurename WHERE measureid = $1 LIMIT 1`;
+         const query = `SELECT measure_description FROM measure_name WHERE measure_id = $1 LIMIT 1`;
          const values = [ingredient.portion.measureId];
          const data = await postgresConnection.query(query, values);
-         const brokenMeasureDescription = breakupMeasureDescription(data.rows[0].measuredescription);
+         const brokenMeasureDescription = breakupMeasureDescription(data.rows[0].measure_description);
          ingredientObject.portion.measureDescription = brokenMeasureDescription.string;
       }
       catch (error) {

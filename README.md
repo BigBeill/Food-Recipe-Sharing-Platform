@@ -219,7 +219,7 @@ export default function SamplePageManager() {
       // some logic for retrieving the objects you want to display from the server and placing it inside objectList
    }, [searchParams]);
 
-   // change the page number in the url without effecting any other url parameters
+   // change the page number in the url without affecting any other url parameters
    function handleNewPage(newPage: number) {
       const newParam = new URLSearchParams(searchParams.toString());
       newParam.set('pageNumber', newPage.toString());
