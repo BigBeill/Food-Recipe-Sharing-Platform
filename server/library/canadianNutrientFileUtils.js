@@ -23,21 +23,21 @@ function conversionFactorList (ingredientId) {
       let conversionOptions = [];
   
       // get a list of all possible conversions from database
-      const query = `SELECT measureid, conversionfactorvalue FROM conversionfactor WHERE foodid = $1`;
+      const query = `SELECT measure_id, conversion_factor_value FROM conversion_factor WHERE food_id = $1`;
       const values = [ingredientId];
       const possibleConversionsData = await postgresConnection.query(query, values);
 
       //go though all items in list of possible conversions and collect more detailed information
       for(const conversion of possibleConversionsData.rows){
         // get more detailed information about conversion from database
-        const query = `SELECT measuredescription FROM measurename WHERE measureid = $1 LIMIT 1`;
-        const values = [conversion.measureid];
+        const query = `SELECT measure_description FROM measure_name WHERE measure_id = $1 LIMIT 1`;
+        const values = [conversion.measure_id];
         const data = await postgresConnection.query(query, values);
 
         // if conversion is found add to conversionOptions arrays
         if (data.rows[0]){
-          const brokenString = breakupMeasureDescription(data.rows[0].measuredescription);
-          conversionOptions.push({ measureId: conversion.measureid, measureDescription: brokenString.string, value: conversion.conversionfactorvalue / brokenString.integer, });
+          const brokenString = breakupMeasureDescription(data.rows[0].measure_description);
+          conversionOptions.push({ measureId: conversion.measure_id, measureDescription: brokenString.string, value: conversion.conversion_factor_value / brokenString.integer, });
         }
       }
 

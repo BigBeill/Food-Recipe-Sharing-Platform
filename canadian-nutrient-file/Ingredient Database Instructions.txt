@@ -5,105 +5,103 @@ create a database called "Canadian Nutrient File"
 
 paste this query into the Canadian Nutrient File database:
 
-CREATE TABLE foodname (
-	foodid numeric,
-	foodcode numeric,
-    	foodgroupid numeric,
-	foodsourceid numeric,
-	fooddescription text,
-	fooddescriptionf text,
-	fooddateofentry date,
-	fooddateofpublication date,
-	countrycode numeric,
-	scientificname text
+// ============ START OF QUERY ============
+
+CREATE TABLE food_name (
+	food_id numeric,
+	food_code numeric,
+   food_group_id numeric,
+	food_source_id numeric,
+	food_description text,
+	food_description_f text,
+	food_date_of_entry date,
+	food_date_of_publication date,
+	country_code numeric,
+	scientific_name text
 );
 
-CREATE TABLE nutrientamount (
-	foodid numeric,
-    	nutrientid numeric,
-    	nutrientvalue numeric,
-	standarderror numeric,
-	numberofobservations numeric,
-	nutrientsourceid numeric,
-	nutrientdateentry date
+CREATE TABLE nutrient_amount (
+	food_id numeric,
+   nutrient_id numeric,
+   nutrient_value numeric,
+	standard_error numeric,
+	number_of_observations numeric,
+	nutrient_source_id numeric,
+	nutrient_date_entry date
 );
 
-CREATE TABLE conversionfactor (
-	foodid numeric,
-	measureid numeric,
-	conversionfactorvalue numeric,
-	conversionfactordateofentry date
+CREATE TABLE conversion_factor (
+	food_id numeric,
+	measure_id numeric,
+	conversion_factor_value numeric,
+	conversion_factor_date_of_entry date
 );
 
-CREATE TABLE refuseamount (
-	foodid numeric,
-	refuseid numeric,
-	refuseamount numeric,
-	refusedateofentry date
+CREATE TABLE refuse_amount (
+	food_id numeric,
+	refuse_id numeric,
+	refuse_amount numeric,
+	refuse_date_of_entry date
 );
 
-CREATE TABLE yieldamount (
-	foodid numeric,
-	yieldid numeric,
-	yieldamount numeric,
-	yielddateofentry date
+CREATE TABLE yield_amount (
+	food_id numeric,
+	yield_id numeric,
+	yield_amount numeric,
+	yield_date_of_entry date
 );
 
-CREATE TABLE foodgroup (
-	foodgroupid numeric,
-	foodgroupcode numeric,
-	foodgroupname text,
-	foodgroupnamef text
+CREATE TABLE food_group (
+	food_group_id numeric,
+	food_group_code numeric,
+	food_group_name text,
+	food_group_name_f text
 );
 
-CREATE TABLE foodsource (
-	foodsourceid numeric,
-	foodsourcecode numeric,
-	foodsourcedescription text,
-	foodsourcedescriptionf text
+CREATE TABLE food_source (
+	food_source_id numeric,
+	food_source_code numeric,
+	food_source_description text,
+	food_source_description_f text
 );
 
-CREATE TABLE nutrientname (
-	nutrientnameid numeric,
-	nutrientcode numeric,
-	nutrientsymbol text,
+CREATE TABLE nutrient_name (
+	nutrient_id numeric,
+	nutrient_code numeric,
+	nutrient_symbol text,
 	unit text,
-	nutrientname text,
-	nutrientnamef text,
-	tagname text,
-	nutrientdecimals numeric
+	nutrient_name text,
+	nutrient_name_f text,
+	tag_name text,
+	nutrient_decimals numeric
 );
 
-CREATE TABLE nutrientsource (
-	nutrientsourceid numeric,
-	nutrientsourcecode numeric,
-	nutrientdescription text,
-	nutrientdescriptionf text
+CREATE TABLE nutrient_source (
+	nutrient_source_id numeric,
+	nutrient_source_code numeric,
+	nutrient_description text,
+	nutrient_description_f text
 );
 
-CREATE TABLE measurename (
-	measureid numeric,
-	measuredescription text,
-	measuredescriptionf text
+CREATE TABLE measure_name (
+	measure_id numeric,
+	measure_description text,
+	measure_description_f text
 );
 
-CREATE TABLE refusename (
-	refuseid numeric,
-	refusename text,
-	refusenamef text
+CREATE TABLE refuse_name (
+	refuse_id numeric,
+	refuse_name text,
+	refuse_name_f text
 );
 
-CREATE TABLE yieldname (
-	yieldid numeric,
-	yieldname text,
-	yieldnamef text
+CREATE TABLE yield_name (
+	yield_id numeric,
+	yield_name text,
+	yield_name_f text
 );
 
-
-
-
-
-
+// ============ END OF QUERY ============
 
 upload .csv files respectively
 

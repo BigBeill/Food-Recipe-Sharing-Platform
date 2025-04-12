@@ -47,17 +47,27 @@ exports.details = async (req, res) => {
 
    let ingredientData = { foodId };
 
-   // get ingredient name from database
-   const ingredientName = await postgresConnection.query(`select fooddescription from foodname where foodid=${foodId}`);
-   ingredientData.foodDescription = ingredientName.rows[0].fooddescription;
+   try {
+      // get ingredient name from database
+      const query = "select food_description from food_name where food_id=$1";
+      const values = [foodId];
+      const result = await postgresConnection.query(query, values);
+      ingredientData.foodDescription = result.rows[0].food_description;
 
-   // get ingredients nutritional value (per 100 grams)
-   ingredientData.nutrition = await ingredientNutrition({foodId});
+      // get ingredients nutritional value (per 100 grams)
+      ingredientData.nutrition = await ingredientNutrition({foodId});
 
-   // get all possible conversion values for ingredient
-   ingredientData.conversionFactors = await conversionFactorList(foodId);
+      // get all possible conversion values for ingredient
+      ingredientData.conversionFactors = await conversionFactorList(foodId);
 
-   return res.status(200).json({message: "ingredient data collected from server", payload: ingredientData});
+      return res.status(200).json({message: "ingredient data collected from server", payload: ingredientData});
+   }
+
+   catch (error) {
+      console.log("\x1b[31m%s\x1b[0m", "ingredient.controller.details failed... unable to create ingredient object");
+      console.error(error);
+      return res.status(500).json({ error: 'server failed to convert provided data into a recipe object' });
+   }
 }
 
 
@@ -69,13 +79,13 @@ exports.list = async (req, res) => {
    const {foodDescription, foodGroupId, limit} = req.query
 
    // find all ingredients with given key words
-   let query = 'SELECT foodid, FoodDescription FROM foodname ';
+   let query = 'SELECT food_id, FoodDescription FROM food_name ';
    let values = [];
    if (foodDescription) {
       values = foodDescription.split(" ");
       values = values.map(substring => `%${substring}%`);
-      query += 'WHERE fooddescription ILIKE $1 ';
-      for (let i = 2; i <= values.length; i++) query += `AND fooddescription ILIKE $${i} `;
+      query += 'WHERE food_description ILIKE $1 ';
+      for (let i = 2; i <= values.length; i++) query += `AND food_description ILIKE $${i} `;
    }
 
    // add foodGroup restriction
@@ -83,7 +93,7 @@ exports.list = async (req, res) => {
       if (values.length == 0) query += 'WHERE ';
       else query += 'AND ';
       values.push(foodGroupId);
-      query += `foodgroupid=$${values.length} `;
+      query += `food_group_id=$${values.length} `;
    }
 
    // tag the limit on to the end of the query
@@ -94,7 +104,7 @@ exports.list = async (req, res) => {
 
    const data = await postgresConnection.query(query, values);
    // change the data to make it usable by the client
-   data.rows = data.rows.map(row => { return { foodId: row.foodid, foodDescription: row.fooddescription } });
+   data.rows = data.rows.map(row => { return { foodId: row.food_id, foodDescription: row.food_description } });
    return res.status(200).json({ message: "ingredient list collected from server", payload: data.rows });
 }
 
@@ -104,9 +114,9 @@ exports.list = async (req, res) => {
 
 
 exports.groups = async (req, res) => {
-   const data = await postgresConnection.query('select * from foodgroup');
+   const data = await postgresConnection.query('select * from food_group');
    console.log(data.rows);
    // change the data to make it usable by the client
-   data.rows = data.rows.map(row => { return { foodGroupId: row.foodgroupid, foodGroupName: row.foodgroupname } });
+   data.rows = data.rows.map(row => { return { foodGroupId: row.food_group_id, foodGroupName: row.food_group_name } });
    return (res.status(200).json({ message: "ingredient groups collected from server", payload: data.rows }));
 };

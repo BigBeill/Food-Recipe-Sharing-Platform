@@ -142,35 +142,35 @@ async function attachNutritionField (ingredient) {
    try {
 
       // query the database for the base nutritional data
-      const query = `SELECT nutrientid, nutrientvalue FROM nutrientamount WHERE foodid = $1 AND nutrientid IN (203, 204, 205, 208, 269, 291, 306, 307, 601) ORDER BY nutrientid;`;
+      const query = `SELECT nutrient_id, nutrient_value FROM nutrient_amount WHERE food_id = $1 AND nutrient_id IN (203, 204, 205, 208, 269, 291, 306, 307, 601) ORDER BY nutrient_id;`;
       const values = [ingredient.foodId];
       const data = await postgresConnection.query(query, values);
       let nutritionData = data.rows;
 
       // if any data is missing, set it to 0
       {
-         if (nutritionData[0].nutrientid != 203) nutritionData.splice(0, 0, { nutrientid: '203', nutrientvalue: '0' } );
-         if (nutritionData[1].nutrientid != 204) nutritionData.splice(1, 0, { nutrientid: '204', nutrientvalue: '0' } );
-         if (nutritionData[2].nutrientid != 205) nutritionData.splice(2, 0, { nutrientid: '205', nutrientvalue: '0' } );
-         if (nutritionData[3].nutrientid != 208) nutritionData.splice(3, 0, { nutrientid: '208', nutrientvalue: '0' } );
-         if (nutritionData[4].nutrientid != 269) nutritionData.splice(4, 0, { nutrientid: '269', nutrientvalue: '0' } );
-         if (nutritionData[5].nutrientid != 291) nutritionData.splice(5, 0, { nutrientid: '291', nutrientvalue: '0' } );
-         if (nutritionData[6].nutrientid != 306) nutritionData.splice(6, 0, { nutrientid: '306', nutrientvalue: '0' } );
-         if (nutritionData[7].nutrientid != 307) nutritionData.splice(7, 0, { nutrientid: '307', nutrientvalue: '0' } );
-         if (!nutritionData[8]) nutritionData.splice(8, 0, { nutrientid: '601', nutrientvalue: '0' } );
+         if (nutritionData[0].nutrient_id != 203) nutritionData.splice(0, 0, { nutrient_id: '203', nutrient_value: '0' } );
+         if (nutritionData[1].nutrient_id != 204) nutritionData.splice(1, 0, { nutrient_id: '204', nutrient_value: '0' } );
+         if (nutritionData[2].nutrient_id != 205) nutritionData.splice(2, 0, { nutrient_id: '205', nutrient_value: '0' } );
+         if (nutritionData[3].nutrient_id != 208) nutritionData.splice(3, 0, { nutrient_id: '208', nutrient_value: '0' } );
+         if (nutritionData[4].nutrient_id != 269) nutritionData.splice(4, 0, { nutrient_id: '269', nutrient_value: '0' } );
+         if (nutritionData[5].nutrient_id != 291) nutritionData.splice(5, 0, { nutrient_id: '291', nutrient_value: '0' } );
+         if (nutritionData[6].nutrient_id != 306) nutritionData.splice(6, 0, { nutrient_id: '306', nutrient_value: '0' } );
+         if (nutritionData[7].nutrient_id != 307) nutritionData.splice(7, 0, { nutrient_id: '307', nutrient_value: '0' } );
+         if (!nutritionData[8]) nutritionData.splice(8, 0, { nutrient_id: '601', nutrient_value: '0' } );
       }
 
       // put all values into a json file as parseInts
       nutrients = {
-         calories: parseInt(nutritionData[3].nutrientvalue),
-         fat: parseInt(nutritionData[1].nutrientvalue),
-         cholesterol: parseInt(nutritionData[8].nutrientvalue),
-         sodium: parseInt(nutritionData[7].nutrientvalue),
-         potassium: parseInt(nutritionData[6].nutrientvalue),
-         carbohydrates: parseInt(nutritionData[2].nutrientvalue),
-         fibre: parseInt(nutritionData[5].nutrientvalue),
-         sugar: parseInt(nutritionData[4].nutrientvalue),
-         protein: parseInt(nutritionData[0].nutrientvalue)
+         calories: parseInt(nutritionData[3].nutrient_value),
+         fat: parseInt(nutritionData[1].nutrient_value),
+         cholesterol: parseInt(nutritionData[8].nutrient_value),
+         sodium: parseInt(nutritionData[7].nutrient_value),
+         potassium: parseInt(nutritionData[6].nutrient_value),
+         carbohydrates: parseInt(nutritionData[2].nutrient_value),
+         fibre: parseInt(nutritionData[5].nutrient_value),
+         sugar: parseInt(nutritionData[4].nutrient_value),
+         protein: parseInt(nutritionData[0].nutrient_value)
       }
 
       // convert all nutrients to per 1g
@@ -186,10 +186,10 @@ async function attachNutritionField (ingredient) {
       // apply the conversionFactorValue
       try {
          //get the conversionFactorValue
-         const query = `SELECT conversionfactorvalue FROM conversionfactor WHERE foodid = $1 AND measureid = $2 LIMIT 1`;
+         const query = `SELECT conversion_factor_value FROM conversion_factor WHERE food_id = $1 AND measure_id = $2 LIMIT 1`;
          const values = [ingredient.foodId, ingredient.portion.measureId];
          const data = await postgresConnection.query(query, values);
-         const conversionFactorValue = parseInt(data.rows[0].conversionfactorvalue);
+         const conversionFactorValue = parseInt(data.rows[0].conversion_factor_value);
 
          // apply conversionFactorValue to each item in nutrition
          Object.keys(nutrients).forEach((key) => { nutrients[key] *= conversionFactorValue; });
@@ -203,10 +203,10 @@ async function attachNutritionField (ingredient) {
       // divide by number of items in measureDescription
       try {
          //get the number of items in the measureDescription
-         const query = `SELECT measuredescription FROM measurename WHERE measureid = $1 LIMIT 1`;
+         const query = `SELECT measure_description FROM measure_name WHERE measure_id = $1 LIMIT 1`;
          const values = [ingredient.portion.measureId];
          const data = await postgresConnection.query(query, values);
-         const brokenMeasureDescription = breakupMeasureDescription(data.rows[0].measuredescription);
+         const brokenMeasureDescription = breakupMeasureDescription(data.rows[0].measure_description);
 
          // divide the nutrients by the number of items in the measureDescription
          nutrients.map((nutrient) => { return nutrient / brokenMeasureDescription.integer });

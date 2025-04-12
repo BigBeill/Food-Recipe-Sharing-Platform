@@ -1,45 +1,86 @@
-# Program Overview
-Hi, my name is Mackenzie Neill, im a COIS student at trent university and this is a personal project im working on to practice my web development skills outside of course material. This has been a lot of fun and has taught me a lot about web development, cybersecurity, and server management. This project has also helped me develop good coding habits to improve my codes readability. If you have any questions about the project (personal or professional), or just some recommendations for me to improve my code please feel free to email me at mackenzie.neill.359@gmail.com!
+## Table of Contents
+1. [Program Overview](#program-overview)
+2. [General Overview](#general-overview)
+3. [Setting Up the Project](#setting-up-the-project)
+4. [Database Explanation](#database-explanation)
+   - [MongoDB](#mongodb)
+   - [PostgreSQL](#postgresql)
+5. [Security Features](#security-features)
+6. [Custom JSON Object Structures](#custom-json-object-structures)
+7. [Notebook.jsx Explanation](#notebookjsx-explanation)
 
-## General overview
-Author: Mackenzie Neill \
+# Program Overview
+Hi! I'm Mackenzie Neill, a COIS student at Trent University. This is a personal project I've been working on to sharpen my web development skills beyond coursework. It's been a great learning experience in full-stack development, cybersecurity, and server management. If you have questions, feedback, or suggestions, feel free to reach out at mackenzie.neill.359@gmail.com.
+
+## General Overview
+Author: Mackenzie Neill 
 Start date: December 15th, 2023
 
-Frontend framework: React (typescript) \
-Backend framework: Node js \
-Server frameworks: MongoDB and PostgreSQL
+Tech Stack
+ - Frontend: React (TypeScript) 
+ - Backend: Node.js
+ - Database: MongoDB (cloud-hosted) and PostgreSQL (local)
+
+### Setting Up the Project
+ 1. Open the `run_website.txt` file in the root directory.
+ 2. Set the URL to the path where you saved this project.
+ 3. Save the file with a `.bat` extension.
+ 4. Double-click the `.bat` file to run the application.
+
+Note: The application will run, but no data will be accessible until the databases are properly configured. Refer to the [Database Explanation](#database-explanation) section for more details.
+
+## Database Explanation
+There are two databases I'm using for this project, I created some relational diagrams to show what's going on.
+
+### MongoDB
+The MongoDB database is cloud-hosted. To run the project locally:
+
+ - Create your own MongoDB cluster online.
+ - Update the connection string in `server/config/connectMongo.js`.
+
+That's it, collections and schemas are auto-generated on first run.
+
+Note: MongoDB supports nested JSON objects, which don't translate cleanly to relational diagrams. Any field labeled "nested" refers to embedded subdocuments, not actual independent objects.
+
+![mongoDB Diagram](/readmeImages/relationalDiagramMongoDb.png)
+
+### PostgreSQL
+This is the PostgreSQL server, containing data from the Canadian Nutrient File. The software runs locally on the machine you're running the server on and requires manual setup. Setup instructions can be found in:
+
+`canadian-nutrient-file/Ingredient Database Instructions.txt`
+
+![PostgreSQL Diagram](/readmeImages/relationalDiagramPostgreSQL.png)
 
 
 
 
 
 
-## Security features
+## Security Features
 - HTTPS connection
-- HTTP only for all cookies
-- client data sanitization (cookies, query, params, and body)
+- HTTP-only cookies
+- Sanitization of all client input (cookies, query, params, and body)
 
-### User authentication
-- using JSON web tokens
-- Access token that lasts 15 min
+### User Authentication
+- JSON web tokens (JWT)
+- Access token that lasts 15 minutes
 - Refresh token that lasts 30 days
 
-### password protection features
+### Password Protection Features
 Client side:
-- password masking
-- user must enter their password twice to verify they entered it correctly
-- (to be done) add minimum password retirements
+- Password masking
+- User must enter their password twice to verify they entered it correctly
+- (Planned) Add minimum password requirements
 
 Server side:
-- salted passwords
-- hashed passwords
+- Passwords are salted and hashed before storage
 
 
 
 
 
 
-## Custom JSON object structures
+## Custom JSON Object Structures
 Any JSON object being sent from the server to the client should follow one of these patterns
 
 ### foodGroupObject
@@ -82,8 +123,8 @@ Any JSON object being sent from the server to the client should follow one of th
    title: string,
    description: string,
    image: string, // to be changed
-   ingredients: [ ingredientObject ], // must include portion and nutrient field 
-   instructions: [ string ],
+   ingredients: Array<ingredientObject>, // must include portion and nutrient field 
+   instructions: Array<string>,
    nutrition: {
       calories: number,
       fat: number,
@@ -91,7 +132,7 @@ Any JSON object being sent from the server to the client should follow one of th
       sodium: number,
       potassium: number,
       carbohydrates: number,
-      fiber: number,
+      fibre: number,
       sugar: number,
       protein: number
    }
@@ -116,8 +157,8 @@ Any JSON object being sent from the server to the client should follow one of th
 ```js
 {
    _id: mongoose.SchemaTypes.ObjectId,
-   folders: [ userFolderObject ] || [ mongoose.SchemaTypes.Object ],
-   users: [ userObject ] || [ mongoose.SchemaTypes.object ]
+   folders: Array<userFolderObject | mongoose.SchemaTypes.ObjectId>,
+   users: Array<userObject | mongoose.SchemaTypes.ObjectId>
 }
 ```
 
@@ -125,8 +166,8 @@ Any JSON object being sent from the server to the client should follow one of th
 
 
 
-
-## Notebook.jsx explanation 
+IM WORKING ON THIS DON'T READ YET
+## Notebook.jsx Explanation 
 location: (client/src/components/Notebook.jsx)
 
 there are 3 crucial parts of notebook that anyone using the component should be aware of:
@@ -163,7 +204,7 @@ pageList is an array of JSON objects, each JSON object inside pageList represent
 ]
 ```
 
-At any given time, Notebook.jsx will display up to two pages. A page that is being displayed will have its content shown in the gree box:\
+At any given time, Notebook.jsx will display up to two pages. A page that is being displayed will have it's content shown in the gree box:\
 ![editable portion of Notebook.jsx](/readmeImages/notebookPageListVisableSquare.png)
 
 There are two parts to each JSON object inside pageList:
