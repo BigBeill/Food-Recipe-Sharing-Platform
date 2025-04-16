@@ -2,9 +2,7 @@
 import { useRef, useState, useEffect } from 'react';
 import { useNavigate, useOutletContext } from 'react-router-dom';
 
-// internal imports
 import axios from '../api/axios';
-
 import UserObject from '../interfaces/UserObject';
 
 function Register() {
@@ -12,21 +10,42 @@ function Register() {
    const navigate = useNavigate();
    const { userData } = useOutletContext<{userData: UserObject}>();
 
-   const [username, setUsername] = useState<string>("")
-   const [email, setEmail] = useState<string>("")
-   const [passwordOne, setPasswordOne] = useState<string>("")
-   const [passwordTwo, setPasswordTwo] = useState<string>("")
-   const [errorMessage, setErrorMessage] = useState<string>("")
+   const [username, setUsername] = useState<string>("");
+   const [email, setEmail] = useState<string>("");
+   const [passwordOne, setPasswordOne] = useState<string>("");
+   const [passwordTwo, setPasswordTwo] = useState<string>("");
+   const [errorMessage, setErrorMessage] = useState<string>("");
 
    useEffect(() => {
       if (userData._id) { navigate('/profile'); }
-      document.body.classList.add('loginBackground')
-      return () => { document.body.classList.remove('loginBackground') }
+      document.body.classList.add('loginBackground');
+      return () => { document.body.classList.remove('loginBackground'); }
    }, [])
 
    useEffect(() => {
       setErrorMessage("")
-   }, [username, email, passwordOne, passwordTwo])
+   }, [username, email, passwordOne, passwordTwo]);
+
+   function checkPasswordRequirements(password: string) {
+      let regex: RegExp;
+
+      if (password.length < 6) { return "Password must be at least 6 characters long."; }
+      if (password.length > 45) { return "Password must be at most 45 characters long."; }
+
+      regex = /[a-z]/; // check for lowercase letters
+      if (!regex.test(password)) { return "Password must contain at least one lowercase letter."; }
+
+      regex = /[A-Z]/; // check for uppercase letters
+      if (!regex.test(password)) { return "Password must contain at least one uppercase letter."; }
+
+      regex = /[0-9]/; // check for numbers
+      if (!regex.test(password)) { return "Password must contain at least one number."; }
+
+      regex = /[!@#$%^&*]/; // check for special characters
+      if (!regex.test(password)) { return "Password must contain at least one special character."; }
+
+      return null;
+   }
 
    function attemptRegister() {
 
@@ -34,6 +53,12 @@ function Register() {
       if (!email) { return setErrorMessage("no email given"); }
       if (!passwordOne) { return setErrorMessage("no password given"); }
       if (passwordOne != passwordTwo) { return setErrorMessage("passwords don't match"); }
+
+      const missingPasswordRequirements: string | null = checkPasswordRequirements(passwordOne);
+      if (missingPasswordRequirements) {
+         setErrorMessage(missingPasswordRequirements);
+         return;
+      }
 
       const userData = { username, email, password:passwordOne };
       axios({ method:'post', url:'authentication/register', data: userData })

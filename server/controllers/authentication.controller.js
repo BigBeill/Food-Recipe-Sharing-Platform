@@ -1,6 +1,6 @@
 const users = require("../models/user");
 const refreshTokens = require("../models/refreshToken");
-const { validPassword, genPassword } = require("../library/passwordUtils");
+const passwordUtils = require("../library/passwordUtils");
 const { verify } = require("jsonwebtoken");
 const { validationResult } = require("express-validator");
 const createToken = require("../config/jsonWebToken");
@@ -24,13 +24,14 @@ exports.register = async (req, res) => {
    try {
       // make sure username and email don't already exist in database
       const searchUsername = await users.findOne({ username: { $regex: `^${username}$`} });
-      if (searchUsername) return res.status(400).json({ error: "username already taken" });
+      if (searchUsername) { return res.status(400).json({ error: "username already taken" }); }
 
       const searchEmail = await users.findOne({ email: { $regex: `^${email}$`} });
-      if (searchEmail) return res.status(400).json({ error: "email already taken" });
+      if (searchEmail) { return res.status(400).json({ error: "email already taken" }); }
 
-      // hash password
-      const hashedPassword = genPassword(password);
+      // check if given password meets all requirements and encrypt it
+      if (!passwordUtils.validPassword(password)) { return res.status(400).json({ error: "password does not meet requirements" }); }
+      const hashedPassword = passwordUtils.encryptPassword(password);
 
       // create user
       const newUser = {
@@ -85,7 +86,7 @@ exports.login = async (req, res) => {
       if (!user) return res.status(400).json({ error: "username not found" });
 
       // check if password is correct
-      if (!validPassword(password, user.hash, user.salt)) return res.status(400).json({ error: "incorrect password" });
+      if (!passwordUtils.correctPassword(password, user.hash, user.salt)) return res.status(400).json({ error: "incorrect password" });
 
       // create new refresh tokens
       const tokens = createToken(user);

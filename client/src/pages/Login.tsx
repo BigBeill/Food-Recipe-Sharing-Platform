@@ -1,31 +1,27 @@
-// external imports
 import { useRef, useState, useEffect } from 'react'
 import { useNavigate, useOutletContext } from 'react-router-dom';
 
-// internal imports
-import axios from '../api/axios'
-
+import axios from '../api/axios';
 import UserObject from '../interfaces/UserObject';
 
 function Login() {
-   const errorRef = useRef(null)
+   const errorRef = useRef(null);
    const navigate = useNavigate();
    const { userData } = useOutletContext<{userData: UserObject}>();
 
-   const [username, setUsername] = useState<string>("")
-   const [password, setPassword] = useState<string>("")
-   const [errorMessage, setErrorMessage] = useState<string>("")
+   const [username, setUsername] = useState<string>("");
+   const [password, setPassword] = useState<string>("");
+   const [errorMessage, setErrorMessage] = useState<string>("");
 
    useEffect(() => {
       if (userData._id) navigate('/profile');
-      document.body.classList.add('loginBackground')
-      return () => { document.body.classList.remove('loginBackground') }
-   }, [])
+      document.body.classList.add('loginBackground');
+      return () => { document.body.classList.remove('loginBackground'); }
+   }, []);
 
    useEffect(() => {
       setErrorMessage("");
-   }, [username, password])
-
+   }, [username, password]);
 
    function attemptLogin() {
 

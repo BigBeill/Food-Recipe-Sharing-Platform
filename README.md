@@ -71,7 +71,7 @@ This is the PostgreSQL server, containing data from the Canadian Nutrient File. 
 Client side:
  - Password masking
  - User must enter their password twice to verify they entered it correctly
- - (Planned) Add minimum password requirements
+ - Minimum password requirements
 
 Server side:
  - Passwords are salted and hashed before storage
