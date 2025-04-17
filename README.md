@@ -140,6 +140,15 @@ Any JSON object being sent from the server to the client should follow one of th
 }
 ```
 
+### relationshipObject
+```js
+{
+   _id: mongoose.SchemaTypes.ObjectId;
+   target:  mongoose.SchemaTypes.ObjectId;
+   type: number; // 0 = no relationship, 1 = friends, 2 = received friend request, 3 sent friend request, 4 = self
+}
+```
+
 ### userObject
 ```js
 {

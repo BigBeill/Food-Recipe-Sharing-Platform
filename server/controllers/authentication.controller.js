@@ -1,6 +1,7 @@
-const users = require("../models/user");
-const refreshTokens = require("../models/refreshToken");
+const User = require("../models/user");
+const RefreshToken = require("../models/refreshToken");
 const passwordUtils = require("../library/passwordUtils");
+const userUtils = require("../library/userUtils");
 const { verify } = require("jsonwebtoken");
 const { validationResult } = require("express-validator");
 const createToken = require("../config/jsonWebToken");
@@ -15,41 +16,48 @@ const cookieAge = 1000 * 60 * 60 * 24 * 30; // 30 days in milliseconds
 
 
 exports.register = async (req, res) => {
-
-   const inputErrors = validationResult(req);
-   if (!inputErrors.isEmpty()) { return res.status(400).json({ error: errors.array() }); }
-
    const { username, email, password } = req.body;
 
+   // check if password meets all requirements
+   if (!passwordUtils.validPassword(password)) { return res.status(400).json({ error: "password does not meet requirements" }); }
+
+   // check the database for any existing User with the same username or email
    try {
-      // make sure username and email don't already exist in database
-      const searchUsername = await users.findOne({ username: { $regex: `^${username}$`} });
+      const searchUsername = await User.findOne({ username: { $regex: `^${username}$`} });
       if (searchUsername) { return res.status(400).json({ error: "username already taken" }); }
 
-      const searchEmail = await users.findOne({ email: { $regex: `^${email}$`} });
+      const searchEmail = await User.findOne({ email: { $regex: `^${email}$`} });
       if (searchEmail) { return res.status(400).json({ error: "email already taken" }); }
+   }
+   catch (error) {
+      console.log("\x1b[31m%s\x1b[0m", "authentication.controller.register failed... unable to search database for existing username or email");
+      console.error(error);
+      return res.status(500).json({ error: "server failed to search database for existing username or email" });
+   }
 
-      // check if given password meets all requirements and encrypt it
-      if (!passwordUtils.validPassword(password)) { return res.status(400).json({ error: "password does not meet requirements" }); }
+   try {
+      // encrypt password
       const hashedPassword = passwordUtils.encryptPassword(password);
 
-      // create user
+      // create newUser
       const newUser = {
          username,
          email,
-         hash: hashedPassword.hash,
-         salt: hashedPassword.salt,
+         bio: "no bio yet",
       };
 
-      // save new user to database
-      const savedUser = await new users(newUser)
+      // create userObject with newUser
+      const userObject = await userUtils.verifyObject(newUser, false);
+
+      // send userObject to database with salt and hash
+      const savedUser = await new User({...userObject, hash: hashedPassword.hash, salt: hashedPassword.salt})
       .save();
 
       // create tokens
       const tokens = createToken(savedUser);
 
       // save refresh token in database
-      await new refreshTokens({ user: savedUser._id, token: tokens.refreshToken })
+      await new RefreshToken({ user: savedUser._id, token: tokens.refreshToken })
       .save();
 
       // send cookies to client
@@ -60,6 +68,7 @@ exports.register = async (req, res) => {
 
    // handle any errors caused by the controller
    catch (error) {
+      console.log("\x1b[31m%s\x1b[0m", "authentication.controller.register failed... server failed to register new user");
       console.error(error);
       return res.status(500).json({ error: "server failed to register new user" });
    }
@@ -79,20 +88,20 @@ exports.login = async (req, res) => {
 
    try {
       // find user in database with provided username
-      const user = await users.findOne(
+      const user = await User.findOne(
          { username: new RegExp(`^${username}$`, 'i') },
          { _id: 1, username: 1, email: 1, bio: 1, hash: 1, salt: 1 }
       );
       if (!user) return res.status(400).json({ error: "username not found" });
 
       // check if password is correct
-      if (!passwordUtils.correctPassword(password, user.hash, user.salt)) return res.status(400).json({ error: "incorrect password" });
+      if (!passwordUtils.correctPassword(password, user.hash, user.salt)) { return res.status(400).json({ error: "incorrect password" }); }
 
       // create new refresh tokens
       const tokens = createToken(user);
 
       //save refresh tokens in database
-      await new refreshTokens({ user: user._id, token: tokens.refreshToken })
+      await new RefreshToken({ user: user._id, token: tokens.refreshToken })
       .save();
 
       // save tokens as cookies for client
@@ -123,7 +132,7 @@ exports.refresh = async (req, res) => {
    
    try {
       // make sure refresh token exists in database
-      const databaseToken = await refreshTokens.findOne({ token: refreshToken });
+      const databaseToken = await RefreshToken.findOne({ token: refreshToken });
       if (!databaseToken)
          return res.status(403).json({ error: "invalid refresh token" });
    

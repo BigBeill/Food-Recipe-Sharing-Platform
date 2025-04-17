@@ -4,7 +4,6 @@ import { useNavigate, useOutletContext, useParams } from 'react-router-dom';
 import axios from '../api/axios';
 import GrowingText from '../components/GrowingText';
 import Loading from '../components/Loading';
-
 import UserObject from '../interfaces/UserObject';
 import RelationshipObject from '../interfaces/RelationshipObject';
 
@@ -14,8 +13,8 @@ export default function Profile() {
    const context = useOutletContext<{userData: UserObject}>();
    const { _id } = useParams();
 
-   const [userData, setUserData] = useState<UserObject>({_id: '', username: '', email: '', bio: ''});
-   const [relationship, setRelationship] = useState<RelationshipObject>({ type: 0, _id: '0' });
+   const [userData, setUserData] = useState<UserObject>();
+   const [relationship, setRelationship] = useState<RelationshipObject>();
    const [editMode, setEditMode] = useState<boolean>(false);
 
    const [buttonSafety, setButtonSafety] = useState<boolean>(true);
@@ -28,7 +27,7 @@ export default function Profile() {
 
          axios({ method: 'get', url: `user/info/${context.userData._id}` })
          .then((response) => { setUserData(response); });
-         setRelationship({ type: 4, _id: "0" });
+         setRelationship({ _id: "0", target: context.userData._id, type: 4 });
       }
       else {
          axios({ method: 'get', url: `user/info/${_id}` })
@@ -36,9 +35,11 @@ export default function Profile() {
          axios({ method: 'get', url: `user/defineRelationship/${_id}` })
          .then((response) => { setRelationship(response); });
       }
+
    }, [_id]);
 
    function exitEditMode(saveChanges: boolean) {
+      if (!userData) { return; }
       if (saveChanges) {
          const requestData = {
             username: userData.username,
@@ -58,35 +59,38 @@ export default function Profile() {
    }
 
    function sendFriendRequest () {
+      if (!userData) { return; }
       axios({ method: 'post', url: 'user/sendFriendRequest', data: {userId: userData._id} })
-      .then((response) => { setRelationship({ type: 3, _id: response._id }); });
+      .then((response) => { setRelationship({ _id: response._id, target: userData._id, type: 3}); });
    }
 
    function processFriendRequest(accept: boolean) {
+      if (!userData || !relationship) { return; }
       if (accept) {
          axios({ method: 'post', url: 'user/processFriendRequest', data: { requestId: relationship._id, accept: true } })
-         .then((response) => { setRelationship({ type: 1, _id: response._id}); });
+         .then((response) => { setRelationship({ _id: response._id, target: userData._id, type: 2 }); });
       }
       else {
          axios({ method: 'post', url: 'user/processFriendRequest', data: { requestId: relationship._id, accept: false } })
-         .then(() => { setRelationship({ type: 0, _id: '0' }); });
+         .then(() => { setRelationship({ _id: '0', target: userData._id, type: 0 }); });
       }
    }
 
    function removeFriend() {
+      if (!userData || !relationship) { return; }
       if (buttonSafety) {
          setButtonSafety(false);
          return;
       }
       axios({ method: 'post', url: 'user/deleteFriend', data: { relationshipId: relationship._id } })
-      .then(() => { setRelationship({ type: 0, _id: '0' }); });
+      .then(() => { setRelationship({ _id: '0', target: userData._id, type: 0 }); });
    }
 
    // handle logout function
-   const handleLogout = () => {
+   function handleLogout() {
       axios({ method: 'post', url: 'authentication/logout' })
       .then(() => { location.assign('/') })
-   };
+   }
 
    // don'd load page until data is fetched
    if (!userData || !relationship) { return <Loading /> }

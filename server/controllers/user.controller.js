@@ -1,74 +1,30 @@
-// internal imports
 const friendRequest = require("../models/joinTables/friendRequest");
 const friendships = require("../models/joinTables/friendship");
 const friendFolders = require("../models/friendFolder");
 const users = require("../models/user");
 const { validationResult } = require("express-validator");
-const { getRelationship } = require('../library/userUtils');
+const userUtils = require('../library/userUtils');
 require("dotenv").config();
-
-
-exports.updateAccount = async (req, res) => {
-   if (!req.user) return res.status(401).json({ error: "user not signed in" });
-
-   const errors = validationResult(req);
-   if (!errors.isEmpty()) { return res.status(400).json({ error: errors.array() }); }
-
-   const { username, email, bio } = req.body;
-
-   // check for any missing fields in the request
-   if (!username) return res.status(400).json({error: 'missing username filed provided in body'});
-   if (!email) return res.status(400).json({error: 'missing email field provided in body'});
-
-   try{
-      //make sure username or email isn't already taken
-      const foundUsername = await users.findOne({ username: new RegExp(`^${username}$`, 'i') });
-      if (foundUsername && foundUsername._id != req.user._id) { return res.status(400).json({ error: "username already taken" }); }
-      const foundEmail = await users.findOne({ email: new RegExp(`^${email}$`, 'i') }) 
-      if (foundEmail && foundEmail._id != req.user._id) { return res.status(400).json({ error: "email already taken" }); }
-
-      // save user to database
-      await users.updateOne(
-         { _id: req.user._id },
-         { $set: {
-         email: email,
-         username: username,
-         bio: bio,
-         }, }
-      );
-
-      return res.status(200).json({ message: "account registered successfully" });
-   }
-
-   // handle any errors caused by the controller
-   catch(error){
-      console.error(error);
-      return res.status(500).json({ error: "server failed to update user account" });
-   }
-}
 
 exports.info = async (req, res) => {
 
-   const paramErrors = validationResult(req);
-   if (!paramErrors.isEmpty()) { return res.status(400).json({ error: paramErrors.array() }); }
-
-   const { userId } = req.params;
-
-   if (!userId) {
-      if(!req.user)  return res.status(401).json({ error: "user not signed in" });
-      return res.status(200).json({ message: "signed in user data", payload: req.user });
+   let user = { _id: req.params.userId }
+   if (!user._id) { 
+      if (!req.user) { 
+         console.log("\x1b[31m%s\x1b[0m", "user.controller.info failed... user not signed in and no userId provided");
+         return res.status(401).json({ error: "user not signed in" });
+      }
+      user._id = req.user._id; 
    }
 
    try {
-      // find user in database
-      const userData = await users.findOne({ _id: userId });
-      if (!userData) return res.status(400).json({ error: "user not found" });
-
-      return res.status(200).json({ message: "user data collected successfully", payload: userData });
+      const userObject = await userUtils.verifyObject(user, true); // get the completed userObject from the database
+      res.status(200).json({ message: "user data collected successfully", payload: userObject });
    }
    catch (error) {
+      console.log("\x1b[31m%s\x1b[0m", "user.controller.info failed... unable to create user object");
       console.error(error);
-      return res.status(500).json({ error: "server failed to find user" });
+      return res.status(500).json({ error: "server failed to get user data" });
    }
 }
 
@@ -86,7 +42,7 @@ exports.defineRelationship = async (req, res) => {
    if (!userId) return res.status(400).json({ error: "missing userId parameter" });
 
    try {
-      const definedRelationship = await getRelationship(_id, userId); 
+      const definedRelationship = await userUtils.getRelationship(_id, userId); 
       return res.status(200).json({ message: "relationship defined successfully", payload: definedRelationship });
    }
    catch (error) {
@@ -157,7 +113,7 @@ exports.find = async (req, res) => {
       else {
          userList = await Promise.all(userList.map(async (user) => {
             user = user.toObject();
-            user.relationship = await getRelationship(_id, user._id);
+            user.relationship = await userUtils.getRelationship(_id, user._id);
             return user;
          }));
       }
@@ -373,5 +329,41 @@ exports.deleteFriend = async (req, res) => {
    catch (error) {
       console.error(error);
       return res.status(500).json({ error: "server failed to delete friendship" });
+   }
+}
+
+exports.updateAccount = async (req, res) => {
+   if (!req.user) { return res.status(401).json({ error: "user not signed in" }); }
+
+   const { username, email, bio } = req.body;
+
+   // check for any missing fields in the request
+   if (!username) return res.status(400).json({error: 'missing username filed provided in body'});
+   if (!email) return res.status(400).json({error: 'missing email field provided in body'});
+
+   try{
+      //make sure username or email isn't already taken
+      const foundUsername = await users.findOne({ username: new RegExp(`^${username}$`, 'i') });
+      if (foundUsername && foundUsername._id != req.user._id) { return res.status(400).json({ error: "username already taken" }); }
+      const foundEmail = await users.findOne({ email: new RegExp(`^${email}$`, 'i') }) 
+      if (foundEmail && foundEmail._id != req.user._id) { return res.status(400).json({ error: "email already taken" }); }
+
+      // save user to database
+      await users.updateOne(
+         { _id: req.user._id },
+         { $set: {
+            email: email,
+            username: username,
+            bio: bio,
+         }, }
+      );
+
+      return res.status(200).json({ message: "account registered successfully" });
+   }
+
+   // handle any errors caused by the controller
+   catch(error){
+      console.error(error);
+      return res.status(500).json({ error: "server failed to update user account" });
    }
 }
