@@ -14,33 +14,58 @@ export default function Home() {
 
    const [searchParams, setSearchParams] = useSearchParams();
    const pageNumber: number = Number(searchParams.get('pageNumber')) || 1;
+   const foodIdParam: string | null = searchParams.get('foodIdList') || null;
+   const foodIdList: number[] | null = foodIdParam ? foodIdParam.split(',').map(Number) : null;
 
-   const [recipeName, setRecipeName] = useState<string>('');
+   const [recipeTitle, setRecipeTitle] = useState<string>('');
    const [ingredientList, setIngredientList] = useState<IngredientObject[]>([]);
 
-   const [recipes, setRecipes] = useState<RecipeObject[]>([]);
+   const [recipeList, setRecipeList] = useState<RecipeObject[]>([]);
 
    useEffect(() => {
+      if(!foodIdList) { return; } // if there are no foodIds, do nothing
+      foodIdList?.forEach((foodId) => {
+         axios({method: 'get', url: `ingredient/getObject/${foodId}`})
+         .then(response => { setIngredientList((list: IngredientObject[]) => [...list, response]); });
+      });
+   }, []);
+
+   // pull information from the url and request information from the server
+   useEffect(() => {
+      // if user is on the first page only request one recipe, otherwise request two recipes
       axios({method: 'get', url: `recipe/find?limit=${pageNumber == 1 ? 1 : 2}&skip=${pageNumber == 1 ? 0 : (pageNumber - 2) }`})
-      .then(response => { setRecipes(response); });
-   }, [searchParams])
+      .then(response => { setRecipeList(response); });
+   }, [searchParams]);
 
+   // send parameters to the url
    function handleSubmit() {
-      setSearchParams({name: recipeName, ingredients: JSON.stringify(ingredientList)});
+      // create params object
+      let newParams: {title?: string, foodIdList?: string } = {};
+      if (recipeTitle) { newParams.title = recipeTitle; } // add the title field if applicable
+      if (ingredientList.length > 0) {  // add the foodIdList field if applicable
+         const foodIdList: string[] = ingredientList.map((ingredient) => { return ingredient.foodId;  }); // get a list of filed ids
+         newParams.foodIdList = foodIdList.join(','); // save them in the url as a comma separated string
+      }
+      setSearchParams(newParams); // update the url with the new params
    }
 
+   // change the page number in the url
    function handlePageChange(newPage: number) {
-      setSearchParams(searchParams => ({...searchParams, pageNumber: newPage}));
+      const newParam = new URLSearchParams(searchParams.toString());
+      newParam.set('pageNumber', newPage.toString());
+      setSearchParams(newParam);
    }
 
+   // create the pageList for the notebook component
    let pageList: PageObject[] = [];
 
+   // attach the search page if the user is currently on the first page
    if (pageNumber == 1) {
       pageList = [{
          content: MainPage,
          props: {
-            recipeName,
-            setRecipeName,
+            recipeTitle,
+            setRecipeTitle,
             ingredientList,
             setIngredientList,
             handleSubmit
@@ -48,7 +73,8 @@ export default function Home() {
       }];
    }
 
-   recipes.forEach((recipe) => {
+   // attach a recipePreview page for each recipe in the recipes array
+   recipeList.forEach((recipe) => {
       pageList.push({
          content: RecipePreview,
          props: {
@@ -61,14 +87,14 @@ export default function Home() {
 }
 
 interface MainPageProps {
-   recipeName: string;
-   setRecipeName: React.Dispatch<React.SetStateAction<string>>;
+   recipeTitle: string;
+   setRecipeTitle: React.Dispatch<React.SetStateAction<string>>;
    ingredientList: IngredientObject[];
    setIngredientList: React.Dispatch<React.SetStateAction<IngredientObject[]>>;
    handleSubmit: () => void;
 }
 
-function MainPage({recipeName, setRecipeName, ingredientList, setIngredientList, handleSubmit}: MainPageProps) {
+function MainPage({recipeTitle, setRecipeTitle, ingredientList, setIngredientList, handleSubmit}: MainPageProps) {
 
    const [newIngredient, setNewIngredient] = useState<IngredientObject>({foodId:"", foodDescription:""});
    const [ingredientsAvailable, setIngredientsAvailable] = useState<IngredientObject[]>([]);
@@ -118,7 +144,7 @@ function MainPage({recipeName, setRecipeName, ingredientList, setIngredientList,
 
          <div className='textInput additionalMargin'>
             <label>Name</label>
-            <input type='text' value={recipeName} onChange={(event) => setRecipeName(event.target.value)} placeholder='recipe name' />
+            <input type='text' value={recipeTitle} onChange={(event) => setRecipeTitle(event.target.value)} placeholder='recipe name' />
          </div>
 
          <div className='textInput sideButton additionalMargin'>

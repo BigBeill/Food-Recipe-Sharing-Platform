@@ -1,7 +1,7 @@
 const router = require("express").Router();
 const userController = require("../controllers/user.controller");
 const { body, param, query } = require("express-validator");
-const { validateNoExtraFields } = require("../library/sanitationUtils");
+const { validateNoExtraFields, runValidation } = require("../library/sanitationUtils");
 
 /*
 ------------ /info route ------------
@@ -22,6 +22,7 @@ router.get("/info/:userId?",
         param("userId").optional().isString().isLength({ min: 24, max: 24 }).withMessage("userId must be a string of 24 characters"),
         validateNoExtraFields(["userId"], "param")
     ],
+    runValidation,
 userController.info);
 
 

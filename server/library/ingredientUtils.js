@@ -32,10 +32,10 @@ async function verifyObject (ingredient, includeNutrition = true) {
    // check if food description is present
    if (!ingredient.foodDescription) { 
       try {
-      const query = `SELECT food_description FROM food_name WHERE food_id = $1 LIMIT 1`;
-      const values = [ingredient.foodId];
-      const data = await postgresConnection.query(query, values);
-      ingredientObject.foodDescription = data.rows[0].food_description;
+         const query = `SELECT food_description FROM food_name WHERE food_id = $1 LIMIT 1`;
+         const values = [ingredient.foodId];
+         const data = await postgresConnection.query(query, values);
+         ingredientObject.foodDescription = data.rows[0].food_description;
       }
       catch (error) {
          console.log('failed to collect foodDescription from database for ingredient:', ingredient);

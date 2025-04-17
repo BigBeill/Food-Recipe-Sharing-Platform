@@ -1,4 +1,3 @@
-const postgresConnection = require('../config/postgres');
 const recipes = require('../models/recipe');
 const ingredientUtils = require('./ingredientUtils');
 
@@ -50,20 +49,19 @@ async function verifyObject (recipe, insideDatabase = true) {
    // check for any missing fields in the recipe object
    let invalidFields = await checkInvalidFields();
 
-   // search the database for any missing fields (skip if skipDatabaseCheck is true)
-   if (invalidFields.length != 0) {
-      if (!insideDatabase) { throw new Error('missing fields in recipe object: ' + invalidFields.join(', ')); }
+   if (invalidFields.length == 0) { return recipeObject; } // no missing fields return object
+   if (!insideDatabase) { throw new Error('missing fields in recipe object: ' + invalidFields.join(', ')); } // return error if insideDatabase is false
 
-      try {
-         const updatedRecipe = await recipes.findOne({ _id: recipe._id }, invalidFields.join(' '));
-         if (!updatedRecipe) { throw new Error('recipe not found in database'); }
-         invalidFields.forEach((field) => { recipeObject[field] = updatedRecipe[field]; });
-      }
-      catch (error) {
-         console.log("failed to search database for missing fields belonging to recipe:", recipe);
-         console.error(error);
-         throw new Error('failed to search database for missing fields');
-      }
+   // search the database for any missing fields
+   try {
+      const updatedRecipe = await recipes.findOne({ _id: recipe._id }, invalidFields.join(' '));
+      if (!updatedRecipe) { throw new Error('recipe not found in database'); }
+      invalidFields.forEach((field) => { recipeObject[field] = updatedRecipe[field]; });
+   }
+   catch (error) {
+      console.log("failed to search database for missing fields belonging to recipe:", recipe);
+      console.error(error);
+      throw new Error('failed to search database for missing fields');
    }
 
    // make sure all fields are present after searching the database

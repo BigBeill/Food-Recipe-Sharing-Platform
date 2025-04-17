@@ -27,7 +27,19 @@ export default function RecipePreview({ recipe }: RecipePreviewProps) {
             </ul>
          </div>
          <div className="nutritionInformation">
-
+            { recipe.nutrition ? 
+            <>
+               <p>Calories: {recipe.nutrition.calories}</p>
+               <p>Fat: {recipe.nutrition.fat}</p>
+               <p>Cholesterol: {recipe.nutrition.cholesterol}</p>
+               <p>Sodium: {recipe.nutrition.sodium}</p>
+               <p>Potassium: {recipe.nutrition.potassium}</p>
+               <p>Carbohydrates: {recipe.nutrition.carbohydrates}</p>
+               <p>Fibre: {recipe.nutrition.fibre}</p>
+               <p>Sugar: {recipe.nutrition.sugar}</p>
+               <p>Protein: {recipe.nutrition.protein}</p>
+            </>
+            : null }
          </div>
       </div>
    );
