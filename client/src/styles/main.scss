@@ -4,53 +4,53 @@
 /* ------------ root level css ------------ */
 
 :root{
-  font-size: 1rem;
-  letter-spacing: 1px;
-  // font-family: 'Coolvetica', sans-serif;
-  font-family: 'Archivo', sans-serif;
-  background-color: #f5f8fa;
+   font-size: 1rem;
+   letter-spacing: 1px;
+   // font-family: 'Coolvetica', sans-serif;
+   font-family: 'Archivo', sans-serif;
+   background-color: #f5f8fa;
 
 
-  // define color variables used throughout the scss files
-  --base-color: #065F46;
+   // define color variables used throughout the scss files
+   --base-color: #065F46;
 
-  --background-color: #f5f8fa;
-  --supporting-color: #065f46;
-  --text-color-main: grey;
-  --text-color-dark: black;
+   --background-color: #f5f8fa;
+   --supporting-color: #065f46;
+   --text-color-main: grey;
+   --text-color-dark: black;
 }
 
 body {
-  margin:0;
-  padding:0;
-  background-image: url('/woodBackground.jpg');
-  background-size: cover;
-  background-position: center;
+   margin:0;
+   padding:0;
+   background-image: url('/woodBackground.jpg');
+   background-size: cover;
+   background-position: center;
 }
 
 #root{
-  margin: 0rem;
-  width:100%;
-  height:100vh;
-  padding: 0rem;
-  overflow-x: hidden;
-  overflow-y: auto;
+   margin: 0rem;
+   width:100%;
+   height:100vh;
+   padding: 0rem;
+   overflow-x: hidden;
+   overflow-y: auto;
 }
 
 main{
-  position: relative;
-  margin: 0rem;
-  padding: 0rem;
-  margin-left: 14.1rem; // add margin to make room for nav bar
-  width: calc(100% - 14.1rem);
-  min-height: 100vh;
-  overflow-x: hidden;
+   position: relative;
+   margin: 0rem;
+   padding: 0rem;
+   margin-left: 14.1rem; // add margin to make room for nav bar
+   width: calc(100% - 14.1rem);
+   min-height: 100vh;
+   overflow-x: hidden;
 
-  // remove left margin making room for nav bar if nav bar is going to be tucked away
-  @media (max-width: 93rem) {
-    margin-left: .3rem;
-    width: calc(100% - .3rem);
-  }
+   // remove left margin making room for nav bar if nav bar is going to be tucked away
+   @media (max-width: 93rem) {
+      margin-left: .3rem;
+      width: calc(100% - .3rem);
+   }
 }
 
 
@@ -61,93 +61,93 @@ main{
 /* ------------ general css classes ------------ */
 
 .shielded *{
-  pointer-events: none;
+   pointer-events: none;
 }
 
 .hidden{
-  display: none !important;
+   display: none !important;
 }
 
 .invisible{
-  visibility: hidden;
+   visibility: hidden;
 }
 
 .centred{
-  margin-left: auto;
-  margin-right: auto;
+   margin-left: auto;
+   margin-right: auto;
 }
 
 .centredVertically{
-  display: flex;
-  align-items: center;
+   display: flex;
+   align-items: center;
 }
 
 .splitSpace{
-  display: flex;
-  width: 100%;
-  margin: 0rem;
-  padding: 0rem;
+   display: flex;
+   width: 100%;
+   margin: 0rem;
+   padding: 0rem;
 
-  > *{
-    flex: 1;
-  }
+   > *{
+      flex: 1;
+   }
 }
 
 .split{
-  flex-grow:0.8;
+   flex-grow:0.8;
 }
 
 @media only screen and (max-width: 720px) {
-  .splitSpace .stackup{
-    display: inline;
-    gap: 0.9rem;
-  }
+   .splitSpace .stackup{
+      display: inline;
+      gap: 0.9rem;
+   }
 }
 
 .displayData{
-  margin-left: 1.2rem;
+   margin-left: 1.2rem;
 }
 
 .displayData p{
-  display: inline-block;
-  margin: .3rem 0rem;
+   display: inline-block;
+   margin: .3rem 0rem;
 }
 
 .softText{
-  color: #4b4b4b;
-  font-style: italic;
+   color: #4b4b4b;
+   font-style: italic;
 }
 
 .consumeSpace{
-  width: 100%;
-  height: 100%;
+   width: 100%;
+   height: 100%;
 }
 
 .notIntractable{
-  pointer-events: none;
+   pointer-events: none;
 }
 
 .error {
-  margin: 0rem !important;
-  padding: .3rem !important;
-  padding-left: .9rem !important;
-  border: .1rem solid #991b1b;
-  border-radius: .3rem;
-  background-color: rgb(153, 27, 27, .5);
+   margin: 0rem !important;
+   padding: .3rem !important;
+   padding-left: .9rem !important;
+   border: .1rem solid #991b1b;
+   border-radius: .3rem;
+   background-color: rgb(153, 27, 27, .5);
 }
 
 .halfVerticalSpace {
-  width: 100%;
-  height: 50%;
+   width: 100%;
+   height: 50%;
 }
 
 .extraBottom {
-  margin-bottom: 3rem;
+   margin-bottom: 3rem;
 }
 
 .moveToBottom {
-  margin-top: auto;
-  bottom: 0;
+   margin-top: auto;
+   bottom: 0;
 }
 
 
@@ -157,65 +157,67 @@ main{
 /* ------------ universally applied css ------------ */
 
 p {
-  white-space: pre-line;
+   white-space: pre-line;
 }
 
 h2{
-  text-decoration: underline #065F46;
-  text-decoration-thickness: 0.2rem;
+   text-decoration: underline #065F46;
+   text-decoration-thickness: 0.2rem;
 }
 
 h3 {
-  margin-top: 2rem;
-  margin-left: 0.5rem;
-  margin-bottom: 0.2rem;
-  font-weight: 100;
-  font-size: 24px;
+   margin-top: 2rem;
+   margin-left: 0.5rem;
+   margin-bottom: 0.2rem;
+   font-weight: 100;
+   font-size: 24px;
 }
 
 /* remove arrows from number input */
 /* Chrome, Safari, Edge, Opera */
 input::-webkit-outer-spin-button,
 input::-webkit-inner-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
+   -webkit-appearance: none;
+   margin: 0;
 }
 /* Firefox */
 input[type=number] {
-  appearance: textfield;
-  -moz-appearance: textfield;
+   appearance: textfield;
+   -moz-appearance: textfield;
 }
 
 ::-webkit-scrollbar {
-  width: .45rem;
+   width: .45rem;
 }
 
 /* Customize the thumb */
 ::-webkit-scrollbar-thumb {
-  background-color: var(--background-color); /* color of the scrollbar thumb */
-  border-radius: 0.3rem; /* rounded corners */
+   background-color: var(--background-color); /* color of the scrollbar thumb */
+   border-radius: 0.3rem; /* rounded corners */
 }
 
 /* Hover state of the thumb */
 ::-webkit-scrollbar-thumb:hover {
-  background-color: lightgray;
+   background-color: lightgray;
 }
 
 /* Handle when scrollbar is in a drag state */
 ::-webkit-scrollbar-thumb:active {
-  background-color: lightgray;
+   background-color: lightgray;
 }
 
 /* Customize the track */
 ::-webkit-scrollbar-track {
-  background: var(--base-color); /* color of the scrollbar track */
+   background: var(--base-color); /* color of the scrollbar track */
 }
 
 .growingText{
-  margin: 0rem !important;
-  padding: 0rem !important;
-  max-width: 100% !important;
-  width: max-content !important;
-  display: inline-block !important;
-  text-wrap: wrap !important;
+   margin: 0rem !important;
+   padding: 0rem !important;
+   max-height: 100% !important;
+   width: max-content !important;
+   max-width: 100% !important;
+   width: max-content !important;
+   display: inline-block !important;
+   text-wrap: wrap !important;
 }
