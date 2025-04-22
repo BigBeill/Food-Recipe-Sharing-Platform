@@ -99,7 +99,7 @@ Any JSON object being sent from the server to the client should follow one of th
    foodDescription: string,
    portion?: {
       measureId: number,
-      measureDescription: string,
+      measureDescription?: string,
       amount: number
    },
    nutrition?: {
@@ -113,6 +113,15 @@ Any JSON object being sent from the server to the client should follow one of th
       sugar: number,
       protein: number
    }
+}
+```
+
+### conversionObject
+```js
+{
+   measureId: number,
+   measureDescription?: string,
+   conversionFactorValue: number,
 }
 ```
 

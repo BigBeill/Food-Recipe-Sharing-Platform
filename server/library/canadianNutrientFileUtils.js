@@ -15,7 +15,7 @@ returns:
     value: int
   }]
 */
-function conversionFactorList (ingredientId) {
+function conversionFactorList (foodId) {
   return new Promise( async (resolve, reject) => {
 
     // accumulate a list of every posable conversion and there values for provided ingredient
