@@ -17,7 +17,7 @@ function Register() {
    const [errorMessage, setErrorMessage] = useState<string>("");
 
    useEffect(() => {
-      if (userData._id) { navigate('/profile'); }
+      if (userData) { navigate('/profile'); }
       document.body.classList.add('loginBackground');
       return () => { document.body.classList.remove('loginBackground'); }
    }, [])

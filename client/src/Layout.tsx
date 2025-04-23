@@ -7,7 +7,7 @@ import Nav from './components/Nav'
 import UserObject from './interfaces/UserObject'
 
 interface LayoutProps {
-  userData: UserObject
+  userData: UserObject | null;
 }
 
 export default function Layout({userData}: LayoutProps) {

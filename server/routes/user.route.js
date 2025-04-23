@@ -4,53 +4,40 @@ const { body, param, query } = require("express-validator");
 const { validateNoExtraFields, runValidation } = require("../library/sanitationUtils");
 
 /*
------------- /info route ------------
-
-takes 0 arguments from params
-
-Optionally accepts 1 arguments from params:
-    userId: mongoose object id
-
-
-route will:
-    get user data with {userId} from database
-    if no userId provided return data for user that is currently logged in
-
+returns a 404 error (use getObject instead)
 */
 router.get("/info/:userId?",
-    [
-        param("userId").optional().isString().isLength({ min: 24, max: 24 }).withMessage("userId must be a string of 24 characters"),
-        validateNoExtraFields(["userId"], "param")
-    ],
-    runValidation,
 userController.info);
 
 
 
 /*
------------- /defineRelationship route ------------
+------------ /getObject route ------------
 
-takes 1 arguments from params
+requires 0 arguments from query:
+
+optionally accepts 2 argument from query:
     userId: mongoose object id
+    relationship: boolean (assumed to be false)
 
 route will:
-    figure out the relationship between the user that is currently logged in and the user with {userId}
+    returns a complete userObject for userId provided in params
+    if no userId is provided, it will return the userObject for the currently logged in user
+    if {relationship} is true, it will add a relationship field to the userObject
 
 returns:
-    type: int
-        0: no relationship
-        1: user is friends with {userId}
-        2: user has received a friend request from {userId}
-        3: user has sent a friend request to {userId}
-        4: users own profile
-    _id: mongoose object id (_id of the relationship, 0 if N/A)
+    userObject;
+    userObject.relationship ( if relationship is true)
 */
-router.get("/defineRelationship/:userId",
+router.get("/getObject/:userId?/:relationship?",
     [
-        param("userId").isString().isLength({ min: 24, max: 24 }).withMessage("userId must be a string of 24 characters"),
-        validateNoExtraFields(["userId"], "param")
+        param("userId").optional().isString().isLength({ min: 24, max: 24 }).withMessage("userId must be a string of 24 characters"),
+        param("relationship").optional().isBoolean().withMessage("relationship must be a boolean"),
+        validateNoExtraFields(["userId", "relationship"], "param")
     ],
-userController.defineRelationship);
+    runValidation,
+    userController.getObject
+);
 
 
 
@@ -103,7 +90,9 @@ router.get("/find",
         query("count").optional().isBoolean().withMessage("count must be a boolean"),
         validateNoExtraFields(["username", "email", "limit", "skip", "relationship", "count"], "query")
     ],
-userController.find);
+    runValidation,
+    userController.find
+);
 
 
 

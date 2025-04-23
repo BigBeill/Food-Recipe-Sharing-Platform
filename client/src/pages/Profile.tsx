@@ -10,10 +10,10 @@ import RelationshipObject from '../interfaces/RelationshipObject';
 export default function Profile() {
    const titleParent = useRef(null);
    const navigate = useNavigate();
-   const context = useOutletContext<{userData: UserObject}>();
+   const {userData} = useOutletContext<{userData: UserObject}>();
    const { _id } = useParams();
 
-   const [userData, setUserData] = useState<UserObject>();
+   const [userObject, setUserObject] = useState<UserObject>();
    const [relationship, setRelationship] = useState<RelationshipObject>();
    const [editMode, setEditMode] = useState<boolean>(false);
 
@@ -23,15 +23,15 @@ export default function Profile() {
       setEditMode(false);
       
       if (!_id){
-         if (!context.userData._id) { navigate('/login'); }
+         if (!userData) { navigate('/login'); }
 
-         axios({ method: 'get', url: `user/info/${context.userData._id}` })
-         .then((response) => { setUserData(response); });
-         setRelationship({ _id: "0", target: context.userData._id, type: 4 });
+         axios({ method: 'get', url: `user/info/${userData._id}` })
+         .then((response) => { setUserObject(response); });
+         setRelationship({ _id: "0", target: userData._id, type: 4 });
       }
       else {
          axios({ method: 'get', url: `user/info/${_id}` })
-         .then((response) => { setUserData(response); });
+         .then((response) => { setUserObject(response); });
          axios({ method: 'get', url: `user/defineRelationship/${_id}` })
          .then((response) => { setRelationship(response); });
       }
@@ -39,51 +39,51 @@ export default function Profile() {
    }, [_id]);
 
    function exitEditMode(saveChanges: boolean) {
-      if (!userData) { return; }
+      if (!userObject) { return; }
       if (saveChanges) {
          const requestData = {
-            username: userData.username,
-            email: userData.email,
-            bio: userData.bio
+            username: userObject.username,
+            email: userObject.email,
+            bio: userObject.bio
          }
          axios({ method: 'post', url: 'user/updateAccount', data: requestData })
       }
       else {
          let url;
-         if (!_id) { url = `user/info/${context.userData._id}`; }
+         if (!_id) { url = `user/info/${userData._id}`; }
          else { url = `user/info/${_id}`; }
          axios({ method: 'get', url })
-         .then((response) => { setUserData(response); });
+         .then((response) => { setUserObject(response); });
       }
       setEditMode(false);
    }
 
    function sendFriendRequest () {
-      if (!userData) { return; }
-      axios({ method: 'post', url: 'user/sendFriendRequest', data: {userId: userData._id} })
-      .then((response) => { setRelationship({ _id: response._id, target: userData._id, type: 3}); });
+      if (!userObject) { return; }
+      axios({ method: 'post', url: 'user/sendFriendRequest', data: {userId: userObject._id} })
+      .then((response) => { setRelationship({ _id: response._id, target: userObject._id, type: 3}); });
    }
 
    function processFriendRequest(accept: boolean) {
-      if (!userData || !relationship) { return; }
+      if (!userObject || !relationship) { return; }
       if (accept) {
          axios({ method: 'post', url: 'user/processFriendRequest', data: { requestId: relationship._id, accept: true } })
-         .then((response) => { setRelationship({ _id: response._id, target: userData._id, type: 2 }); });
+         .then((response) => { setRelationship({ _id: response._id, target: userObject._id, type: 2 }); });
       }
       else {
          axios({ method: 'post', url: 'user/processFriendRequest', data: { requestId: relationship._id, accept: false } })
-         .then(() => { setRelationship({ _id: '0', target: userData._id, type: 0 }); });
+         .then(() => { setRelationship({ _id: '0', target: userObject._id, type: 0 }); });
       }
    }
 
    function removeFriend() {
-      if (!userData || !relationship) { return; }
+      if (!userObject || !relationship) { return; }
       if (buttonSafety) {
          setButtonSafety(false);
          return;
       }
       axios({ method: 'post', url: 'user/deleteFriend', data: { relationshipId: relationship._id } })
-      .then(() => { setRelationship({ _id: '0', target: userData._id, type: 0 }); });
+      .then(() => { setRelationship({ _id: '0', target: userObject._id, type: 0 }); });
    }
 
    // handle logout function
@@ -93,12 +93,12 @@ export default function Profile() {
    }
 
    // don'd load page until data is fetched
-   if (!userData || !relationship) { return <Loading /> }
+   if (!userObject || !relationship) { return <Loading /> }
 
    return (
       <div className='displayUserData'>
          <div ref={titleParent} className='centredVertically'>
-            <GrowingText text={userData.username} parentDiv={titleParent} />
+            <GrowingText text={userObject.username} parentDiv={titleParent} />
          </div>
          <div>
             <img className="consumeSpace" src="../../public/profile-photo.png" alt='profile picture' />
@@ -107,20 +107,20 @@ export default function Profile() {
          <div> {/* styleDiv, should not contain anything */} </div>
 
          <div>
-            <p>_id: {userData._id}</p>
-            <p>username: {userData.username}</p>
-            <p>email: {userData.email}</p>
+            <p>_id: {userObject._id}</p>
+            <p>username: {userObject.username}</p>
+            <p>email: {userObject.email}</p>
          </div>
          <div className='textInputParent bottomPadding'>
             { editMode ? (
                <>
                   <label htmlFor="bio">Personal Bio</label>
-                  <textarea id="bio "value={userData.bio} onChange={ (event) => { setUserData({ ...userData, bio: event.target.value }); } } />
+                  <textarea id="bio "value={userObject.bio} onChange={ (event) => { setUserObject({ ...userObject, bio: event.target.value }); } } />
                </> 
             ) : (
                <>
                   <h4>Personal Bio</h4>
-                  { userData.bio ? <p>{userData.bio}</p> : <p>No bio available</p> }
+                  { userObject.bio ? <p>{userObject.bio}</p> : <p>No bio available</p> }
                </>
             )}
 

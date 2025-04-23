@@ -9,7 +9,7 @@ import UserObject from '../interfaces/UserObject'
 
 
 interface NavProps {
-    userData: UserObject
+    userData: UserObject | null;
 }
 
 function Nav({userData}: NavProps) {
@@ -47,7 +47,7 @@ function Nav({userData}: NavProps) {
             <NavLink className="navLink" to="/index" onClick={() => setOpen(false)}>Search</NavLink>
 
             {   
-                userData._id ?
+                userData ?
                 <>
 
                 <h3>Your Recipes</h3>
