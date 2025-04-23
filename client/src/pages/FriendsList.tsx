@@ -125,7 +125,7 @@ export default function FriendsList() {
 
    return (
       <div>
-         <div className='displayUserInformationCards'>
+         <div className='displayPinCollection'>
             <div className='filterPanel'>
                <h2>Filter Users - Friends</h2>
                <div className="textInput">
@@ -163,7 +163,7 @@ export default function FriendsList() {
             ))}
 
             { users.map((userData, index) => (
-            <UserPin key={index} userData={userData} /> 
+            <UserPin key={index} userObject={userData} /> 
             ))}
 
          </div>

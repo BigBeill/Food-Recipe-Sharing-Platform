@@ -26,7 +26,7 @@ export default function NewEditRecipe () {
   const recipeId = searchParams.get('recipeId');
 
   // make sure current user is signed in, otherwise redirect to login
-  if (userData._id == "") navigate('/login');
+  if (!userData) navigate('/login');
 
   //define required useStates
   const [title, setTitle] = useState<string>('');
@@ -232,15 +232,13 @@ function IngredientPage ({ingredientList, setIngredientList}: IngredientPageProp
       {/* ingredients list */}
       <Reorder.Group className='displayList addPadding' axis='y' values={ingredientList} onReorder={setIngredientList}>
         {ingredientList.map((item, index) => (
-          <Reorder.Item key={item.id} value={item} className='listItemContainer'>
+          <Reorder.Item key={item.id} value={item} className='listItem'>
             <div className='itemOptions'>
               <FontAwesomeIcon icon={faCircleXmark} style={{color: "#575757",}} onClick={() => removeIngredient(index)} />
             </div>
-            <div className='listItem'>
-              { item.content.portion ?
-                <p>{item.content.portion.amount} {item.content.portion.measureDescription} of [{item.content.foodDescription}]</p>
-              : null }
-            </div>
+            { item.content.portion ?
+              <p>{item.content.portion.amount} {item.content.portion.measureDescription} of [{item.content.foodDescription}]</p>
+            : null }
           </Reorder.Item>
         ))}
       </Reorder.Group>
@@ -306,8 +304,8 @@ function InstructionPage ({instructionList, setInstructionList}: InstructionPage
       <h2>Recipe Instructions</h2>
       <Reorder.Group className='displayList' axis='y' values={instructionList} onReorder={setInstructionList}>
         {instructionList.map((item, index) => (
-          <Reorder.Item key={item.id} value={item} className='listItemContainer'>
-            <div className='listItem'>
+          <Reorder.Item key={item.id} value={item} className='listItem'>
+            <div className='contents'>
               <h4>Step {index + 1} </h4>
               <p>{item.content}</p>
             </div>

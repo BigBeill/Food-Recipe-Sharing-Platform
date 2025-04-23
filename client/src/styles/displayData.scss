@@ -11,14 +11,10 @@
      padding: 3rem;
    }
 
-   .listItemContainer{
+   .listItem{
       display: flex;
 
-      .listItem {
-         width: 100%;
-      }
-
-      .itemOptions{
+      .options{
          display: flex;
          flex-direction: column;
          justify-content: center;
@@ -37,7 +33,7 @@
    }
 }
 
-.displayUserInformationCards {
+.displayPinCollection {
    box-sizing: border-box;
    margin: auto;
    width: 100%;

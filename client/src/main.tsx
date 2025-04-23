@@ -1,8 +1,6 @@
-// external imports
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 
-// internal imports
 import App from './App';
 import './styles/displayData.scss';
 import './styles/main.scss';
