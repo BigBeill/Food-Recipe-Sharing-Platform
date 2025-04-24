@@ -1,8 +1,6 @@
-// external imports
 import { useState, useEffect } from 'react';
 import { useSearchParams, useParams } from "react-router-dom";
 
-//internal imports
 import axios from '../api/axios';
 import UserPin from '../components/UserPin';
 import Folder from '../components/Folder';
@@ -106,7 +104,7 @@ export default function FriendsList() {
          
          axios({ method: 'get', url })
          .then((response) => {
-            setUsers(response.users);
+            setUsers(response.userObjectList);
             setUsersCount(response.count);
             resolve();
          })

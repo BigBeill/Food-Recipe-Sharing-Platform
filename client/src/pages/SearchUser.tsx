@@ -65,7 +65,7 @@ export default function SearchUser() {
          url
       })
       .then((response) => {
-         setUsers(response.users);
+         setUsers(response.userObjectList);
          setTotalCount(response.count);
       })
    },[searchParams]);

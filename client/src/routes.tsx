@@ -32,7 +32,7 @@ export const routes = [
     element:<Login />,
   },
   {
-    path:'/profile/:_id?',
+    path:'/profile/:userId?',
     element:<Profile />,
   },
   {

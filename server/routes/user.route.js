@@ -3,12 +3,6 @@ const userController = require("../controllers/user.controller");
 const { body, param, query } = require("express-validator");
 const { validateNoExtraFields, runValidation } = require("../library/sanitationUtils");
 
-/*
-returns a 404 error (use getObject instead)
-*/
-router.get("/info/:userId?",
-userController.info);
-
 
 
 /*
@@ -68,16 +62,7 @@ Route description:
     return list and count to client
 
 Returns: 
-    users:
-        [
-            {
-                _id: mongoose object id
-                username: string
-                email: string
-                bio: string
-                relationship: { type: int, _id: mongoose object id }
-            }
-        ]
+    userObjectList: userObject Array (including relationship fields)
     count: int (if count is true)
 */
 router.get("/find",
@@ -137,7 +122,9 @@ router.get("/folder",
         query("count").optional().isBoolean().withMessage("count must be a boolean"),
         validateNoExtraFields(["skip", "limit", "folderId", "count"], "query")
     ],
-userController.folder);
+    runValidation,
+    userController.folder
+);
 
 
 
@@ -171,7 +158,9 @@ router.post("/updateAccount",
         body("bio").isString().withMessage("Bio must be a string"),
         validateNoExtraFields(["username", "email", "bio"], "body")
     ],
-userController.updateAccount);
+    runValidation,
+    userController.updateAccount
+);
 
 /*
 ---------- /sendFriendRequest route ------------
@@ -190,7 +179,9 @@ router.post("/sendFriendRequest",
         body("userId").isString().isLength({ min: 24, max: 24 }).withMessage("userId must be a string of 24 characters"),
         validateNoExtraFields(["userId"], "body")
     ],
-userController.sendFriendRequest);
+    runValidation,
+    userController.sendFriendRequest
+);
 
 /*
 ---------- /acceptFriendRequest route ------------
@@ -213,7 +204,9 @@ router.post("/processFriendRequest",
         body("accept").isBoolean().withMessage("accept must be a boolean"),
         validateNoExtraFields(["requestId", "accept"], "body")
     ],
-userController.processFriendRequest);
+    runValidation,
+    userController.processFriendRequest
+);
 
 
 
@@ -235,6 +228,8 @@ router.post("/deleteFriend",
         body("relationshipId").isString().isLength({ min: 24, max: 24 }).withMessage("relationshipId must be a string of 24 characters"),
         validateNoExtraFields(["relationshipId"], "body")
     ],
-userController.deleteFriend);
+    runValidation,
+    userController.deleteFriend
+);
 
 module.exports = router;

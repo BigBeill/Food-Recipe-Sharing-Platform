@@ -33,25 +33,26 @@ async function verifyObject (user, insideDatabase = true) {
    // check for any missing fields in the user object
    let invalidFields = checkInvalidFields();
 
-   if (invalidFields.length == 0) { return userObject; } // no missing fields return object
-   if (!insideDatabase) { throw new Error('missing fields in user object: ' + invalidFields.join(', ')); } // return error if insideDatabase is false
+   if (invalidFields.length != 0) {  
+      if (!insideDatabase) { throw new Error('missing fields in user object: ' + invalidFields.join(', ')); } // return error if insideDatabase is false
 
-   // search the database for any missing fields
-   try {
-      const updatedUser = await User.findOne({ _id: user._id }, invalidFields.join(' '));
-      if (!updatedUser) { throw new Error('user not found in database'); }
-      invalidFields.forEach((field) => { userObject[field] = updatedUser[field]; });
-   }
-   catch (error) {
-      console.log("failed to search database for missing fields belonging to user:", user);
-      console.error(error);
-      throw new Error('failed to search database for missing fields');
-   }
+      // search the database for any missing fields
+      try {
+         const updatedUser = await User.findOne({ _id: user._id }, invalidFields.join(' '));
+         if (!updatedUser) { throw new Error('user not found in database'); }
+         invalidFields.forEach((field) => { userObject[field] = updatedUser[field]; });
+      }
+      catch (error) {
+         console.log("failed to search database for missing fields belonging to user:", user);
+         console.error(error);
+         throw new Error('failed to search database for missing fields');
+      }
 
-   invalidFields = checkInvalidFields(); // check for any missing fields again after searching the database
-   if (invalidFields.length > 0) {
-      console.log("missing fields in user object: " + invalidFields.join(', '));
-      throw new Error('missing fields in user object: ' + invalidFields.join(', '));
+      invalidFields = checkInvalidFields(); // check for any missing fields again after searching the database
+      if (invalidFields.length > 0) {
+         console.log("missing fields in user object: " + invalidFields.join(', '));
+         throw new Error('missing fields in user object: ' + invalidFields.join(', '));
+      }
    }
 
    if (!user.relationship) {
@@ -66,7 +67,8 @@ async function verifyObject (user, insideDatabase = true) {
 
    if (!insideDatabase) { throw new Error('no relationship field should exist for userObject not inside the database'); }
    if (!userObject.relationship.target) { throw new Error('relationship field passed, but no target was given'); }
-   if (!userObject.relationship._id || !userObject.relationship.type) { userObject.relationship = await attachRelationshipField(userObject, userObject.relationship.target); }
+   if (!userObject.relationship._id || !userObject.relationship.type) { userObject = await attachRelationshipField(userObject, userObject.relationship.target); }
+
    return {
       _id: userObject._id,
       username: userObject.username,
@@ -108,21 +110,21 @@ async function attachRelationshipField (user, targetId) {
       let relationship;
 
       // check if users are friends
-      relationship = await Friendship.findOne({ friendIds: { $all: [user._id, target] } });
+      relationship = await Friendship.findOne({ friendIds: { $all: [user._id, targetId] } });
       if (relationship) { return { ...user, relationship: { _id: relationship._id, target: targetId,  type: 1 } }; }
 
       // check if friend request has been received
-      relationship = await FriendRequest.findOne({ senderId: target, receiverId: user._id });
+      relationship = await FriendRequest.findOne({ senderId: targetId, receiverId: user._id });
       if (relationship) { return {...user, relationship: { _id: relationship._id, target: targetId, type: 2 } }; }
 
       // check if friend request has been sent
-      relationship = await FriendRequest.findOne({ senderId: user._id, receiverId: target });
+      relationship = await FriendRequest.findOne({ senderId: user._id, receiverId: targetId });
       if (relationship) { return { ...user, relationship: { _id: relationship._id, target: targetId, type: 3 } };}
 
       return { ...user, relationship: { _id: 0, target: targetId, type: 0 } }; // no relationship found
    }
    catch (error) {
-      console.log("filed to get relationship between user:", user, "and target:", target);
+      console.log("filed to get relationship between user:", user, "and target:", targetId);
       console.error(error);
       throw new Error('failed to find relationship between users');
    }

@@ -6,13 +6,6 @@ const { validationResult } = require("express-validator");
 const userUtils = require('../library/userUtils');
 require("dotenv").config();
 
-/*
-returns a 404 error (use getObject instead)
-*/
-exports.info = async (req, res) => {
-   return res.status(404).json({ error: "user info route no longer supported" });
-}
-
 
 
 /*
@@ -21,14 +14,15 @@ returns a complete userObject depending on the parameters provided in the reques
 */
 exports.getObject = async (req, res) => {
    // get necessary data from request
-   const { _id } = req.user;
+   const _id = req.user?._id;
    const { userId = _id, relationship = false } = req.params;
-   if (!userId) { return res.status(400).json({ error: "no user signed in and missing userId field in params" }); }
+   if (!userId) { return res.status(401).json({ error: "no user signed in and missing userId field in params" }); }
 
    try {
 
-      const userData = await User.findOne({ _id: userId });
+      let userData = await User.findOne({ _id: userId });
       if (!userData) { return res.status(400).json({ error: "user not found in database" }); }
+      userData = userData.toObject(); // convert userData to a plain object
 
       // attach current user as target if relationship is true
       if (relationship) { userData.relationship = {target: _id}; }
@@ -61,10 +55,9 @@ exports.find = async (req, res) => {
    // make sure no required fields are missing
    if (relationship != 0 && !_id) { return res.status(401).json({ error: "user not signed in" }); };
 
-   let userList = [];
+   let userList = []; // create empty array to hold user objects
+   let query = {}; // create query for searching the database with required user fields
    try {
-      // create query for searching the database for usernames containing client provided string
-      let query = {};
 
       // add username and email fields to query if provided
       if (username) query.username = { $regex: new RegExp(username, 'i') };
@@ -111,8 +104,9 @@ exports.find = async (req, res) => {
 
    try {
       const userObjectList = await Promise.all( userList.map( async (user) => {
-         user.relationship = { target: _id };
-         const userObject = await userUtils.verifyObject(user, true);
+         userData = user.toObject();
+         userData.relationship = { target: _id };
+         const userObject = await userUtils.verifyObject(userData, true);
          return userObject;
       }));
 
@@ -120,7 +114,7 @@ exports.find = async (req, res) => {
 
       // attach count if requested by the client
       if (count) {
-         const totalCount = await users.countDocuments(query);
+         const totalCount = await User.countDocuments(query);
          payload.count = totalCount;
       }
 
@@ -141,12 +135,9 @@ returns a folderObject array containing all the folders in the database that mat
 */
 exports.folder = async (req, res) => {
 
-   const queryErrors = validationResult(req);
-   if (!queryErrors.isEmpty()) { return res.status(400).json({ error: queryErrors.array() }); }
-
    if (!req.user) return res.status(401).json({ error: "user not signed in" });
 
-   const { _id } = req.user;
+   const _id = req.user._id;
    const { folderId, count, limit, skip } = req.query;
 
    try {
@@ -183,10 +174,7 @@ creates a friend request object in the database between the signed in user and t
 exports.sendFriendRequest = async (req, res) => {
    if (!req.user) return res.status(401).json({ error: "user not signed in" });
 
-   const errors = validationResult(req);
-   if (!errors.isEmpty()) { return res.status(400).json({ error: errors.array() }); }
-
-   const { _id } = req.user;
+   const _id = req.user._id;
    const { userId } = req.body;
 
    // check if user is signed in
@@ -244,10 +232,7 @@ Removes a friend request from the database and creates a friendshipObject if the
 exports.processFriendRequest = async (req, res) => {
    if (!req.user) return res.status(401).json({ error: "user not signed in" });
 
-   const errors = validationResult(req);
-   if (!errors.isEmpty()) { return res.status(400).json({ error: errors.array() }); }
-
-   const { _id } = req.user;
+   const _id = req.user._id;
    const { requestId, accept } = req.body;
 
    // check if user is signed in
@@ -321,10 +306,7 @@ removes a friendshipObject from the database
 exports.deleteFriend = async (req, res) => {
    if (!req.user) return res.status(401).json({ error: "user not signed in" });
 
-   const errors = validationResult(req);
-   if (!errors.isEmpty()) { return res.status(400).json({ error: errors.array() }); }
-
-   const { _id } = req.user;
+   const _id = req.user._id;
    const { relationshipId } = req.body;
 
    // check if user is signed in

@@ -23,12 +23,12 @@ export default function Folder({ folderDetails }: FolderProps) {
       // fetch the first 3 users in the folder from server
       if (folderDetails._id == "requests") {
          axios({ method: 'get', url: `/user/find?limit=3&relationship=2` })
-         .then((response) => { setDisplayUsers(response.users) })
+         .then((response) => { setDisplayUsers(response.userObjectList) })
          .catch((error) => { console.error(error) });
       }
       else {
          folderDetails.content.slice(0, 3).forEach((userId) => {
-            axios({ method: 'get', url: `/user/info/${userId}` })
+            axios({ method: 'get', url: `/user/getObject/${userId}` })
             .then((response) => { setDisplayUsers((prev) => [...prev, response]) })
             .catch((error) => { console.error(error) });
          });
@@ -45,17 +45,17 @@ export default function Folder({ folderDetails }: FolderProps) {
          <div className="userCards shielded">
          { displayUsers[2] ? (
             <div className="cardContainer">
-               <UserPin userData={displayUsers[2]} />
+               <UserPin userObject={displayUsers[2]} />
             </div>
          ) : <div style={ {display: 'none'} }></div>}
          { displayUsers[0] ? (
             <div className="cardContainer">
-               <UserPin userData={displayUsers[0]} />
+               <UserPin userObject={displayUsers[0]} />
             </div>
          ) : <div style={ {display: 'none'} }></div> }
          { displayUsers[1] ? (
             <div className="cardContainer">
-               <UserPin userData={displayUsers[1]} />
+               <UserPin userObject={displayUsers[1]} />
             </div>
          ) : <div style={ {display: 'none'} }></div> }
 
