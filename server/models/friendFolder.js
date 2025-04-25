@@ -12,8 +12,4 @@ const friendFolderSchema = new mongoose.Schema({
    }
 });
 
-function limitSize(val) {
-   return val.length <= 3;
-}
-
 module.exports = mongoose.model("friendFolder", friendFolderSchema);

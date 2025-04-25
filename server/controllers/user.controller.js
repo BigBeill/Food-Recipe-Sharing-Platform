@@ -1,8 +1,7 @@
-const friendRequest = require("../models/joinTables/friendRequest");
-const friendships = require("../models/joinTables/friendship");
-const friendFolders = require("../models/friendFolder");
+const FriendRequest = require("../models/joinTables/friendRequest");
+const Friendship = require("../models/joinTables/friendship");
+const FriendFolder = require("../models/friendFolder");
 const User = require("../models/user");
-const { validationResult } = require("express-validator");
 const userUtils = require('../library/userUtils');
 require("dotenv").config();
 
@@ -65,7 +64,7 @@ exports.find = async (req, res) => {
 
       if (relationship == 1) {
          // collect a list of friendship relationships user is involved in
-         const friendshipList = await friendships.find({ friendIds: _id });
+         const friendshipList = await Friendship.find({ friendIds: _id });
          // extract the _ids of each non-signed in user
          const friendsList = friendshipList.map((friendship) => friendship.friendIds.filter((friend) => friend != _id) );
          // add the _ids to the query
@@ -74,7 +73,7 @@ exports.find = async (req, res) => {
 
       else if (relationship == 2) {
          // collect a list of friend requests user has received
-         const receivedRequests = await friendRequest.find({ receiverId: _id });
+         const receivedRequests = await FriendRequest.find({ receiverId: _id });
          // extract the _ids of each non-signed in user
          const requestList = receivedRequests.map((request) => request.senderId);
          // add the _ids to the query
@@ -83,7 +82,7 @@ exports.find = async (req, res) => {
 
       else if (relationship == 3) {
          // collect a list of friend requests user has sent
-         const sentRequests = await friendRequest.find({ senderId: _id });
+         const sentRequests = await FriendRequest.find({ senderId: _id });
          // extract the _ids of each non-signed in user
          const requestList = sentRequests.map((request) => request.receiverId);
          // add the _ids to the query
@@ -146,14 +145,14 @@ exports.folder = async (req, res) => {
       else { query = { owner: _id, parent: folderId }; }
 
       // find folders in database
-      const foldersList = await friendFolders.find(query)
+      const foldersList = await FriendFolder.find(query)
       .skip(skip)
       .limit(limit);
       let payload = { folders: foldersList };
 
       // attach count if requested by the client
       if (count) {
-         const totalCount = await friendFolders.countDocuments(query);
+         const totalCount = await FriendFolder.countDocuments(query);
          payload.count = totalCount;
       }
 
@@ -194,13 +193,13 @@ exports.sendFriendRequest = async (req, res) => {
       if (!receiverData) return res.status(400).json({ error: "receiver not found" });
 
       // make sure friend request doesn't already exist in database
-      const sentRequest = await friendRequest.findOne({ senderId: _id, receiverId: userId });
+      const sentRequest = await FriendRequest.findOne({ senderId: _id, receiverId: userId });
       if (sentRequest) return res.status(400).json({ error: "friend request already sent" });
-      const receivedRequest = await friendRequest.findOne({ senderId: userId, receiverId: _id });
+      const receivedRequest = await FriendRequest.findOne({ senderId: userId, receiverId: _id });
       if (receivedRequest) return res.status(400).json({ error: "friend request already received" });
 
       // make sure friendship doesn't already exist in database
-      const existingFriendship = await friendships.findOne({ friendIds: { $all: [senderData._id, receiverData._id] } });
+      const existingFriendship = await Friendship.findOne({ friendIds: { $all: [senderData._id, receiverData._id] } });
       if (existingFriendship) return res.status(400).json({ error: "friendship already exists" });
 
       // create friend request
@@ -210,7 +209,7 @@ exports.sendFriendRequest = async (req, res) => {
       };
 
       // save friend request to database
-      const friendship = await new friendRequest(newRequest)
+      const friendship = await new FriendRequest(newRequest)
       .save();
 
       return res.status(200).json({ message: "friend request sent", payload: friendship });
@@ -239,50 +238,50 @@ exports.processFriendRequest = async (req, res) => {
    if (!_id) return res.status(401).json({ error: "user not signed in" });
 
    // check for any missing fields in the request
-   if (!requestId) return res.status(400).json({ error: 'missing sender field in body' });
-   if (accept === undefined) return res.status(400).json({ error: 'missing accept field in body' });
+   if (!requestId) { return res.status(400).json({ error: 'missing sender field in body' }); }
+   if (accept === undefined) { return res.status(400).json({ error: 'missing accept field in body' }); }
 
    try {
 
       // make sure friend request exists in database
-      const requestData = await friendRequest.findOne({ _id: requestId });
-      if (!requestData) return res.status(400).json({ error: "request not found in database" });
+      const requestData = await FriendRequest.findOne({ _id: requestId });
+      if (!requestData) { return res.status(400).json({ error: "request not found in database" }); }
       // check if sender is current user
       if (requestData.senderId == _id) {
-         if (accept) return res.status(401).json({ error: "you cant accept a friend request sent by you" });
-         await friendRequest.deleteOne({ _id: requestData._id });
+         if (accept) { return res.status(401).json({ error: "you cant accept a friend request sent by you" }); }
+         await FriendRequest.deleteOne({ _id: requestData._id });
          return res.status(200).json({ message: "friend request canceled" });
       }
       // check that current user is the receiver of the request
-      if (!requestData.receiverId == _id) return res.status(401).json({ error: "current user is not the receiver of this request" });
+      if (!requestData.receiverId == _id) { return res.status(401).json({ error: "current user is not the receiver of this request" }); }
 
       // check if user accepted the friend request
       if (!accept) {
          // delete friend request from database
-         await friendRequest.deleteOne({ _id: requestData._id });
+         await FriendRequest.deleteOne({ _id: requestData._id });
          return res.status(200).json({ message: "friend request denied" });
       }
 
       // make sure user exists in database
       const receiverData = await User.findOne({ _id });
-      if (!receiverData) return res.status(400).json({ error: "signed in user not found in database" });
+      if (!receiverData) { return res.status(400).json({ error: "signed in user not found in database" }); }
 
       // make sure receiver exists in database
       const senderData = await User.findOne({ _id: requestData.senderId });
-      if (!senderData) return res.status(400).json({ error: "request sender not found in database" });
+      if (!senderData) { return res.status(400).json({ error: "request sender not found in database" }); }
 
       // make sure friendship doesn't already exist in database
-      const existingFriendship = await friendships.findOne({ friends: { $all: [senderData._id, _id] }});
+      const existingFriendship = await Friendship.findOne({ friends: { $all: [senderData._id, _id] }});
       if (existingFriendship) {
-         await friendRequest.deleteOne({ _id: request });
+         await FriendRequest.deleteOne({ _id: request });
          return res.status(400).json({ error: "friendship already exists" });
       }
 
       // delete friend request from database
-      await friendRequest.deleteOne({ _id: requestId });
+      await FriendRequest.deleteOne({ _id: requestId });
 
       // create friendship and save to database
-      const newFriendship = await new friendships({
+      const newFriendship = await new Friendship({
          friendIds: [senderData._id, _id]
       })
       .save();
@@ -317,14 +316,14 @@ exports.deleteFriend = async (req, res) => {
 
    try {
       // make sure friendship exists in database
-      const friendship = await friendships.findOne({ _id: relationshipId });
+      const friendship = await Friendship.findOne({ _id: relationshipId });
       if (!friendship) return res.status(400).json({ error: "friendship not found in database" });
 
       // make sure user is part of the friendship
       if (!friendship.friendIds.includes(_id)) return res.status(401).json({ error: "user is not part of this friendship" });
 
       // delete friendship from database
-      await friendships.deleteOne({ _id: relationshipId });
+      await Friendship.deleteOne({ _id: relationshipId });
       return res.status(200).json({ message: "friendship deleted successfully" });
    }
 
