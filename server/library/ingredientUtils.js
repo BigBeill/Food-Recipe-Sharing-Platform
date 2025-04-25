@@ -27,7 +27,7 @@ async function verifyObject (ingredient, includeNutrition = true) {
    else { ingredientObject = ingredient; }
    
    // make sure an foodId field is present
-   if (!ingredient.foodId || typeof ingredient.foodId != 'number') { throw new Error('missing foodId field in ingredient object'); }
+   if (!ingredient.foodId) { throw new Error('missing foodId field in ingredient object'); }
 
    // check if food description is present
    if (!ingredient.foodDescription) { 

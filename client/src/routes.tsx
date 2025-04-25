@@ -20,7 +20,7 @@ export const routes = [
     element:<Home />,
   },
   {
-    path:'/editRecipe',
+    path:'/editRecipe/:recipeId?',
     element:<EditRecipe />,
   },
   {

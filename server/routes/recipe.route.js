@@ -1,6 +1,5 @@
 const router = require("express").Router();
 const recipeController = require("../controllers/recipe.controller");
-const recipes = require("../models/recipe");
 const { body, query, param } = require("express-validator");
 const { validateNoExtraFields, runValidation } = require("../library/sanitationUtils");
 

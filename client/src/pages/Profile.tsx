@@ -96,7 +96,7 @@ export default function Profile() {
             <GrowingText text={userObject.username} parentDiv={titleParent} />
          </div>
          <div>
-            <img className="consumeSpace" src="../../public/profile-photo.png" alt='profile picture' />
+            <img className="consumeSpace" src="/profile-photo.png" alt='profile picture' />
          </div>
 
          <div> {/* styleDiv, should not contain anything */} </div>
@@ -118,7 +118,6 @@ export default function Profile() {
                   { userObject.bio ? <p>{userObject.bio}</p> : <p>No bio available</p> }
                </>
             )}
-
          </div>
 
          <div> {/* styleDiv, should not contain anything */} </div>

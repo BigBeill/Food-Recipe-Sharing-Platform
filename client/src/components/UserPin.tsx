@@ -71,7 +71,7 @@ export default function UserPin({ userObject }: UserPinProps) {
          <GrowingText text={userObject.username} parentDiv={titleRef} />
          </div>
          <div onClick={ () => { viewProfile() } }>
-         <img src='../../public/profile-photo.png' alt='profile picture' />
+         <img src='/profile-photo.png' alt='profile picture' />
          </div>
 
          <div className='styleDiv'></div>
