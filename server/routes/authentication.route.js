@@ -2,7 +2,7 @@
 const router = require("express").Router();
 const authenticationController = require("../controllers/authentication.controller");
 const { body } = require("express-validator");
-const { validateNoExtraFields } = require("../library/sanitationUtils");
+const { validateNoExtraFields, runValidation } = require("../library/sanitationUtils");
 
 
 
@@ -34,7 +34,9 @@ router.post("/register",
       body("password").isString().isLength({ min: 3, max: 60 }).withMessage("Password must be a string between 3 and 60 characters"),
       validateNoExtraFields(["username", "email", "password"], "body")
    ],
-authenticationController.register);
+   runValidation,
+   authenticationController.register
+);
 
 
 
@@ -62,7 +64,9 @@ router.post("/login",
       body("password").isString().isLength({ min: 3, max: 60 }).withMessage("Password must be a string between 3 and 60 characters"),
       validateNoExtraFields(["username", "password"], "body")
    ],
-authenticationController.login);
+   runValidation,
+   authenticationController.login
+);
 
 
 
@@ -85,7 +89,9 @@ router.post("/refresh",
    [
       validateNoExtraFields([], "body")
    ],
-authenticationController.refresh);
+   runValidation,
+   authenticationController.refresh
+);
 
 
 
@@ -107,7 +113,9 @@ router.post("/logout",
    [
       validateNoExtraFields([], "body")
    ],
-authenticationController.logout);
+   runValidation,
+   authenticationController.logout
+);
 
 
 

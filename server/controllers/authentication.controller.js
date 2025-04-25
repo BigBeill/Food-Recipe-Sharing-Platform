@@ -81,9 +81,6 @@ exports.register = async (req, res) => {
 
 exports.login = async (req, res) => {
 
-   const inputErrors = validationResult(req);
-   if (!inputErrors.isEmpty()) { return res.status(400).json({ error: errors.array() }); }
-
    const { username, password } = req.body;
 
    try {
@@ -123,8 +120,6 @@ exports.login = async (req, res) => {
 
 
 exports.refresh = async (req, res) => {
-   const inputErrors = validationResult(req);
-   if (!inputErrors.isEmpty()) { return res.status(400).json({ error: errors.array() }); }
 
    if (!req.cookies) { return res.status(403).json({ error: "no cookies found" }); }
    const refreshToken = req.cookies.refreshToken;
@@ -160,8 +155,6 @@ exports.refresh = async (req, res) => {
 
 
 exports.logout = async (req, res) => {
-   const inputErrors = validationResult(req);
-   if (!inputErrors.isEmpty()) { return res.status(400).json({ error: errors.array() }); }
    
    res.clearCookie("accessToken");
    res.clearCookie("refreshToken");
