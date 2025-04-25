@@ -51,17 +51,7 @@ method description:
    return a list of recipes that match the search criteria
 
 method returns:
-   recipes:
-      [
-         {
-            _id: mongoose object id
-            title: string
-            description: string
-            image: string
-            ingredients: [{_id: mongoose object id, unit: string, amount: number}]
-            instructions: [string]
-         }
-      ]
+   recipeObjectArray: recipeObject array
    count: int (if count is true)
 */
 
@@ -76,7 +66,8 @@ router.get('/find',
       }),
       query("limit").optional().toInt().isInt({ min: 1, max: 90 }).withMessage("limit must be an integer between 1 and 90"),
       query("skip").optional().toInt().isInt({ min: 0, max: 900 }).withMessage("skip must be an integer between 0 and 900"),
-      validateNoExtraFields(["title", "ingredients", "limit", "skip"], "query")
+      query("count").optional().isBoolean().withMessage("count must be a boolean"),
+      validateNoExtraFields(["title", "ingredients", "limit", "skip", "count"], "query")
    ], 
    runValidation,
    recipeController.find

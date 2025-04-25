@@ -33,8 +33,11 @@ export default function Home() {
    // pull information from the url and request information from the server
    useEffect(() => {
       // if user is on the first page only request one recipe, otherwise request two recipes
-      axios({method: 'get', url: `recipe/find?limit=${pageNumber == 1 ? 1 : 2}&skip=${pageNumber == 1 ? 0 : (pageNumber - 2) }`})
-      .then(response => { setRecipeList(response); });
+      axios({method: 'get', url: `recipe/find?limit=${pageNumber == 1 ? 1 : 2}&skip=${pageNumber == 1 ? 0 : (pageNumber - 2) }&count=true`})
+      .then(response => { 
+         if (response.count + 1 < pageNumber) { handlePageChange(response.count + 1); }
+         else { setRecipeList(response.recipeObjectArray); }
+      });
    }, [searchParams]);
 
    // send parameters to the url

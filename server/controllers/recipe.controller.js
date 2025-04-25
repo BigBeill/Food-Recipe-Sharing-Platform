@@ -36,11 +36,10 @@ finds a list of recipes in the database that match the query parameters
 */
 exports.find = async (req, res) => {
 
-   const { title, ingredients, limit, skip } = req.query;
+   const { title, ingredients, limit, skip, count } = req.query;
    let recipeData = [];
-
+   let query = {};
    try {
-      let query = {}
       if (title) { query.title = { $regex: new RegExp(title, 'i') } }
       if (ingredients) { query.ingredients = { $all: ingredients.split(',') } }
       recipeData = await recipes.find(query)
@@ -54,14 +53,22 @@ exports.find = async (req, res) => {
    }
 
    try {
-      const recipeObjects = await Promise.all(recipeData.map((recipe) => { return recipeUtils.verifyObject(recipe); }));
-      return res.status(200).json({ message: "recipes found", payload: recipeObjects });
+      const recipeObjectArray = await Promise.all(recipeData.map((recipe) => { return recipeUtils.verifyObject(recipe); }));
+      let payload = { recipeObjectArray };
+
+      if (count) {
+         const recipeCount = await recipes.countDocuments(query);
+         payload.count = recipeCount;
+      }
+
+      return res.status(200).json({ message: "recipes found", payload });
    }
    catch (error) {
       console.log("\x1b[31m%s\x1b[0m", "recipe.controller.find failed... unable to verify recipe objects before sending to client");
       console.error(error);
       return res.status(500).json({ error: "server failed to verify recipe objects" });
    }
+
 }
 
 
