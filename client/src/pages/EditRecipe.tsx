@@ -178,7 +178,7 @@ function IngredientPage ({ingredientList, setIngredientList}: IngredientPageProp
 
 	// define useStates
 	const [newIngredient, setNewIngredient] = useState<IngredientObject>({foodId:"", foodDescription:"", portion: { measureId:"", measureDescription:"", amount: null } });
-	const [conversionFactorsAvailable, setConversionFactorsAvailable] = useState<{measureId: string, unit: string}[]>([{ measureId: '1489', unit: 'g' }])
+	const [conversionFactorsAvailable, setConversionFactorsAvailable] = useState<{measureId: string, measureDescription: string, conversionFactorValue: number }[]>([{ measureId: '1489', measureDescription: 'g', conversionFactorValue: 1 }]);
 	const [ingredientsAvailable, setIngredientsAvailable] = useState<IngredientObject[]>([])
 	const [availableId, setAvailableId] = useState<number>(ingredientList.length)
 	
@@ -197,13 +197,11 @@ function IngredientPage ({ingredientList, setIngredientList}: IngredientPageProp
 		.catch(error => { console.error('unable to fetch ingredients:', error); });
 	}
 
-	function ingredientSelected (foodId: string) {
-		axios({ method: 'get', url:`ingredient/details?foodId=${foodId}`})
-		.then(response => {
-			setNewIngredient({ ...newIngredient, foodId, foodDescription: response.foodDescription});
-			setConversionFactorsAvailable([ ...response.conversionFactors, { measureId: '1455', unit: 'g' } ]);
-		});
-
+	function ingredientSelected (ingredient: IngredientObject) {
+		console.log("ingredient selected:", ingredient)
+		setNewIngredient((oldIngredient) => ({ ...oldIngredient, foodId: ingredient.foodId, foodDescription: ingredient.foodDescription }));
+		axios({ method: 'get', url:`ingredient/conversionOptions/${ingredient.foodId}` })
+		.then((response) => { setConversionFactorsAvailable(response); });
 		setIngredientsAvailable([]);
 	}
 
@@ -225,10 +223,10 @@ function IngredientPage ({ingredientList, setIngredientList}: IngredientPageProp
 			<h2>Recipe Ingredients</h2>
 
 			{/* ingredients list */}
-			<Reorder.Group className='displayList addPadding' axis='y' values={ingredientList} onReorder={setIngredientList}>
+			<Reorder.Group className='displayList' axis='y' values={ingredientList} onReorder={setIngredientList}>
 			{ingredientList.map((item, index) => (
 				<Reorder.Item key={item.id} value={item} className='listItem'>
-					<div className='itemOptions'>
+					<div className='options'>
 					<FontAwesomeIcon icon={faCircleXmark} style={{color: "#575757",}} onClick={() => removeIngredient(index)} />
 					</div>
 					{ item.content.portion ?
@@ -246,14 +244,14 @@ function IngredientPage ({ingredientList, setIngredientList}: IngredientPageProp
 				<select value={newIngredient.portion?.measureDescription} onChange={(event) => setNewIngredient({...newIngredient, portion: { measureId: event.target.options[event.target.selectedIndex].id, measureDescription: event.target.value, amount: newIngredient.portion?.amount || null }})} >
 					<option value="" disabled hidden className='light'>Units</option>
 					{conversionFactorsAvailable.map((conversionFactor, index) => (
-					<option key={index} id={conversionFactor.measureId}>{conversionFactor.unit}</option>
+					<option key={index} id={conversionFactor.measureId}>{conversionFactor.measureDescription}</option>
 					))}
 				</select>
 				<div className='activeSearchBar'> {/* ingredient search bar */}
 					<input type='text' className='mainInput' value={newIngredient.foodDescription} onChange={(event) => {updateNewIngredientName(event.target.value)}} placeholder='Ingredient Name'/>
 					<ul className={`${ingredientsAvailable.length == 0 ? 'hidden' : ''}`}>
 					{ingredientsAvailable.map((ingredient, index) => (
-							<li key={index} onClick={() => ingredientSelected(ingredient.foodId)}> {ingredient.foodDescription} </li>
+							<li key={index} onClick={() => ingredientSelected(ingredient)}> {ingredient.foodDescription} </li>
 					))}
 					</ul>
 				</div>
@@ -304,7 +302,7 @@ function InstructionPage ({instructionList, setInstructionList}: InstructionPage
 					<h4>Step {index + 1} </h4>
 					<p>{item.content}</p>
 					</div>
-					<div className='itemOptions extraMargin'>
+					<div className='options'>
 					<FontAwesomeIcon icon={faTrash} style={{color: "#575757",}} onClick={() => removeInstruction(index)} />
 					<FontAwesomeIcon icon={faPen} style={{color: "#575757",}} />
 					</div>
