@@ -37,8 +37,6 @@ router.get('/getObject/:foodId/:measureId?/:amount?',
 
 
 
-// returns a 404 error, use the getObject route instead
-router.get('/details', ingredientController.details);
 
 
 
@@ -83,7 +81,17 @@ router.get('/list',
 
 /*
 ------------ /conversionOptions route ------------
+One method type:
+   GET - returns a list of conversion options for a given foodId
 
+Requires 1 argument from param:
+   foodId: integer
+
+method 'GET' description:
+   returns a list of all conversion types found for given foodId in the canadian nutrient file database
+
+returns:
+   conversionOptionObject array (with measureDescription field attached)
 */
 router.get('/conversionOptions/:foodId',
    [

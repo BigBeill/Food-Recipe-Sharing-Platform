@@ -40,16 +40,6 @@ exports.getObject = async (req, res) => {
 
 
 /*
-returns a 404 error
-@route: GET /ingredient/details
-*/
-exports.details = async (req, res) => {
-   return res.status(404).json({ error: 'this route is deprecated, please use the getObject route instead' });
-}
-
-
-
-/*
 returns a list of ingredients based on search criteria
 @route: GET /ingredient/list
 */
@@ -132,7 +122,6 @@ exports.conversionOptions = async (req, res) => {
       console.error(error);
       return res.status(500).json({ error: 'server failed to collect measurement information from database' });
    }
-
 }
 
 
