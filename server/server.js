@@ -1,4 +1,3 @@
-//External imports
 const express = require('express');
 const bodyParser = require ('body-parser');
 const cookieParser = require('cookie-parser');
@@ -6,16 +5,16 @@ const cors = require('cors');
 const https = require('https');
 const fs = require('fs');
 
-//Local imports
 const mongoConnection = require ('./config/connectMongo');
 const validateToken = require ('./middleware/auth/validateToken');
 const setCookieFlags = require ('./middleware/auth/cookieFlags');
 require("dotenv").config();
 
-// define server settings
+// define cors settings
 const corsOptions = {
    origin: function (origin, callback) {
-      if (origin && origin.startsWith('https://localhost')) {
+      // MAKE SURE TO CHANGE THIS BEFORE PRODUCTION !!!
+      if (!origin || origin.startsWith('https://localhost')) {
          callback(null, true);
       } else {
          callback(new Error('Not allowed by CORS'));

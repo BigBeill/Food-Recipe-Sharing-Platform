@@ -1,7 +1,7 @@
 const router = require("express").Router();
 const ingredientController = require("../controllers/ingredient.controller");
-const { body, query, param } = require("express-validator");
-const { validateNoExtraFields, runValidation } = require("../library/sanitationUtils");
+const { body, query, param, checkExact } = require("express-validator");
+const { runValidation } = require("../library/sanitationUtils");
 
 /*
 ------------ /getObject route ------------
@@ -29,7 +29,7 @@ router.get('/getObject/:foodId/:measureId?/:amount?',
       param("foodId").toInt().isInt({ min: 1 }).withMessage("foodId must be a positive integer"),
       param("measureId").optional().toInt().isInt({ min: 1 }).withMessage("measureId must be a positive integer"),
       param("amount").optional().toInt().isInt({ min: 1 }).withMessage("amount must be a positive integer"),
-      validateNoExtraFields(["foodId", "measureId", "amount"], "param")
+      checkExact()
    ],
    runValidation,
    ingredientController.getObject
@@ -71,7 +71,7 @@ router.get('/list',
       query("foodGroupId").optional().isString().trim().escape().withMessage("foodGroupId must be a string"),
       query("skip").optional().toInt().isInt({ min: 0 }).withMessage("skip must be a positive integer"),
       query("limit").optional().toInt().isInt({ min: 1, max: 60 }).withMessage("limit must be a positive integer between 1 and 60"),
-      validateNoExtraFields(["foodDescription", "foodGroupId", "skip", "limit"], "query")
+      checkExact()
    ],
    runValidation,
    ingredientController.list
@@ -96,7 +96,7 @@ returns:
 router.get('/conversionOptions/:foodId',
    [
       param("foodId").toInt().isInt({ min: 1 }).withMessage("foodId must be a positive integer"),
-      validateNoExtraFields(["foodId"], "param")
+      checkExact()
    ],
    runValidation,
    ingredientController.conversionOptions

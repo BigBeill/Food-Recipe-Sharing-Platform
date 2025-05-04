@@ -27,7 +27,11 @@ async function verifyObject (ingredient, includeNutrition = true) {
    else { ingredientObject = ingredient; }
    
    // make sure an foodId field is present
-   if (!ingredient.foodId) { throw new Error('missing foodId field in ingredient object'); }
+   if (!ingredientObject.foodId) { throw new Error('missing foodId field in ingredient object'); }
+   if (typeof ingredientObject.foodId != 'number') {
+      try { ingredientObject.foodId = parseInt(ingredientObject.foodId); } // attempt to convert foodId to a number
+      catch { throw new Error('foodId field in ingredient object is not a number'); }
+   }
 
    // check if food description is present
    if (!ingredient.foodDescription) { 
@@ -52,8 +56,10 @@ async function verifyObject (ingredient, includeNutrition = true) {
    }
 
    // check for required missing fields
-   if (!ingredientObject.portion.measureId || typeof ingredientObject.portion.measureId != 'number') { throw new Error('missing measureId field in ingredientObject portion'); }
-   if (!ingredientObject.portion.amount || typeof ingredientObject.portion.amount != 'number') { throw new Error('missing amount field in ingredientObject portion'); }
+   if (!ingredientObject.portion.measureId) { throw new Error('missing measureId field in ingredientObject portion'); }
+   if (typeof ingredientObject.portion.measureId != 'number') { throw new Error('measureId field in ingredientObject portion is not a number'); }
+   if (!ingredientObject.portion.amount) { throw new Error('missing amount field in ingredientObject portion'); }
+   if (typeof ingredientObject.portion.amount != 'number') { throw new Error('amount field in ingredientObject portion is not a number'); }
 
    // check if measureDescription is present, if not attach it
    if (!ingredientObject.portion.measureDescription) {

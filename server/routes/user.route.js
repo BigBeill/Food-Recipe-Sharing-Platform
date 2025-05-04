@@ -1,7 +1,7 @@
 const router = require("express").Router();
 const userController = require("../controllers/user.controller");
-const { body, param, query } = require("express-validator");
-const { validateNoExtraFields, runValidation } = require("../library/sanitationUtils");
+const { body, param, query, checkExact } = require("express-validator");
+const { runValidation } = require("../library/sanitationUtils");
 
 
 
@@ -27,7 +27,7 @@ router.get("/getObject/:userId?/:relationship?",
     [
         param("userId").optional().isString().isLength({ min: 24, max: 24 }).withMessage("userId must be a string of 24 characters"),
         param("relationship").optional().isBoolean().withMessage("relationship must be a boolean"),
-        validateNoExtraFields(["userId", "relationship"], "param")
+        checkExact()
     ],
     runValidation,
     userController.getObject
@@ -73,7 +73,7 @@ router.get("/find",
         query("skip").optional().isInt({ min: 0, max: 900 }).toInt().withMessage("skip must be an integer between 0 and 900"),
         query("relationship").optional().isInt({ min: 0, max: 4 }).toInt().withMessage("relationship must be an integer between 0 and 4"),
         query("count").optional().isBoolean().withMessage("count must be a boolean"),
-        validateNoExtraFields(["username", "email", "limit", "skip", "relationship", "count"], "query")
+        checkExact()
     ],
     runValidation,
     userController.find
@@ -120,7 +120,7 @@ router.get("/folder",
         query("limit").optional().isInt({ min: 1, max: 90 }).toInt().withMessage("limit must be an integer between 3 and 90"),
         query("folderId").optional().isString().isLength({ min: 24, max: 24 }).withMessage("folderId must be a string of 24 characters"),
         query("count").optional().isBoolean().withMessage("count must be a boolean"),
-        validateNoExtraFields(["skip", "limit", "folderId", "count"], "query")
+        checkExact()
     ],
     runValidation,
     userController.folder
@@ -156,7 +156,7 @@ router.post("/updateAccount",
         body("username").isString().isLength({ min: 3, max: 60 }).withMessage("Username must be a string between 3 and 60 characters"),
         body("email").isString().isEmail().withMessage("Email must be a valid email address"),
         body("bio").isString().withMessage("Bio must be a string"),
-        validateNoExtraFields(["username", "email", "bio"], "body")
+        checkExact()
     ],
     runValidation,
     userController.updateAccount
@@ -177,7 +177,7 @@ Route description:
 router.post("/sendFriendRequest", 
     [
         body("userId").isString().isLength({ min: 24, max: 24 }).withMessage("userId must be a string of 24 characters"),
-        validateNoExtraFields(["userId"], "body")
+        checkExact()
     ],
     runValidation,
     userController.sendFriendRequest
@@ -202,7 +202,7 @@ router.post("/processFriendRequest",
     [
         body("requestId").isString().isLength({ min: 24, max: 24 }).withMessage("requestId must be a string of 24 characters"),
         body("accept").isBoolean().withMessage("accept must be a boolean"),
-        validateNoExtraFields(["requestId", "accept"], "body")
+        checkExact()
     ],
     runValidation,
     userController.processFriendRequest
@@ -226,7 +226,7 @@ Route description:
 router.post("/deleteFriend", 
     [
         body("relationshipId").isString().isLength({ min: 24, max: 24 }).withMessage("relationshipId must be a string of 24 characters"),
-        validateNoExtraFields(["relationshipId"], "body")
+        checkExact()
     ],
     runValidation,
     userController.deleteFriend

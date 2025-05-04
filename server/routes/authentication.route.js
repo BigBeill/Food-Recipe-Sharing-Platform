@@ -1,8 +1,8 @@
 // router for managing authentication related
 const router = require("express").Router();
 const authenticationController = require("../controllers/authentication.controller");
-const { body } = require("express-validator");
-const { validateNoExtraFields, runValidation } = require("../library/sanitationUtils");
+const { body, checkExact } = require("express-validator");
+const { runValidation } = require("../library/sanitationUtils");
 
 
 
@@ -32,7 +32,7 @@ router.post("/register",
       body("username").isString().isLength({ min: 3, max: 60 }).withMessage("Username must be a string between 3 and 60 characters"),
       body("email").isString().isEmail().withMessage("Email must be a valid email address"),
       body("password").isString().isLength({ min: 3, max: 60 }).withMessage("Password must be a string between 3 and 60 characters"),
-      validateNoExtraFields(["username", "email", "password"], "body")
+      checkExact(),
    ],
    runValidation,
    authenticationController.register
@@ -62,7 +62,7 @@ router.post("/login",
    [
       body("username").isString().isLength({ min: 3, max: 60 }).withMessage("Username must be a string between 3 and 60 characters"),
       body("password").isString().isLength({ min: 3, max: 60 }).withMessage("Password must be a string between 3 and 60 characters"),
-      validateNoExtraFields(["username", "password"], "body")
+      checkExact(),
    ],
    runValidation,
    authenticationController.login
@@ -87,7 +87,7 @@ Route description:
 */
 router.post("/refresh", 
    [
-      validateNoExtraFields([], "body")
+      checkExact(),
    ],
    runValidation,
    authenticationController.refresh
@@ -111,7 +111,7 @@ Route description:
 */
 router.post("/logout",
    [
-      validateNoExtraFields([], "body")
+      checkExact(),
    ],
    runValidation,
    authenticationController.logout

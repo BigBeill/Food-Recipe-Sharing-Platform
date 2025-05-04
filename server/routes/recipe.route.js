@@ -1,7 +1,7 @@
 const router = require("express").Router();
 const recipeController = require("../controllers/recipe.controller");
-const { body, query, param } = require("express-validator");
-const { validateNoExtraFields, runValidation } = require("../library/sanitationUtils");
+const { body, query, param, checkExact } = require("express-validator");
+const { advancedCheckExact, runValidation } = require("../library/sanitationUtils");
 
 
 /*
@@ -23,7 +23,7 @@ Method 'GET' returns:
 router.get("getObject/:recipeId",
    [
       param("recipeId").toInt().isInt({ min: 1 }).withMessage("recipeId must be a positive integer"),
-      validateNoExtraFields(["recipeId"], "param")
+      checkExact()
    ],
    runValidation,
    recipeController.getObject
@@ -67,8 +67,8 @@ router.get('/find',
       query("limit").optional().toInt().isInt({ min: 1, max: 90 }).withMessage("limit must be an integer between 1 and 90"),
       query("skip").optional().toInt().isInt({ min: 0, max: 900 }).withMessage("skip must be an integer between 0 and 900"),
       query("count").optional().isBoolean().withMessage("count must be a boolean"),
-      validateNoExtraFields(["title", "ingredients", "limit", "skip", "count"], "query")
-   ], 
+      checkExact()
+   ],
    runValidation,
    recipeController.find
 );
@@ -89,7 +89,15 @@ requires 5 arguments from body:
    title: string
    description: string
    image: string
-   ingredients: [{_id: string, unit: string, amount: number}]
+   ingredients: [{
+      foodId: number, 
+      foodDescription: string, 
+      portion: {
+         measureId: number,
+         measureDescription: string,
+         amount: number
+      }
+   }]
    instructions: [string]
 
 method 'PUT' requires 1 additional argument from body:
@@ -109,19 +117,36 @@ Method 'PUT' description:
    use the json object in req.recipeSchema to save over the recipe with the id req.body._id
 */
 
-router.route('/edit',
+router.route('/edit')
+.all(
    [
       body("title").isString().isLength({ min: 3, max: 90 }).withMessage("title must be a string between 3 and 100 characters"),
-      body("description").isString().isLength({ min: 3, max: 9000 }).withMessage("description must be a string between 3 and 1000 characters"),
+      body("description").isString().isLength({ min: 3, max: 10000 }).withMessage("description must be a string between 3 and 1000 characters"),
       body("image").isString().isLength({ min: 0, max: 90 }).withMessage("image must be a string between 3 and 900 characters"),
       body("ingredients").isArray().withMessage("ingredients must be an array"),
+      body("ingredients.*").isObject().withMessage("ingredients must be an array of objects"),
+      body("ingredients.*.foodId").toInt().isInt({ min: 1, max: 100000 }).withMessage("ingredients must be an array of objects with foodId as a positive integer"),
+      body("ingredients.*.foodDescription").isString().isLength({ min: 3, max: 90 }).withMessage("ingredients must be an array of objects with foodDescription as a string between 3 and 100 characters"),
+      body("ingredients.*.portion").isObject().withMessage("ingredients must be an array of objects with portion as an object"),
+      body("ingredients.*.portion.measureId").toInt().isInt({ min: 1, max: 100000 }).withMessage("ingredients must be an array of objects with portion as an object with measureId as a positive integer"),
+      body("ingredients.*.portion.measureDescription").isString().isLength({ min: 3, max: 90 }).withMessage("ingredients must be an array of objects with portion as an object with measureDescription as a string between 3 and 100 characters"),
+      body("ingredients.*.portion.amount").toFloat().isFloat({ min: 0.01, max: 10000 }).withMessage("ingredients must be an array of objects with portion as an object with amount as a positive float"),
       body("instructions").isArray().withMessage("instructions must be an array"),
+      body("instructions.*").isString().isLength({ min: 3, max: 10000 }).withMessage("instructions must be an array of strings"),
       body("_id").optional().isString().isLength({ min: 24, max: 24 }).withMessage("_id must be a string of 24 characters"),
-      validateNoExtraFields(["title", "description", "image", "ingredients", "instructions", "_id"], "body")
+      checkExact(),
+      advancedCheckExact({
+         title: true,
+         description: true,
+         image: true,
+         ingredients: [{foodId: true, foodDescription: true, portion: {measureId: true, measureDescription: true, amount: true}}],
+         instructions: [],
+         _id: true
+      }, "body" )
    ],
-   runValidation
+   runValidation,
+   recipeController.packageIncoming
 )
-.all(recipeController.packageIncoming)
 .post(recipeController.add)
 .put(recipeController.update);
 
