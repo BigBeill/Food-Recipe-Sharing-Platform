@@ -20,9 +20,6 @@ export default function NewEditRecipe () {
 	const { userData } = useOutletContext<{userData: UserObject}>();
 	const { recipeId } = useParams(); //get recipeId if in url
 
-	// make sure current user is signed in, otherwise redirect to login
-	if (!userData) navigate('/login');
-
 	//define required useStates
 	const [title, setTitle] = useState<string>('');
 	const [description, setDescription] = useState<string>('');
@@ -32,6 +29,9 @@ export default function NewEditRecipe () {
 
 	//run useEffect on page start
 	useEffect (() => {
+		// make sure current user is signed in, otherwise redirect to login
+		if (!userData) { navigate('/login'); }
+
 		// if recipeId exists, populate the page with data from server for associated recipe
 		if (recipeId) {
 			axios({ method:'get', url:`recipe/getObject/${recipeId}` })
