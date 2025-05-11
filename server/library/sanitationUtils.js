@@ -71,9 +71,6 @@ function advancedCheckExact(allowedFields, location) {
    }
 
    const customValidator = validator().custom((value, { req }) => {
-      console.log("starting validation sequence")
-      console.log("data:", req[location])
-      console.log("allowedFields:", allowedFields)
 
       const data = req[location];
       if (typeof data !== 'object' || data === null) {
@@ -94,7 +91,6 @@ function advancedCheckExact(allowedFields, location) {
 }
 
 function runValidation(req, res, next) {
-   console.log("running validation sequence");
    const errors = validationResult(req);
    if (!errors.isEmpty()) {
       console.log("\x1b[31m%s\x1b[0m", "REQUEST FAILED VALIDATION");
