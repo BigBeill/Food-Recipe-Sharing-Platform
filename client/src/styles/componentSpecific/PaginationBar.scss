@@ -1,26 +1,39 @@
 .paginationBar {
+   margin: auto;
+   margin-bottom: 0.6rem;
+   width: fit-content;
+   height : fit-content;
+   background-color: var(--background-color);
    display: flex;
    justify-content: center;
-   gap: 0.6rem;
-   margin-bottom: 1.5rem;
+   overflow: hidden;
+   box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+   border: 0.06rem solid var(--text-color-dark);
+   border-radius: 3rem;
 
-   * {
-      display: flex;
-      margin: 0rem;
-      width: 3.6rem;
-      height: 3.6rem;
-      border-radius: 0.3rem;
-      border: none;
-      align-items: center;
-      justify-content: center;
-      background-color: var(--background-color);
+   .primaryBlock {
+      pointer-events: none;
+      text-decoration: underline;
+   }
+
+   > * {
       box-sizing: border-box;
-      box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+      border: 0.06rem solid var(--text-color-dark);
+      border-top: 0rem;
+      border-bottom: 0rem;
+      margin: 0rem;
+      padding: 0rem 1.2rem;
+      height: 3rem;
+      border-radius: 0rem;
+      font-size: 1.5rem;
+      line-height: 3rem;
 
-      &.primaryBlock {
-         border: 0.18rem solid var(--base-color);
-         pointer-events: none;
-         justify-self: center;
+      &:first-child{
+         border-left: none;
+      }
+
+      &:last-child{
+         border-right: none;
       }
    }
 }

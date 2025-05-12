@@ -1,5 +1,6 @@
-
 import "../styles/componentSpecific/paginationBar.scss";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faArrowLeft, faArrowRight } from '@fortawesome/free-solid-svg-icons';
 
 interface PaginationBarProps {
    currentPage: number;
@@ -11,10 +12,9 @@ export default function PaginationBar({ currentPage, totalPages, requestNewPage 
 
    return (
       <div className="paginationBar">
-         <div className={(currentPage > 5)? 'hidden' : 'invisible'}>F</div> {/* balancing div, will never be shown, just takes up space and balances the flexbox*/}
+         <button onClick={() => requestNewPage(currentPage - 1)} > <FontAwesomeIcon icon={faArrowLeft} /> </button>
          { currentPage == 4 ? (
             <>
-               <div className="invisible">F</div> {/* balancing div, will never be shown, just takes up space and balances the flexbox*/}
                <button onClick={() => requestNewPage(0)}> 1 </button>
             </>
          ): currentPage > 4 ? (
@@ -22,36 +22,25 @@ export default function PaginationBar({ currentPage, totalPages, requestNewPage 
                <button onClick={() => requestNewPage(0)}> 1 </button>
                <button onClick={() => requestNewPage(1)}> 2 </button>
             </>
-         ): (
-            <>
-               <div className="invisible">F</div> {/* balancing div, will never be shown, just takes up space and balances the flexbox*/}
-               <div className="invisible">F</div> {/* balancing div, will never be shown, just takes up space and balances the flexbox*/}
-            </>
-         )}
-         <p className={(currentPage > 5)? '' : 'hidden'} >...</p>
-         <button className={(currentPage > 2)? '' : 'invisible'} onClick={() => requestNewPage(currentPage - 2)}> {currentPage - 2} </button>
-         <button className={(currentPage > 1)? '' : 'invisible'} onClick={() => requestNewPage(currentPage - 1)}> {currentPage - 1} </button>
+         ) : null }
+         { currentPage > 5 ? (<p>...</p>) : null}
+         { currentPage > 2 ? (<button onClick={() => requestNewPage(currentPage - 2)}> {currentPage - 2} </button>) : null }
+         { currentPage > 1 ? (<button onClick={() => requestNewPage(currentPage - 1)}> {currentPage - 1} </button>) : null }
          <p className="primaryBlock">{currentPage}</p>
-         <button className={(currentPage < totalPages)? '' : 'invisible'} onClick={() => requestNewPage(currentPage + 1)}> {currentPage + 1} </button>
-         <button className={(currentPage < totalPages - 1)? '' : 'invisible'}  onClick={() => requestNewPage(currentPage + 2)}> {currentPage + 2} </button>
-         <p className={(currentPage < totalPages - 4)? '' : 'hidden'} >...</p>
-         {currentPage == (totalPages - 3)? (
+         { currentPage < totalPages ?  (<button onClick={() => requestNewPage(currentPage + 1)}> {currentPage + 1} </button>) : null}
+         { currentPage < totalPages - 1 ? (<button onClick={() => requestNewPage(currentPage + 2)}> {currentPage + 2} </button>) : null }
+         { currentPage < totalPages - 4 ? (<p>...</p>) : null}
+         { currentPage == (totalPages - 3)? (
             <>
                <button onClick={() => requestNewPage(totalPages)}> {totalPages} </button>
-               <div className="invisible">F</div> {/* balancing div, will never be shown, just takes up space and balances the flexbox*/}
             </>
          ) : currentPage < (totalPages - 3)? (
             <>
               <button  onClick={() => requestNewPage(totalPages - 1)}> {totalPages - 1} </button>
               <button onClick={() => requestNewPage(totalPages)}> {totalPages} </button> 
             </>
-         ) : (
-            <>
-               <div className="invisible">F</div> {/* balancing div, will never be shown, just takes up space and balances the flexbox*/}
-               <div className="invisible">F</div> {/* balancing div, will never be shown, just takes up space and balances the flexbox*/}
-            </>
-         )}
-         <div className={(currentPage <= totalPages - 4)? 'hidden' : 'invisible'}>F</div> {/* balancing div, will never be shown, just takes up space and balances the flexbox*/}
+         ) : null}
+         <button onClick={() => requestNewPage(currentPage + 1)} > <FontAwesomeIcon icon={faArrowRight} /> </button>
       </div>
    )
 }

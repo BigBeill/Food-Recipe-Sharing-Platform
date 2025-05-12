@@ -1,201 +1,174 @@
-.notebook {
-  --background-color: #f6eee3;
-  --supporting-color: #4a4a4a;
-  --text-color-main: #575757;
-  --text-color-dark: #4a4a4a;
+.notebookContainer{
+   box-sizing: border-box;
+   padding: 0.6rem 3rem;
+   width: 100%;
+   height: 100vh;
+   display: flex;
+   flex-direction: column;
+   gap: 0.6rem;
 
-  position: absolute;
-  margin: .6rem 3rem;
-  width: calc(100% - 6rem);
-  min-width: 75rem;
-  height: calc(100% - 1.2rem);
-  left: calc(50% - 3rem);
-  transform: translate(-50%, 0%);
-  padding: 3rem, 3rem, 3rem, 3rem;
-  display: flex;
-  gap: .6rem;
-  color: var(--text-color-main);
+   .notebook {
+      --background-color: #f6eee3;
+      --supporting-color: #4a4a4a;
+      --text-color-main: #575757;
+      --text-color-dark: #4a4a4a;
+      color: var(--text-color-main);
 
-  // if screen is too narrow to fit .notebook, show only one page at a time
-  @media (max-width: 78rem) {
-
-    margin-left: 1.5rem;
-    left: 0%;
-    transform: translate(0%, 0%);
-    transition: margin-left .3s ease-in-out;
-
-    // if the right page is being focused, move the left page off screen
-    &.displayRight{
-      margin-left: calc(100% - 76.5rem);
-    }
-  }
-
-  .notebookPage {
-    position: relative;
-    width: calc(50% - .3rem);
-    height: calc(100% - 2.1rem);
-    z-index: 1;
-    background-color: var(--background-color);
-    box-shadow: 0.09rem 0.09rem 0.3rem #2C1A1D;
-
-    &:first-child {
-      margin-top: .3rem;
-      padding: .9rem 2.4rem .9rem 1.2rem;
-      border-radius: 2.5rem .15rem .15rem 2.5rem;
-    }
-
-    &:last-child {
-      padding: .9rem 1.2rem .9em 2.4rem;
-      border-radius: .15rem 2.5rem 2.5rem .15rem;
-    }
-
-    .pageContent{
-      position:absolute;
-      width: calc(100% - 3.6rem);
-      height: calc(100% - 6.9rem);
-      overflow: hidden;
-    }
-
-    .bottomArrows{
-      position: absolute;
-      width: calc(100% - 3.6rem);
-      height: 4.5rem;
-      bottom: .9rem;
-      display: flex;
-      justify-content: space-between;
-
-      p{
-        margin-top: auto;
-        font-size: 1.2rem;
-      }
-
-      .arrowContainer {
-        height: 4.5rem;
-        width: 4.5rem;
-        
-        :hover {
-          cursor: pointer;
-        }
-
-        svg{
-          height: 100%;
-          width: 100%;
-        }
-      }
-    }
-  }
-
-  .notebookSpine {
-    position: absolute;
-    height: 100%;
-    left: 50%;
-    transform: translate(-50%, 0%);
-    z-index: 2;
-    pointer-events: none;
-    user-select: none;
-  }
-
-  // ------------ the following scss is for the content inside a notebook page, not for the notebook itself ------------
-
-  p {
-    margin: 0rem;
-  }
-
-  h1{
-    margin: 3rem 3rem 3rem 3rem;
-    color: var(--text-color-dark);
-    font-size: 3rem;
-    text-decoration: underline #065F46;
-  }
-
-  h2{
-    margin: 1.2rem .9rem;
-  }
-
-  h4{
-    margin-top: 1.2rem;
-    margin-bottom: .3rem;
-  }
-
-  .standardPage{
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-    height: 100%;
-  }
-
-  .pinContainer{
-    box-sizing: border-box;
-    margin: 0rem;
-    width: 100%;
-    height: 100%;
-    padding: 1.2rem;
-    display: flex;
-    flex-direction: column;
-    overflow-x: hidden;
-    overflow-y: auto;
-
-    .UserPin{
-      grid-template-columns: 1fr auto 0rem 6.3rem;
-      grid-template-rows: 100%;
-    }
-  
-    .pin{
       flex: 1;
-      gap: 1.2rem;
-      margin: -0.06rem 0rem;
       width: 100%;
-      max-height: 9rem;
-      padding: 1.2rem;
-      border-top: .12rem solid #797979;
-      border-bottom: .12rem solid #797979;
-      box-sizing: border-box;
+      min-width: 75rem;
+      height: 100%;
+      position: relative;
       display: flex;
-      overflow: hidden;
+      gap: .6rem;
 
-      .title{
-        flex: 1 1 auto;
-        width: 100%;
-        height: 100%;
-        overflow: hidden;
+      // if screen is too narrow to fit .notebook, show only one page at a time
+      @media (max-width: 78rem) {
+
+         margin-left: 1.5rem;
+         left: 0%;
+         transform: translate(0%, 0%);
+         transition: margin-left .3s ease-in-out;
+
+         // if the right page is being focused, move the left page off screen
+         &.displayRight{
+            margin-left: calc(100% - 76.5rem);
+         }
       }
 
-      .icons{
-        flex: 0 1 auto;
-        height: 100%;
-        display: flex;
-        justify-content: flex-end;
-        gap: 1.2rem;
-    
-        svg {
-          margin: auto 0;
-          height: 50%;
-    
-          &:hover {
-            cursor: pointer;
-          }
-        }
-      }
-    }
-  }
+      .notebookPage {
+         position: relative;
+         width: calc(50% - .3rem);
+         height: calc(100% - 2.1rem);
+         background-color: var(--background-color);
+         overflow: hidden;
+         box-shadow: 0.09rem 0.09rem 0.3rem #2C1A1D;
 
-  ::-webkit-scrollbar-thumb {
-    background-color: var(--text-color-main); /* color of the scrollbar thumb */
-    border-radius: 0.3rem; /* rounded corners */
-  }
-  
-  /* Hover state of the thumb */
-  ::-webkit-scrollbar-thumb:hover {
-    background-color: var(--text-color-dark);
-  }
-  
-  /* Handle when scrollbar is in a drag state */
-  ::-webkit-scrollbar-thumb:active {
-    background-color: var(--text-color-dark);
-  }
-    
-  /* Customize the track */
-  ::-webkit-scrollbar-track {
-    background: transparent; /* color of the scrollbar track */
-  }
+         &:first-child {
+            margin-top: .3rem;
+            padding: .9rem 2.4rem .9rem 1.2rem;
+            border-radius: 2.5rem .15rem .15rem 2.5rem;
+         }
+
+         &:last-child {
+            padding: .9rem 1.2rem .9em 2.4rem;
+            border-radius: .15rem 2.5rem 2.5rem .15rem;
+         }
+      }
+
+      .notebookSpine {
+         position: absolute;
+         height: 100%;
+         width: 8.1rem;
+         left: 50%;
+         transform: translate(-50%, 0%);
+         z-index: 1;
+         pointer-events: none;
+         user-select: none;
+      }
+
+      // ------------ the following scss is for the content inside a notebook page, not for the notebook itself ------------
+
+      p {
+         margin: 0rem;
+      }
+
+      h1{
+         margin: 3rem 3rem 3rem 3rem;
+         color: var(--text-color-dark);
+         font-size: 3rem;
+         text-decoration: underline #065F46;
+      }
+
+      h2{
+         margin: 1.2rem .9rem;
+      }
+
+      h4{
+         margin-top: 1.2rem;
+         margin-bottom: .3rem;
+      }
+
+      .standardPage{
+         display: flex;
+         flex-direction: column;
+         width: 100%;
+         height: 100%;
+      }
+
+      .pinContainer{
+         box-sizing: border-box;
+         margin: 0rem;
+         width: 100%;
+         height: 100%;
+         padding: 1.2rem;
+         display: flex;
+         flex-direction: column;
+         overflow-x: hidden;
+         overflow-y: auto;
+
+         .UserPin{
+            grid-template-columns: 1fr auto 0rem 6.3rem;
+            grid-template-rows: 100%;
+         }
+      
+         .pin{
+            flex: 1;
+            gap: 1.2rem;
+            margin: -0.06rem 0rem;
+            width: 100%;
+            max-height: 9rem;
+            padding: 1.2rem;
+            border-top: .12rem solid #797979;
+            border-bottom: .12rem solid #797979;
+            box-sizing: border-box;
+            display: flex;
+            overflow: hidden;
+
+            .title{
+            flex: 1 1 auto;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            }
+
+            .icons{
+            flex: 0 1 auto;
+            height: 100%;
+            display: flex;
+            justify-content: flex-end;
+            gap: 1.2rem;
+         
+            svg {
+               margin: auto 0;
+               height: 50%;
+         
+               &:hover {
+                  cursor: pointer;
+               }
+            }
+            }
+         }
+      }
+
+      ::-webkit-scrollbar-thumb {
+         background-color: var(--text-color-main); /* color of the scrollbar thumb */
+         border-radius: 0.3rem; /* rounded corners */
+      }
+      
+      /* Hover state of the thumb */
+      ::-webkit-scrollbar-thumb:hover {
+         background-color: var(--text-color-dark);
+      }
+      
+      /* Handle when scrollbar is in a drag state */
+      ::-webkit-scrollbar-thumb:active {
+         background-color: var(--text-color-dark);
+      }
+         
+      /* Customize the track */
+      ::-webkit-scrollbar-track {
+         background: transparent; /* color of the scrollbar track */
+      }
+   }
 }
