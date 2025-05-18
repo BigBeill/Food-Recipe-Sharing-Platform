@@ -32,7 +32,7 @@ export default async function sendRequest( configuration: sendRequestProps ) {
       // attempt to send request
       axiosInstance(configuration)
       .then((response) => {
-         console.trace("Response from server:", response);
+         console.trace("RESPONSE FROM SERVER!", "\n url:", configuration.url, "\n response:", response);
          return resolve(response.data.payload);
       })
       .catch((error) => {
@@ -46,7 +46,7 @@ export default async function sendRequest( configuration: sendRequestProps ) {
                console.log("accessToken refreshed, retrying request");
                axiosInstance(configuration)
                .then((response) => {
-                  console.trace("Response from server:", response);
+                  console.trace("RESPONSE FROM SERVER!", "\n url:", configuration.url, "\n response:", response);
                   return resolve(response.data.payload);
                })
                .catch((error) => {
