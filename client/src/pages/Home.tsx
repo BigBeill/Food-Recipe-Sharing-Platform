@@ -21,24 +21,9 @@ export default function Home() {
    const [ingredientList, setIngredientList] = useState<IngredientObject[]>([]);
 
    const [recipeList, setRecipeList] = useState<RecipeObject[]>([]);
+   const [recipeCount, setRecipeCount] = useState<number>(0);
 
-   useEffect(() => {
-      if(!foodIdList) { return; } // if there are no foodIds, do nothing
-      foodIdList?.forEach((foodId) => {
-         axios({method: 'get', url: `ingredient/getObject/${foodId}`})
-         .then(response => { setIngredientList((list: IngredientObject[]) => [...list, response]); });
-      });
-   }, []);
-
-   // pull information from the url and request information from the server
-   useEffect(() => {
-      // if user is on the first page only request one recipe, otherwise request two recipes
-      axios({method: 'get', url: `recipe/find?limit=${pageNumber == 1 ? 1 : 2}&skip=${pageNumber == 1 ? 0 : (pageNumber - 2) }&count=true`})
-      .then(response => { 
-         if (response.count + 1 < pageNumber) { handlePageChange(response.count + 1); }
-         else { setRecipeList(response.recipeObjectArray); }
-      });
-   }, [searchParams]);
+   const [pageList, setPageList] = useState<PageObject[]>([]);
 
    // send parameters to the url
    function handleSubmit() {
@@ -52,41 +37,73 @@ export default function Home() {
       setSearchParams(newParams); // update the url with the new params
    }
 
-   // change the page number in the url
+   // handle fetching page contents
    function handlePageChange(newPage: number) {
+
       const newParam = new URLSearchParams(searchParams.toString());
       newParam.set('pageNumber', newPage.toString());
       setSearchParams(newParam);
-   }
 
-   // create the pageList for the notebook component
-   let pageList: PageObject[] = [];
+      setRecipeList([]);
 
-   // attach the search page if the user is currently on the first page
-   if (pageNumber == 1) {
-      pageList = [{
-         content: MainPage,
-         props: {
-            recipeTitle,
-            setRecipeTitle,
-            ingredientList,
-            setIngredientList,
-            handleSubmit
+      axios({method: 'get', url: `recipe/find?limit=${newPage == 1 ? 1 : 2}&skip=${newPage == 1 ? 0 : (((newPage - 1) * 2) - 1)}&count=true`})
+      .then((response) => {
+         if (!response.count) { 
+            console.error("server failed to return count"); 
+            return;
          }
-      }];
-   }
-
-   // attach a recipePreview page for each recipe in the recipes array
-   recipeList.forEach((recipe) => {
-      pageList.push({
-         content: RecipePreview,
-         props: {
-            recipe
+         const maxPages = Math.round(((response.count + 1) / 2) + 1);
+         if (maxPages >= newPage) {
+            setRecipeList(response.recipeObjectArray);
+            setRecipeCount(response.count);
          }
+         else { handlePageChange(maxPages) }
       });
-   });
+   }
 
-   return <Notebook pageList={pageList} parentPageNumber={pageNumber} requestNewPage={handlePageChange}/>
+   // on object mount, add any ingredients inside the url to the ingredientList
+   useEffect(() => {
+      if(!foodIdList) { return; } // if there are no foodIds, do nothing
+      foodIdList?.forEach((foodId) => {
+         axios({method: 'get', url: `ingredient/getObject/${foodId}`})
+         .then(response => { setIngredientList((list: IngredientObject[]) => [...list, response]); });
+      });
+   }, []);
+
+   // when ingredientList changes, request new recipeList
+   useEffect(() => {
+      handlePageChange(pageNumber);
+   }, [ingredientList]);
+
+   // useEffect for converting contents of recipeList into a PageObject array and saving it to pageList
+   useEffect(() => {
+      let newPageList: PageObject[] = [];
+      if (pageNumber == 1) {
+         newPageList = [{
+            content: MainPage,
+            props: {
+               recipeTitle,
+               setRecipeTitle,
+               ingredientList,
+               setIngredientList,
+               handleSubmit
+            }
+         }]
+      }
+
+      recipeList.forEach((recipe) => {
+         newPageList.push({
+            content: RecipePreview,
+            props: {
+               recipe
+            }
+         })
+      })
+
+      setPageList(newPageList);
+   }, [recipeList]);
+
+   return <Notebook pageList={pageList} parentPageNumber={pageNumber} requestNewPage={handlePageChange} pageCount={recipeCount + 1}/>
 }
 
 interface MainPageProps {
@@ -113,10 +130,7 @@ function MainPage({recipeTitle, setRecipeTitle, ingredientList, setIngredientLis
       }
 
       axios({method: 'get', url: `ingredient/list?foodDescription=${value}&limit=12`})
-      .then(response => { 
-         console.log(response);
-         setIngredientsAvailable(response); 
-      })
+      .then(response => { setIngredientsAvailable(response); })
       .catch(error => { console.error('unable to fetch ingredients:', error); });
    }
 
