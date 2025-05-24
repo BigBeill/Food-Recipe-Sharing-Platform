@@ -175,91 +175,101 @@ Any JSON object being sent from the server to the client should follow one of th
 
 
 
-## Component Explanations
-Some components in this project can be a bit tricky to use at first. This section explains how to use them properly.
+## Client Side Component Explanations
+On the client side, some components in this project can be a bit tricky to use at first. This section explains how to use them properly.
 
 ### Notebook.jsx Explanation 
 location: (client/src/components/Notebook.jsx)
 
-The Notebook component simulates a flip-book style UI for content. It has three main parts:
-- blank space
-   - the area on each page that will be filled in by content passed from the parent component.
-- arrow buttons
-   - large arrows the user can click to flip through pages.
-   - Keyboard shortcuts (arrow and A/D keys) also work.
-- page number
-   - shown at the bottom to indicate the current page.
+The Notebook component simulates a flip-book style UI for content you wish to display to the user.
+It will display two react components at a time, inside the notebook pages (each page sharing the screen space width wise).
+Any additional react components will be accessible through a pagination bar under the notebook.
 
-This is what notebook.jsx looks like without any props being provided: \
-![blank Notebook.jsx](/readmeImages/notebookBlank.png)
+#### Using Notebook.jsx
 
-Notebook accepts the following 3 props:
-- pageList
-   - required prop
+Notebook accepts the following 4 props:
+- componentList
+   - Required prop.
+   - JSON object array (continue reading for structure)
    - Array of page objects to display in the notebook.
 - parentPageNumber
-   - optional prop
-   - Sets the initial page number. Defaults to 1.
+   - Optional prop.
+   - Number
+   - Tells notebook the exact page number that the first component in componentList belongs to. 
+   - Defaults to 1.
 - requestNewPage
-   - optional prop
-   - Function that fires when a user tries to navigate to a page that doesn’t exist yet. 
-   - Receives the requested page number as a prop.
+   - Optional prop.
+   - Function (continue reading for structure)
+   - A function that fires when a user tries to navigate to a page that doesn’t exist yet. 
+- componentCount
+   - Optional prop.
+   - Number
+   - Tells the notebook how many components exist, even if not all of them appear inside componentList.
+   - Defaults to size of componentList
 
-#### PageList Structure
-pageList is an array of objects. Each object represents one page and has two fields:
+Note: looking at the naming conventions, you may notice that some props reference pages and others reference components, a page is just a set of 2 components. So the 5th and 6th components should be displayed on page 3.
+
+#### componentList Structure
+ComponentList is an array of JSON objects. Two of these objects make up a single page. Each object consists of two fields:
  - content: the react component that will be displayed on the notebook page
- - props: an array of props being passed to component
+ - props: an object containing the props being passed to the content component (field name is what the content component reads the prop as)
+
+#### requestNewPage structure
+This is a function that accepts one numerical prop. When the Notebook tries to display a page that it doesn't currently have access to the components for (like trying to display components 5 and 6 when only having access to 4 components) this function will be called, passing the page trying to be accessed as a numerical value prop. Its then this functions job to figure out how to handle accessing the page that's not currently accessible.
 
 #### Example Code
-Some sample code for creating a paginated list: 
+Some sample code for creating a paginated list while utilizing Notebook.jsx:
+
+Note: in this example RecipePreview.jsx is a regular react component that takes a recipe as a prop
 ```js
 import React, { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import Notebook from '../components/Notebook';
-import PageObject from '../interfaces/PageObject';
+import PageComponentObject from '../interfaces/PageComponentObject';
+import RecipePreview from '../components/notebookPages/RecipePreview';
 
-export default function SamplePageManager() {
-
+export default function Home() {
    const [searchParams, setSearchParams] = useSearchParams();
    const pageNumber: number = Number(searchParams.get('pageNumber')) || 1;
 
-   const [objectList, setObjectList] = useState<any[]>([]);
+   const [componentList, setComponentList] = useState<PageComponentObject[]>([]);
+   const [componentCount, setComponentCount] = useState<number>(0);
 
-   useEffect(() => {
-      // some logic for retrieving the objects you want to display from the server and placing it inside objectList
-   }, [searchParams]);
+   // handle fetching page contents
+   function handlePageChange(newPage: number) {
 
-   // change the page number in the url without affecting any other url parameters
-   function handleNewPage(newPage: number) {
+      // update the url to have the new page number
       const newParam = new URLSearchParams(searchParams.toString());
       newParam.set('pageNumber', newPage.toString());
       setSearchParams(newParam);
+
+      // empty the componentList so the page does not look frozen to user
+      setComponentList([]);
+
+      //send a request to the server for 2 new items, based on newPage value
+      axios({method: 'get', url: `recipe/find?limit=2&skip=${((newPage - 1) * 2)}&count=true`})
+      .then((response) => {
+         // make sure enough entries exist in the database to display requested page
+         const maxPages = Math.round(((response.count + 1) / 2) + 1);
+         if (maxPages >= newPage) {
+            // add each recipe to a component list
+            let newComponentList: PageComponentObject[] = [];
+            response.recipeObjectArray.forEach((recipe) => {
+               newComponentList.push({
+                  content: RecipePreview,
+                  props: {
+                     recipe
+                  }
+               })
+            });
+            setComponentList(newComponentList);
+            setComponentCount(response.count);
+         }
+         // if page being requested is too large to be accessible, return a page that isn't
+         else { handlePageChange(maxPages) }
+      });
    }
 
-   // create the pageList for the notebook component
-   let pageList: PageObject[] = [];
-
-   // create pages for notebook and add them to the pageList array
-   objectList.forEach((object) => {
-      pageList.push({
-         content: Page,
-         props: {
-            object: object
-         }
-      });
-   });
-
-   // call the notebook function
-   return <Notebook pageList={pageList} parentPageNumber={pageNumber} requestNewPage={handlePageChange}/>
-}
-
-interface PageProps {
-   object: any;
-}
-
-function Page({object}: PageProps) {
-   return (
-      // code for displaying object content in HTML format
-   )
+   return <Notebook componentList={componentList} parentPageNumber={pageNumber} requestNewPage={handlePageChange} componentCount={componentCount}/>
 }
 ```
