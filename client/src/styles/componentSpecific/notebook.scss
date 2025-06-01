@@ -23,7 +23,7 @@
       gap: .6rem;
 
       // if screen is too narrow to fit .notebook, show only one page at a time
-      @media (max-width: 78rem) {
+      @media (min-width: 48rem) and (max-width: 78rem) {
 
          margin-left: 1.5rem;
          left: 0%;
@@ -55,7 +55,6 @@
             border-radius: .15rem 2.5rem 2.5rem .15rem;
          }
       }
-
       .notebookSpine {
          position: absolute;
          height: 100%;
@@ -169,6 +168,32 @@
       /* Customize the track */
       ::-webkit-scrollbar-track {
          background: transparent; /* color of the scrollbar track */
+      }
+   }
+
+   // mobile view
+   @media (max-width: 48rem) {
+      height: fit-content;
+
+      .notebook {
+         display: block;
+         overflow: hidden;
+         min-width: 0rem;
+         margin: 0rem;
+
+         .notebookSpine {
+            display: none;
+         }
+         
+         .notebookPage {
+            box-sizing: border-box !important;
+            height: calc(100vh - 1.2rem) !important;
+            width: 100% !important;
+            margin: 0rem !important;
+            margin-bottom: 0.6rem !important;
+            padding: 0rem !important;
+            border-radius: 0.15rem !important;
+         }
       }
    }
 }
