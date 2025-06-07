@@ -1,8 +1,10 @@
 import "../../styles/pageSpecific/recipePreview.scss";
 import RecipeObject from "../../interfaces/RecipeObject";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 
 import GrowingText from "../GrowingText";
+import Popup from "../Popup";
+import Recipe from "../../pages/Recipe";
 
 interface RecipePreviewProps {
    recipe: RecipeObject;
@@ -10,8 +12,22 @@ interface RecipePreviewProps {
 
 export default function RecipePreview({ recipe }: RecipePreviewProps) {
    const titleRef = useRef(null);
+   const [showRecipe, setShowRecipe] = useState<boolean>(false);
+   const [baseUrl, setBaseUrl] = useState<string>("");
+
+   function displayRecipe() {
+      setBaseUrl(window.location.href);
+      window.history.pushState({}, '', `/Recipe/${recipe._id}`);
+      setShowRecipe(true);
+   }
+
+   function closePopup() {
+      window.history.pushState({}, '', baseUrl);
+      setShowRecipe(false);
+   }
 
    return (
+      <>
       <div className="recipePreviewPage">
          <div className="titleContainer" ref={titleRef}>
             <GrowingText text={recipe.title} parentDiv={titleRef}/>
@@ -41,6 +57,17 @@ export default function RecipePreview({ recipe }: RecipePreviewProps) {
             </>
             : null }
          </div>
+
+         <div>
+            <button onClick={displayRecipe}> View Recipe </button>
+         </div>
+         
       </div>
+      
+      {showRecipe && (
+         <Popup Child={Recipe} closePopup={closePopup} />
+      )}
+
+      </>
    );
 };

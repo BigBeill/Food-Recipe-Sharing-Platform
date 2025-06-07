@@ -3,9 +3,13 @@
    height: 100%;
    display: grid;
    gap: 0.6rem;
-   grid-template-columns: calc(100% - 12.6rem) 12rem;
-   grid-template-rows: 12rem 12rem calc(100% - 25.2rem);
+   grid-template-columns: 1fr 12rem;
+   grid-template-rows: 12rem 9rem 1fr;
    grid-template-areas: "titleContainer image" "description description" "ingredients nutrientInformation";
+
+   > * {
+      overflow: hidden;
+   }
 
    .titleContainer {
       grid-area: titleContainer;

@@ -5,6 +5,7 @@ import Ingredients from './pages/Ingredients.tsx'
 import Login from './pages/Login.tsx'
 import Profile from './pages/Profile.tsx'
 import Register from './pages/Register.tsx'
+import Recipe from './pages/Recipe.tsx'
 import SearchUser from './pages/SearchUser.tsx'
 import Admin from './pages/Admin.tsx'
 
@@ -38,6 +39,10 @@ export const routes = [
   {
     path:'/register',
     element:<Register />,
+  },
+  {
+    path: '/recipe/:recipeId?',
+    element: <Recipe />
   },
   {
     path:'searchUser',

@@ -52,7 +52,7 @@ export default function Home() {
             console.error("server failed to return count"); 
             return;
          }
-         const maxPages = Math.round(((response.count + 1) / 2) + 1);
+         const maxPages = Math.round(((response.count + 1) / 2));
          if (maxPages >= newPage) {
             setRecipeList(response.recipeObjectArray);
             setRecipeCount(response.count);
