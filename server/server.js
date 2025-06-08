@@ -62,5 +62,5 @@ const options = {
 }
 
 //listen to port
-const PORT = 4000
+const PORT = process.env.PORT || 4000
 https.createServer(options, app).listen(PORT, () => {console.log("Server started on port " + PORT)})

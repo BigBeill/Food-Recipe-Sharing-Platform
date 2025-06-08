@@ -1,6 +1,7 @@
-import "../styles/componentSpecific/paginationBar.scss";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowLeft, faArrowRight } from '@fortawesome/free-solid-svg-icons';
+
+import "../styles/componentSpecific/paginationBar.scss";
 
 interface PaginationBarProps {
    currentPage: number;
