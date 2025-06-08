@@ -5,7 +5,7 @@ import RecipeObject from "../interfaces/RecipeObject";
 import axios from "../api/axios";
 
 interface RecipeParams {
-   recipe: RecipeObject
+   recipe?: RecipeObject
 }
 
 export default function Recipe({recipe}: RecipeParams) {
@@ -31,20 +31,20 @@ export default function Recipe({recipe}: RecipeParams) {
    return (
       <div>
          <h1>{recipeObject.title}</h1>
-         <p>{recipe.image}</p>
+         <p>{recipeObject.image}</p>
          <h2>Nutrition</h2>
          <ul>
-            { recipe.nutrition ? 
+            { recipeObject.nutrition ? 
             <>
-               <li>Calories: {recipe.nutrition.calories}</li>
-               <li>Fat: {recipe.nutrition.fat}</li>
-               <li>Cholesterol: {recipe.nutrition.cholesterol}</li>
-               <li>Sodium: {recipe.nutrition.sodium}</li>
-               <li>Potassium: {recipe.nutrition.potassium}</li>
-               <li>Carbohydrates: {recipe.nutrition.carbohydrates}</li>
-               <li>Fibre: {recipe.nutrition.fibre}</li>
-               <li>Sugar: {recipe.nutrition.sugar}</li>
-               <li>Protein: {recipe.nutrition.protein}</li>
+               <li>Calories: {recipeObject.nutrition.calories}</li>
+               <li>Fat: {recipeObject.nutrition.fat}</li>
+               <li>Cholesterol: {recipeObject.nutrition.cholesterol}</li>
+               <li>Sodium: {recipeObject.nutrition.sodium}</li>
+               <li>Potassium: {recipeObject.nutrition.potassium}</li>
+               <li>Carbohydrates: {recipeObject.nutrition.carbohydrates}</li>
+               <li>Fibre: {recipeObject.nutrition.fibre}</li>
+               <li>Sugar: {recipeObject.nutrition.sugar}</li>
+               <li>Protein: {recipeObject.nutrition.protein}</li>
             </>
             : null }
          </ul>
