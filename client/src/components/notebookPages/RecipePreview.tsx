@@ -32,7 +32,7 @@ export default function RecipePreview({ recipe }: RecipePreviewProps) {
          <div className="titleContainer" ref={titleRef}>
             <GrowingText text={recipe.title} parentDiv={titleRef}/>
          </div>
-         <p className="image">🍗</p>
+         <p className="image">{recipe.image}</p>
          <p className="description">{recipe.description}</p>
          <div className="ingredients">
             <p>Ingredients:</p>
@@ -65,7 +65,7 @@ export default function RecipePreview({ recipe }: RecipePreviewProps) {
       </div>
       
       {showRecipe && (
-         <Popup Child={Recipe} closePopup={closePopup} />
+         <Popup Child={Recipe} childProps={{recipe: recipe}} closePopup={closePopup} />
       )}
 
       </>

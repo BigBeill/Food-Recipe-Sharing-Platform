@@ -2,11 +2,12 @@ import React, { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 
 interface PopupProps {
-   Child: React.ComponentType;
+   Child: React.ComponentType<any>;
+   childProps?: { [key: string]: any; }
    closePopup: (show: boolean) => void;
 }
 
-export default function Popup({Child, closePopup}: PopupProps) {
+export default function Popup({Child, childProps, closePopup}: PopupProps) {
    const [portalRoot, setPortalRoot] = useState<HTMLElement | null>(null);
 
    useEffect(() => {
@@ -22,7 +23,7 @@ export default function Popup({Child, closePopup}: PopupProps) {
                <button className="closePopup" onClick={() => {closePopup(false)}}>&larr; Return</button>
                <div></div>
             </div>
-            <Child />
+            <Child {...childProps} />
          </div>
       </div>,
       portalRoot

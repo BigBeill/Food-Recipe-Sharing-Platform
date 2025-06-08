@@ -115,6 +115,7 @@ interface MainPageProps {
 }
 
 function MainPage({recipeTitle, setRecipeTitle, ingredientList, setIngredientList, handleSubmit}: MainPageProps) {
+   
 
    const [newIngredient, setNewIngredient] = useState<IngredientObject>({foodId:"", foodDescription:""});
    const [ingredientsAvailable, setIngredientsAvailable] = useState<IngredientObject[]>([]);
