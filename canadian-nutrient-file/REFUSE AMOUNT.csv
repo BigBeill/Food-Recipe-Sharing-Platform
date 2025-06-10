@@ -1,4 +1,4 @@
-FoodID,RefuseID,RefuseAmount,RefuseDateOfEntry
+Food_ID,Refuse_ID,Refuse_Amount,Refuse_Date_Of_Entry
 2,750,0,1997-05-01
 4,750,0,1997-05-01
 5,750,0,1997-05-01

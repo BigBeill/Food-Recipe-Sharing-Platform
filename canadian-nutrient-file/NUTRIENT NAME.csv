@@ -1,4 +1,4 @@
-NutrientID,NutrientCode,NutrientSymbol,NutrientUnit,NutrientName,NutrientNameF,Tagname,NutrientDecimals
+Nutrient_ID,Nutrient_Code,Nutrient_Symbol,Nutrient_Unit,Nutrient_Name,Nutrient_Name_F,Tag_name,Nutrient_Decimals
 203,203,PROT,g,PROTEIN,PROTÉINES,PROCNT,2
 204,204,FAT,g,FAT (TOTAL LIPIDS),LIPIDES TOTAUX,FAT,2
 205,205,CARB,g,"CARBOHYDRATE, TOTAL (BY DIFFERENCE)",GLUCIDES TOTAUX (PAR DIFFÉRENCE),CHOCDF,2

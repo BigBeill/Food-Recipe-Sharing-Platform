@@ -1,4 +1,4 @@
-FoodID,FoodCode,FoodGroupID,FoodSourceID,FoodDescription,FoodDescriptionF,FoodDateOfEntry,FoodDateOfPublication,CountryCode,ScientificName
+Food_ID,Food_Code,Food_Group_ID,Food_Source_ID,Food_Description,Food_Description_F,Food_Date_Of_Entry,Food_Date_Of_Publication,Country_Code,Scientific_Name
 2,2,22,20,Cheese souffle,Soufflé au fromage,1981-01-01,,,
 4,4,22,20,"Chop suey, with meat, canned","Chop suey, avec viande, conserve",1981-01-01,,,
 5,5,22,0,"Chinese dish, chow mein, chicken","Mets chinois, chow mein, poulet",1981-01-01,,36623,

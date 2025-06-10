@@ -2,10 +2,10 @@ const { Pool } = require('pg');
 require('dotenv').config()
 
 const postgresConnection = new Pool({
-  user: 'postgres',
-  database: 'Canadian Nutrient File',
+  user: process.env.POSTGRES_DB_USER,
+  database: process.env.POSTGRES_DB_DATABASE,
   password: process.env.POSTGRES_DB_PASSWORD,
-  port: 5432, // Default PostgreSQL port
+  port: process.env.POSTGRES_DB_PORT,
 })
 
 postgresConnection.connect((error, client, release) => {

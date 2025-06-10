@@ -1,4 +1,4 @@
-NutrientSourceID,NutrientSourceCode,NutrientSourceDescription,NutrientSourc DescriptionF
+Nutrient_Source_ID,Nutrient_Source_Code,Nutrient_Source_Description,Nutrient_Source_Description_F
 0,0,No change from USDA,Provient intégralement de l'USDA
 1,1,Nutrient levels changed to meet the canadian regulations ,Teneur en nutriments modifiée pour satisfaire la réglementation canadienne
 2,2,Nutrient calculated from data other than USDA,Nutriment calculé avec des données autres que l'USDA

@@ -79,8 +79,8 @@ CREATE TABLE nutrient_name (
 CREATE TABLE nutrient_source (
 	nutrient_source_id numeric,
 	nutrient_source_code numeric,
-	nutrient_description text,
-	nutrient_description_f text
+	nutrient_Source_description text,
+	nutrient_Source_description_f text
 );
 
 CREATE TABLE measure_name (
@@ -91,14 +91,14 @@ CREATE TABLE measure_name (
 
 CREATE TABLE refuse_name (
 	refuse_id numeric,
-	refuse_name text,
-	refuse_name_f text
+	refuse_description text,
+	refuse_description_f text
 );
 
 CREATE TABLE yield_name (
 	yield_id numeric,
-	yield_name text,
-	yield_name_f text
+	yield_description text,
+	yield_description_f text
 );
 
 // ============ END OF QUERY ============
