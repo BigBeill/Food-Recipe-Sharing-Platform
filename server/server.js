@@ -13,7 +13,7 @@ require("dotenv").config();
 // define cors settings
 const corsOptions = {
    origin: function (origin, callback) {
-      if (origin.startsWith(process.env.FRONTEND_URL)) {
+      if (origin === process.env.FRONTEND_URL) {
          callback(null, true);
       } else {
          callback(new Error('Not allowed by CORS'));
