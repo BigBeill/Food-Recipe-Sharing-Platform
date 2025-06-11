@@ -13,8 +13,7 @@ require("dotenv").config();
 // define cors settings
 const corsOptions = {
    origin: function (origin, callback) {
-      // MAKE SURE TO CHANGE THIS BEFORE PRODUCTION !!!
-      if (!origin || origin.startsWith('https://localhost')) {
+      if (origin.startsWith(process.env.FRONTEND_URL)) {
          callback(null, true);
       } else {
          callback(new Error('Not allowed by CORS'));
