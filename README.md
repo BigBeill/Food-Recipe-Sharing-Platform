@@ -58,9 +58,14 @@ This is the PostgreSQL server, containing data from the Canadian Nutrient File. 
 
 
 ## Security Features
- - HTTPS connection
+ - HTTPS connection (only on cloud deployment)
  - HTTP-only cookies
  - Sanitization of all client input (cookies, query, params, and body)
+
+Originally I did have this code configured to use HTTPS connections. 
+However, both render and vercel automatically convert HTTP messages to HTTPS, so i had to revert everything back to http when debugging the cloud deployment.
+Any local deployment of this project now uses HTTP but the cloud deployment uses HTTPS
+Since we cant use the secure tags on cookies in a local host environment they have been set to cross-site: 'strict'.
 
 ### User Authentication
  - JSON web tokens (JWT)
