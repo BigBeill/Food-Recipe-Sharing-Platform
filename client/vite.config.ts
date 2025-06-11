@@ -5,9 +5,11 @@ import react from '@vitejs/plugin-react-swc'
 export default defineConfig({
    plugins: [react()],
    server:{
+      /*
       https: {
          key: './certificates/localhost-key.pem',
          cert: './certificates/localhost.pem'
       }
+      */
    }
 })
