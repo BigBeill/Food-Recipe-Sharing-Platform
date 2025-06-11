@@ -56,11 +56,6 @@ app.use('/user', userRouter)
 const errorHandler = require('./middleware/debugging/errorHandler');
 app.use(errorHandler);
 
-const options = {
-   key: fs.readFileSync(process.env.SSL_KEY_PATH),
-   cert: fs.readFileSync(process.env.SSL_CERT_PATH)
-}
-
 //listen to port
 const PORT = process.env.PORT || 4000
-https.createServer(options, app).listen(PORT, () => {console.log("Server started on port " + PORT)})
+app.listen(PORT, () => {console.log("Server started on port " + PORT)})
