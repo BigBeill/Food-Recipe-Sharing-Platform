@@ -11,6 +11,7 @@ function Login() {
 
    const [username, setUsername] = useState<string>("");
    const [password, setPassword] = useState<string>("");
+   const [rememberMe, setRememberMe] = useState<boolean>(false);
    const [errorMessage, setErrorMessage] = useState<string>("");
 
    useEffect(() => {
@@ -28,7 +29,7 @@ function Login() {
       if (!username) return setErrorMessage("no username given");
       if (!password) return setErrorMessage("no password given");
 
-      const userData = { username, password };
+      const userData = { username, password, rememberMe };
       axios({method: 'post', url: 'authentication/login', data: userData})
       .then(() => {
          navigate('/');
@@ -77,7 +78,10 @@ function Login() {
                <input type="checkbox"
                name="remember me"
                id="remember"
-               value="1" />
+               value="1" 
+               checked={rememberMe}
+               onChange={(event) => setRememberMe(event.target.checked)}
+               />
                <label htmlFor="remember">Remember Me</label>
             </div>
          </div>

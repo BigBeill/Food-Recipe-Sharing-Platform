@@ -49,19 +49,22 @@ router.post("/register",
 Type:
    POST - logs user in
 
-Requires 2 arguments from body:
+Requires 3 arguments from body:
    username: string
    password: string
+   rememberMe: boolean
 
 Route description:
    get user data from database
    encrypt password and compare to database
    return json web token to client if valid password
+   set cookies max age if rememberMe is true
 */
 router.post("/login", 
    [
       body("username").isString().isLength({ min: 3, max: 60 }).withMessage("Username must be a string between 3 and 60 characters"),
       body("password").isString().isLength({ min: 3, max: 60 }).withMessage("Password must be a string between 3 and 60 characters"),
+      body("rememberMe").isBoolean().withMessage("Remember must be a boolean value"),
       checkExact(),
    ],
    runValidation,

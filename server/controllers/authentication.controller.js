@@ -61,8 +61,8 @@ exports.register = async (req, res) => {
       .save();
 
       // send cookies to client
-      res.cookie("accessToken", tokens.accessToken, { maxAge: cookieAge });
-      res.cookie("refreshToken", tokens.refreshToken, { maxAge: cookieAge });
+      res.cookie("accessToken", tokens.accessToken);
+      res.cookie("refreshToken", tokens.refreshToken);
       return res.status(200).json({ message: "account registered successfully" });
    }
 
@@ -81,7 +81,7 @@ exports.register = async (req, res) => {
 
 exports.login = async (req, res) => {
 
-   const { username, password } = req.body;
+   const { username, password, rememberMe } = req.body;
 
    try {
       // find user in database with provided username
@@ -102,8 +102,9 @@ exports.login = async (req, res) => {
       .save();
 
       // save tokens as cookies for client
-      res.cookie("accessToken", tokens.accessToken, { maxAge: cookieAge });
-      res.cookie("refreshToken", tokens.refreshToken, { maxAge: cookieAge });
+      const cookieAgeField = rememberMe ? { maxAge: cookieAge } : {};
+      res.cookie("accessToken", tokens.accessToken, cookieAgeField);
+      res.cookie("refreshToken", tokens.refreshToken, cookieAgeField);
       return res.status(200).json({ message: "user Signed in" });
    }
 
