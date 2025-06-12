@@ -1,4 +1,5 @@
-import Home from './pages/Home.tsx'
+import LandingPage from './pages/LandingPage.tsx'
+import PublicRecipes from './pages/PublicRecipes.tsx'
 import EditRecipe from "./pages/EditRecipe.tsx"
 import FriendsList from './pages/FriendsList.tsx'
 import Ingredients from './pages/Ingredients.tsx'
@@ -14,11 +15,11 @@ import NotFound from './pages/NotFound.tsx'
 export const routes = [
   {
     path:'/',
-    element:<Home />,
+    element:<LandingPage />,
   },
   {
-    path:'/home',
-    element:<Home />,
+    path:'/publicRecipes',
+    element:<PublicRecipes />,
   },
   {
     path:'/editRecipe/:recipeId?',

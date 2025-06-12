@@ -3,7 +3,7 @@ import { useState, useEffect, useRef} from 'react'
 
 // internal imports
 import '../styles/componentSpecific/nav.scss'
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 
 import UserObject from '../interfaces/UserObject'
 
@@ -15,6 +15,7 @@ interface NavProps {
 function Nav({userData}: NavProps) {
     const [open, setOpen] = useState<boolean>(false);
     const navRef = useRef<HTMLDivElement>(null);
+    const navigate = useNavigate();
     
     // open/close the nav bar whenever the handle on the side of the nav panel is clicked
     function openNav() {
@@ -38,11 +39,11 @@ function Nav({userData}: NavProps) {
         <>
         <nav ref={navRef} className={`navBar ${open ? 'open' : ''}`} id="navBar">
 
-            <img className="logo" src="/BigBeill-logo_black.png" alt="Beill Greenhouse Logo" />
+            <img className="logo" src="/BigBeill-logo_black.png" alt="Beill Greenhouse Logo" onClick={() => {navigate('/')}}/>
 
 
             <h3>Find Recipes</h3>
-            <NavLink className="navLink" to="/" onClick={() => setOpen(false)}>Public</NavLink>
+            <NavLink className="navLink" to="/publicRecipes" onClick={() => setOpen(false)}>Public</NavLink>
             <NavLink className="navLink" to="/index" onClick={() => setOpen(false)}>Following</NavLink>
             <NavLink className="navLink" to="/index" onClick={() => setOpen(false)}>Search</NavLink>
 

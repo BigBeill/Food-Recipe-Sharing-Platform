@@ -10,7 +10,7 @@ import IngredientObject from '../interfaces/IngredientObject';
 import RecipePreview from '../components/notebookPages/RecipePreview';
 import axios from '../api/axios';
 
-export default function Home() {
+export default function PublicRecipes() {
 
    const [searchParams, setSearchParams] = useSearchParams();
    const pageNumber: number = Number(searchParams.get('pageNumber')) || 1;
