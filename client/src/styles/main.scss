@@ -70,6 +70,16 @@ main{
    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
 }
 
+.loadingContainer{
+   background-color: var(--background-color);
+   margin: 1.5rem 3rem;
+   box-sizing: border-box;
+   width: fit-content;
+   padding: 0.6rem 0.9rem;
+   box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+}
+
+
 .shielded *{
    pointer-events: none;
 }
