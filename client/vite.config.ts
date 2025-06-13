@@ -5,11 +5,18 @@ import react from '@vitejs/plugin-react-swc'
 export default defineConfig({
    plugins: [react()],
    server:{
-      /*
-      https: {
-         key: './certificates/localhost-key.pem',
-         cert: './certificates/localhost.pem'
+      proxy: {
+         "/proxy": {
+            // VITE DEV SERVER ONLY - This proxy is ignored in production
+            target: "http://localhost:4000",
+            changeOrigin: true,
+            rewrite: (path) => path.replace(/^\/proxy/, ""),
+            configure: (proxy) => {
+               proxy.on('proxyReq', (proxyReq, req) => {
+                  if (!req.headers.origin) { proxyReq.setHeader('Origin', 'http://localhost:5173'); }
+               });
+            }
+         }
       }
-      */
    }
 })
