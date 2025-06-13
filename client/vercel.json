@@ -1,8 +1,0 @@
-{
-   "rewrites": [
-      {
-         "source": "/proxy/:match*",
-         "destination": "https://food-website-jgxy.onrender.com/:match*"
-      }
-   ]
-}
