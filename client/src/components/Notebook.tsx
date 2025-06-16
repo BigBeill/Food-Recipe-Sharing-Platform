@@ -67,9 +67,6 @@ export default function Notebook ({pageList, parentPageNumber = 1, requestNewPag
    const [narrowScreen, setNarrowScreen] = useState<boolean>(false);
 
    const [currentIndex, setCurrentIndex] = useState<number>(0);
-   
-   const [firstPage, setFirstPage] = useState<PageObject>(pageList[0]);
-   const [secondPage, setSecondPage] = useState<PageObject>(pageList[1]);
 
    useEffect(() => {
       // check if the screen is too small to support both pages of notebook at once
@@ -88,10 +85,8 @@ export default function Notebook ({pageList, parentPageNumber = 1, requestNewPag
       return () => { window.removeEventListener('resize', handleResize); }
    }, []);
 
-   useEffect(() => {
-      setFirstPage(pageList[currentIndex * 2]);
-      setSecondPage(pageList[(currentIndex * 2) + 1]);
-   }, [currentIndex, pageList]);
+   const firstPage = pageList[currentIndex * 2];
+   const secondPage = pageList[(currentIndex * 2) + 1];
 
    useEffect(() => {
       // changes page if arrow key or a/d is pressed
