@@ -22,16 +22,34 @@ Tech Stack
  - Backend: Node.js
  - Database: MongoDB (cloud-hosted) and PostgreSQL (local)
 
+Architecture:
+ - Client-server model: frontend and backend communicate over HTTPS
+ - model-view-controller: Backend file organization
+
 ### Setting Up the Project
  1. Open the `run_website.txt` file in the root directory.
  2. Set the URL to the path where you saved this project.
- 3. Save the file with a `.bat` extension.
- 4. Double-click the `.bat` file to run the application.
+ 3. Save the file with a `.bat` extension (or respective file type if your not using windows).
+ 4. Inside the `client` folder, create a `.env` file and add:
+```
+VITE_SERVER_LOCATION=http://localhost:4000
+```
+ 5. Inside the `server` folder, create a `.env` file and add:
+ ```
+SESSION_SECRET=
+LOCAL_ENVIRONMENT=true
+```
+ 6. Fill in a value for `SESSION_SECRET` (choose a strong secret).
+ 7. Double-click the `.bat` file to run the application.
 
 Note: The application will run, but no data will be accessible until the databases are properly configured. Refer to the [Database Explanation](#database-explanation) section for more details.
 
-## Database Explanation
-There are two databases I'm using for this project, I created some relational diagrams to show what's going on.
+This project uses two databases:
+
+- **MongoDB** is used to store larger and more dynamic data in a remote, cloud-hosted environment.
+- **PostgreSQL** stores a small amount of static data that needs to be accessed quickly. It is kept local, next to the server.
+
+I have created some relational diagrams to illustrate the structure and relationships within these databases.
 
 ### MongoDB
 The MongoDB database is cloud-hosted. To run the project locally:
