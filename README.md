@@ -54,19 +54,24 @@ I have created some relational diagrams to illustrate the structure and relation
 ### MongoDB
 The MongoDB database is cloud-hosted. To run the project locally:
 
- - Create your own MongoDB cluster online.
- - Update the connection string in `server/config/connectMongo.js`.
+- Create your own MongoDB cluster online.
+- Update the connection string in `server/config/connectMongo.js`.
+- Add the following line to the server’s `.env` file:
+```
+MONGO_DB_PASSWORD=
+```
+- Fill in your MongoDB password.
 
-That's it, collections and schemas are auto-generated on first run.
+That’s it, collections and schemas are auto-generated on first run.
 
-Note: MongoDB supports nested JSON objects, which don't translate cleanly to relational diagrams. Any field labeled "nested" refers to embedded subdocuments, not actual independent objects.
+> **Note:** MongoDB supports nested JSON objects, which don’t translate cleanly into relational diagrams. Any field labeled “nested” refers to embedded subdocuments, not independent objects.
 
-![mongoDB Diagram](/readmeImages/relationalDiagramMongoDb.png)
+![MongoDB Diagram](/readmeImages/relationalDiagramMongoDb.png)
 
 ### PostgreSQL
-This is the PostgreSQL server, containing data from the Canadian Nutrient File. The software runs locally on the machine you're running the server on and requires manual setup. Setup instructions can be found in:
+This is the PostgreSQL server, containing data from the Canadian Nutrient File. The software runs locally on the machine you're using to run the server and requires manual setup. Setup instructions can be found in:
 
-`canadian-nutrient-file/Ingredient Database Instructions.txt`
+`/canadian-nutrient-file/DB_Setup.md`
 
 ![PostgreSQL Diagram](/readmeImages/relationalDiagramPostgreSQL.png)
 
