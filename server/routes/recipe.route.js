@@ -120,17 +120,18 @@ Method 'PUT' description:
 router.route('/edit')
 .all(
    [
-      body("title").isString().isLength({ min: 3, max: 90 }).withMessage("title must be a string between 3 and 100 characters"),
-      body("description").isString().isLength({ min: 3, max: 10000 }).withMessage("description must be a string between 3 and 1000 characters"),
-      body("image").isString().isLength({ min: 0, max: 90 }).withMessage("image must be a string between 3 and 900 characters"),
+      body("title").isString().isLength({ min: 3, max: 900 }).withMessage("Your recipe must contain a title between 1 and 900 characters long"),
+      body("description").isString().isLength({ min: 3, max: 90000 }).withMessage("description must be a string between 3 and 90000 characters"),
+      body("image").isString().isLength({ min: 0, max: 90 }).withMessage("image must be a string"),
       body("ingredients").isArray().withMessage("ingredients must be an array"),
       body("ingredients.*").isObject().withMessage("ingredients must be an array of objects"),
-      body("ingredients.*.foodId").toInt().isInt({ min: 1, max: 100000 }).withMessage("ingredients must be an array of objects with foodId as a positive integer"),
-      body("ingredients.*.foodDescription").isString().isLength({ min: 3, max: 90 }).withMessage("ingredients must be an array of objects with foodDescription as a string between 3 and 100 characters"),
-      body("ingredients.*.portion").isObject().withMessage("ingredients must be an array of objects with portion as an object"),
-      body("ingredients.*.portion.measureId").toInt().isInt({ min: 1, max: 100000 }).withMessage("ingredients must be an array of objects with portion as an object with measureId as a positive integer"),
-      body("ingredients.*.portion.measureDescription").isString().isLength({ min: 3, max: 90 }).withMessage("ingredients must be an array of objects with portion as an object with measureDescription as a string between 3 and 100 characters"),
-      body("ingredients.*.portion.amount").toFloat().isFloat({ min: 0.01, max: 10000 }).withMessage("ingredients must be an array of objects with portion as an object with amount as a positive float"),
+      body("ingredients.*.foodId").toInt().isInt({ min: 1, max: 100000000 }).withMessage("All ingredients must have a valid foodId"),
+      body("ingredients.*.label").optional().isString().isLength({ min: 1, max: 900}).withMessage("All ingredients with the label field must have a label as a string between 1 and 900 characters long"),
+      body("ingredients.*.foodDescription").isString().isLength({ min: 1, max: 900 }).withMessage("All ingredients must have a foodDescription that is a string between 1 and 900 characters long"),
+      body("ingredients.*.portion").isObject().withMessage("All ingredients must have a portion object"),
+      body("ingredients.*.portion.measureId").toInt().isInt({ min: 1, max: 900000 }).withMessage("All ingredients portion field must have a valid measureId"),
+      body("ingredients.*.portion.measureDescription").isString().isLength({ min: 1, max: 900 }).withMessage("All ingredients portion field must have a measureDescription that is a string between 1 and 900 characters long"),
+      body("ingredients.*.portion.amount").toFloat().isFloat({ min: 0.01, max: 90000 }).withMessage("All ingredients portion field must have an amount that is a float between 0.01 and 90000"),
       body("instructions").isArray().withMessage("instructions must be an array"),
       body("instructions.*").isString().isLength({ min: 3, max: 10000 }).withMessage("instructions must be an array of strings"),
       body("_id").optional().isString().isLength({ min: 24, max: 24 }).withMessage("_id must be a string of 24 characters"),
@@ -139,7 +140,7 @@ router.route('/edit')
          title: true,
          description: true,
          image: true,
-         ingredients: [{foodId: true, foodDescription: true, portion: {measureId: true, measureDescription: true, amount: true}}],
+         ingredients: [{foodId: true, label: true, foodDescription: true, portion: {measureId: true, measureDescription: true, amount: true}}],
          instructions: [],
          _id: true
       }, "body" )

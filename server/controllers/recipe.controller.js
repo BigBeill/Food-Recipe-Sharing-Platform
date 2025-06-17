@@ -90,6 +90,7 @@ exports.packageIncoming = async (req, res, next) => {
    try {
       const recipeObject = await recipeUtils.verifyObject(recipe, false);
       req.recipeObject = recipeObject;
+      console.log("Recipe Object: ", req.recipeObject);
       next();
    }
    catch (error) {

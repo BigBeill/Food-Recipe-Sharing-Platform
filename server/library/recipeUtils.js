@@ -25,7 +25,7 @@ async function verifyObject (recipe, insideDatabase = true) {
    // define function to check for missing fields
    async function checkInvalidFields() {
       let found = [];
-      if (!recipeObject.owner || typeof recipeObject.owner == 'string') { found.push('owner'); }
+      if (insideDatabase && ( !recipeObject.owner || typeof recipeObject.owner == 'string' )) { found.push('owner'); }
       if (!recipeObject.title || typeof recipeObject.title != 'string') { found.push('title'); }
       if (!recipeObject.description || typeof recipeObject.description != 'string') { found.push('description'); }
       if (!recipeObject.image || typeof recipeObject.image != 'string') { found.push('image'); }

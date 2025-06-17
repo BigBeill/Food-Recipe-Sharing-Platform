@@ -18,9 +18,9 @@
 
    label {
       display: inline-block;
+      margin-bottom: 0.3rem;
       width: calc(100% - .3rem);
       margin-left: 0.3rem;
-      margin-bottom: 0.12rem;
       font-size: 1.2rem;
       color: var(--text-color-dark);
 
@@ -30,8 +30,9 @@
       }
    }
 
-   input, textarea {
+   input, textarea, select {
       box-sizing: border-box;
+      margin-bottom: 0.6rem;
       width: 100%;
       padding: .03rem .48rem;
       background-color: transparent;
@@ -76,7 +77,6 @@
       gap: .6rem;
 
       input, select{
-         margin: 0rem;
          width: 5.4rem;
          background-color: transparent;
          border: none;
@@ -225,4 +225,3 @@ button{
       resize: none;
    }
 }
-

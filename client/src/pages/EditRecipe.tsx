@@ -64,6 +64,8 @@ export default function NewEditRecipe () {
 			instructions: removeIds(instructionList)
 		}
 
+		console.log("recipeData:", recipeData);
+
 		//send request to the server
 		axios({ method:method, url:'recipe/edit', data: recipeData })
 		.then(() => { navigate('/'); })
@@ -177,7 +179,7 @@ interface IngredientPageProps {
 function IngredientPage ({ingredientList, setIngredientList}: IngredientPageProps) {
 
 	// define useStates
-	const [newIngredient, setNewIngredient] = useState<IngredientObject>({foodId:"", foodDescription:"", portion: { measureId:"", measureDescription:"", amount: null } });
+	const [newIngredient, setNewIngredient] = useState<IngredientObject>({foodId:"", label:"", foodDescription:"", portion: { measureId:"", measureDescription:"", amount: null } });
 	const [conversionFactorsAvailable, setConversionFactorsAvailable] = useState<{measureId: string, measureDescription: string, conversionFactorValue: number }[]>([{ measureId: '1489', measureDescription: 'g', conversionFactorValue: 1 }]);
 	const [ingredientsAvailable, setIngredientsAvailable] = useState<IngredientObject[]>([])
 	const [availableId, setAvailableId] = useState<number>(ingredientList.length)
@@ -207,9 +209,23 @@ function IngredientPage ({ingredientList, setIngredientList}: IngredientPageProp
 
 	function addIngredient () {
 		if (!newIngredient.foodId || !newIngredient.portion?.measureDescription || !newIngredient.portion?.measureDescription) { return }
-		setIngredientList([...ingredientList, {id: availableId, content: newIngredient} ]);
+
+		// add new ingredient to ingredientList
+		setIngredientList([
+			...ingredientList, 
+			{
+				id: availableId, 
+				content: (() => {
+					const { label, ...rest } = newIngredient;
+					return label ? { ...rest, label } : { ...rest };
+				})()
+			} 
+		]);
+
+		console.log("ingredientList:", ingredientList);
+
 		setAvailableId( availableId+1 );
-		setNewIngredient({foodId: "", foodDescription: "", portion: { measureId: "", measureDescription: "", amount: null }});
+		setNewIngredient({foodId: "", foodDescription: "", label:"", portion: { measureId: "", measureDescription: "", amount: null }});
 	}
 
 	function removeIngredient (index: number) {
@@ -224,38 +240,44 @@ function IngredientPage ({ingredientList, setIngredientList}: IngredientPageProp
 
 			{/* ingredients list */}
 			<Reorder.Group className='displayList' axis='y' values={ingredientList} onReorder={setIngredientList}>
-			{ingredientList.map((item, index) => (
-				<Reorder.Item key={item.id} value={item} className='listItem'>
-					<div className='options'>
-					<FontAwesomeIcon icon={faCircleXmark} style={{color: "#575757",}} onClick={() => removeIngredient(index)} />
-					</div>
-					{ item.content.portion ?
-					<p>{item.content.portion.amount} {item.content.portion.measureDescription} of [{item.content.foodDescription}]</p>
-					: null }
-				</Reorder.Item>
-			))}
+				{ingredientList.map((item, index) => (
+					<Reorder.Item key={item.id} value={item} className='listItem'>
+						<div className='options'>
+							<FontAwesomeIcon icon={faCircleXmark} style={{color: "#575757",}} onClick={() => removeIngredient(index)} />
+						</div>
+						{ item.content.label ? (
+							<p>{item.content.label}</p>
+						) : item.content.portion ? (
+							<p>{item.content.portion.amount} {item.content.portion.measureDescription} of [{item.content.foodDescription}]</p>
+						
+						) : null }
+					</Reorder.Item>
+				))}
 			</Reorder.Group>
 
 			{/* add new ingredient section */}
 			<div className='textInput shared additionalMargin'> 
-			<label>New Ingredient</label>
-			<div className='inputs'>
-				<input type='number'  placeholder='Amount' value={newIngredient.portion?.amount ?? ''} onChange={(event) => setNewIngredient({...newIngredient, portion: { measureId: newIngredient.portion?.measureId || "", measureDescription: newIngredient.portion?.measureDescription || "", amount: event.target.value }})}/>
-				<select value={newIngredient.portion?.measureDescription} onChange={(event) => setNewIngredient({...newIngredient, portion: { measureId: event.target.options[event.target.selectedIndex].id, measureDescription: event.target.value, amount: newIngredient.portion?.amount || null }})} >
-					<option value="" disabled hidden className='light'>Units</option>
-					{conversionFactorsAvailable.map((conversionFactor, index) => (
-					<option key={index} id={conversionFactor.measureId}>{conversionFactor.measureDescription}</option>
-					))}
-				</select>
-				<div className='activeSearchBar'> {/* ingredient search bar */}
-					<input type='text' className='mainInput' value={newIngredient.foodDescription} onChange={(event) => {updateNewIngredientName(event.target.value)}} placeholder='Ingredient Name'/>
-					<ul className={`${ingredientsAvailable.length == 0 ? 'hidden' : ''}`}>
-					{ingredientsAvailable.map((ingredient, index) => (
-							<li key={index} onClick={() => ingredientSelected(ingredient)}> {ingredient.foodDescription} </li>
-					))}
-					</ul>
+				<label>New Ingredient</label>
+
+				<input type='text' placeholder='Ingredient Label (optional)' value={newIngredient.label} onChange={(event) => setNewIngredient({...newIngredient, label: event.target.value})}/>
+
+				<div className='inputs'>
+					<input type='number'  placeholder='Amount' value={newIngredient.portion?.amount ?? ''} onChange={(event) => setNewIngredient({...newIngredient, portion: { measureId: newIngredient.portion?.measureId || "", measureDescription: newIngredient.portion?.measureDescription || "", amount: event.target.value }})}/>
+					<select value={newIngredient.portion?.measureDescription} onChange={(event) => setNewIngredient({...newIngredient, portion: { measureId: event.target.options[event.target.selectedIndex].id, measureDescription: event.target.value, amount: newIngredient.portion?.amount || null }})} >
+						<option value="" disabled hidden className='light'>Units</option>
+						{conversionFactorsAvailable.map((conversionFactor, index) => (
+						<option key={index} id={conversionFactor.measureId}>{conversionFactor.measureDescription}</option>
+						))}
+					</select>
+					<div className='activeSearchBar'> {/* ingredient search bar */}
+						<input type='text' className='mainInput' value={newIngredient.foodDescription} onChange={(event) => {updateNewIngredientName(event.target.value)}} placeholder='Ingredient Description'/>
+						<ul className={`${ingredientsAvailable.length == 0 ? 'hidden' : ''}`}>
+						{ingredientsAvailable.map((ingredient, index) => (
+								<li key={index} onClick={() => ingredientSelected(ingredient)}> {ingredient.foodDescription} </li>
+						))}
+						</ul>
+					</div>
 				</div>
-			</div>
 			</div>
 			<button className="darkText additionalMargin" onClick={() => addIngredient()}>Add Ingredient</button>
 

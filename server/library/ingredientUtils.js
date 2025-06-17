@@ -80,6 +80,7 @@ async function verifyObject (ingredient, includeNutrition = true) {
    if (!includeNutrition) {
       return {
          foodId: ingredientObject.foodId,
+         ...(ingredientObject.label && { label: ingredientObject.label }),
          foodDescription: ingredientObject.foodDescription,
          portion: {
             measureId: ingredientObject.portion.measureId,
@@ -104,6 +105,7 @@ async function verifyObject (ingredient, includeNutrition = true) {
    // make sure no extra fields are present
    return {
       foodId: ingredientObject.foodId,
+      ...(ingredientObject.label && { label: ingredientObject.label }),
       foodDescription: ingredientObject.foodDescription,
       portion: {
          measureId: ingredientObject.portion.measureId,

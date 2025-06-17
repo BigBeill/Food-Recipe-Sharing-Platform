@@ -52,7 +52,9 @@ export default function Recipe({recipe}: RecipeParams) {
          <ul>
             {recipeObject.ingredients.map((ingredient, index) => (
                <li key={index}>
-                  {ingredient.portion?.amount} {ingredient.portion?.measureDescription} of {ingredient.foodDescription}
+                  {ingredient.label ? ingredient.label :
+                     ingredient.portion?.amount + " " + ingredient.portion?.measureDescription + " of " + ingredient.foodDescription
+                  }
                </li>
             ))}
          </ul>

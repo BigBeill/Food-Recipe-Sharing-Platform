@@ -67,14 +67,14 @@
             }
 
             &:focus + label {
-                transform: translateY(-2.5rem);
+                transform: translateY(-2.4rem);
                 color: #34d399;
                 font-size: 0.75rem;
                 line-height: 1rem;
             }
 
             &:not(:placeholder-shown) + label{
-                transform: translateY(-2.5rem);
+                transform: translateY(-2.4rem);
                 font-size: 0.75rem;
             }    
         }
@@ -87,7 +87,7 @@
             font-size: 0.875rem;
             line-height: 1.25rem;
             transition: all 0.18s ease-in-out;
-            transform: translateY(-1.5rem);
+            transform: translateY(-2.1rem);
             color: #ffffff;
         }
     }

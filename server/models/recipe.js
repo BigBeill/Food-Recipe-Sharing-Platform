@@ -7,6 +7,7 @@ const recipeSchema = new mongoose.Schema({
     image: {type: String, enum: ['🧀', '🥞', '🍗', '🍔','🍞', '🥯', '🥐','🥨','🍗','🥓','🥩','🍟','🍕','🌭','🥪','🌮','🌯','🥙','🥚','🍳','🥘','🥣','🥗','🍿','🧂','🥫']},
     ingredients: [{
         foodId: Number,
+        label: String,
         portion: {
             measureId: Number,
             amount: Number
