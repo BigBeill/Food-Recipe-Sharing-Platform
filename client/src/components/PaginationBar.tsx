@@ -11,37 +11,43 @@ interface PaginationBarProps {
 
 export default function PaginationBar({ currentPage, totalPages, requestNewPage }: PaginationBarProps) {
 
+   function handlePageChange(newPage: number) {
+      console.log(`Current Page: ${currentPage}, Total Pages: ${totalPages}`);
+      if (newPage < 1 || newPage > totalPages) { return; }
+      requestNewPage(newPage);
+   }
+
    return (
       <div className="paginationBar">
-         <button onClick={() => requestNewPage(currentPage - 1)} > <FontAwesomeIcon icon={faArrowLeft} /> </button>
+         <button onClick={() => handlePageChange(currentPage - 1)} > <FontAwesomeIcon icon={faArrowLeft} /> </button>
          { currentPage == 4 ? (
             <>
-               <button onClick={() => requestNewPage(0)}> 1 </button>
+               <button onClick={() => handlePageChange(1)}> 1 </button>
             </>
          ): currentPage > 4 ? (
             <>
-               <button onClick={() => requestNewPage(0)}> 1 </button>
-               <button onClick={() => requestNewPage(1)}> 2 </button>
+               <button onClick={() => handlePageChange(1)}> 1 </button>
+               <button onClick={() => handlePageChange(2)}> 2 </button>
             </>
          ) : null }
          { currentPage > 5 ? (<p>...</p>) : null}
-         { currentPage > 2 ? (<button onClick={() => requestNewPage(currentPage - 2)}> {currentPage - 2} </button>) : null }
-         { currentPage > 1 ? (<button onClick={() => requestNewPage(currentPage - 1)}> {currentPage - 1} </button>) : null }
+         { currentPage > 2 ? (<button onClick={() => handlePageChange(currentPage - 2)}> {currentPage - 2} </button>) : null }
+         { currentPage > 1 ? (<button onClick={() => handlePageChange(currentPage - 1)}> {currentPage - 1} </button>) : null }
          <p className="primaryBlock">{currentPage}</p>
-         { currentPage < totalPages ?  (<button onClick={() => requestNewPage(currentPage + 1)}> {currentPage + 1} </button>) : null}
-         { currentPage < totalPages - 1 ? (<button onClick={() => requestNewPage(currentPage + 2)}> {currentPage + 2} </button>) : null }
+         { currentPage < totalPages ?  (<button onClick={() => handlePageChange(currentPage + 1)}> {currentPage + 1} </button>) : null}
+         { currentPage < totalPages - 1 ? (<button onClick={() => handlePageChange(currentPage + 2)}> {currentPage + 2} </button>) : null }
          { currentPage < totalPages - 4 ? (<p>...</p>) : null}
          { currentPage == (totalPages - 3)? (
             <>
-               <button onClick={() => requestNewPage(totalPages)}> {totalPages} </button>
+               <button onClick={() => handlePageChange(totalPages)}> {totalPages} </button>
             </>
          ) : currentPage < (totalPages - 3)? (
             <>
-              <button  onClick={() => requestNewPage(totalPages - 1)}> {totalPages - 1} </button>
-              <button onClick={() => requestNewPage(totalPages)}> {totalPages} </button> 
+              <button  onClick={() => handlePageChange(totalPages - 1)}> {totalPages - 1} </button>
+              <button onClick={() => handlePageChange(totalPages)}> {totalPages} </button> 
             </>
          ) : null}
-         <button onClick={() => requestNewPage(currentPage + 1)} > <FontAwesomeIcon icon={faArrowRight} /> </button>
+         <button onClick={() => handlePageChange(currentPage + 1)} > <FontAwesomeIcon icon={faArrowRight} /> </button>
       </div>
    )
 }

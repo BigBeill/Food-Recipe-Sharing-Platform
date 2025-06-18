@@ -126,7 +126,7 @@ export default function Notebook ({pageList, parentPageNumber = 1, requestNewPag
                {secondPage ? (<secondPage.content {...secondPage.props} />) : null}
             </div>
          </div>
-         <PaginationBar currentPage={(currentIndex + parentPageNumber)} totalPages={(pageCount / 2)} requestNewPage={handlePageChange} />
+         <PaginationBar currentPage={(currentIndex + parentPageNumber)} totalPages={Math.ceil(pageCount / 2)} requestNewPage={handlePageChange} />
       </div>
    )
 }
