@@ -13,19 +13,23 @@ const { runValidation } = require("../library/sanitationUtils");
 ---------- /register route ------------
 
 Type:
-   POST - registers a new user
+   POST — Registers a new user
 
-Requires 3 arguments from body:
+Expects 3 arguments in body:
    username: string
    email: string
    password: string
 
 Route description:
-   checks database for any data already being used by another account
-   encrypt password
-   create user profile and save in database
-   create json cookies
-   send json cookies to client
+   - Checks if the username or email is already registered
+   - Salts and hashes the password
+   - Creates a user object and saves it to the database
+   - Creates JSON Web Token cookies and sends them to the client
+
+Returns:
+   - 201 User was successfully registered
+   - 400 Invalid or missing fields
+   - 409 Username or email is already registered
 */
 router.post("/register",
    [
@@ -47,18 +51,23 @@ router.post("/register",
 ---------- /login route ------------
 
 Type:
-   POST - logs user in
+   POST — Logs user in
 
-Requires 3 arguments from body:
+Expects 3 arguments in body:
    username: string
    password: string
    rememberMe: boolean
 
 Route description:
-   get user data from database
-   encrypt password and compare to database
-   return json web token to client if valid password
-   set cookies max age if rememberMe is true
+   - Retrieves user data from the database
+   - Verifies the password matches the hashed password
+   - Creates JWT cookies and sends them to the client
+   - If rememberMe is true, sets cookie max-age to 30 days
+
+Returns:
+   - 200 User verified and cookies sent
+   - 400 Invalid or missing fields
+   - 401 Username or password is incorrect
 */
 router.post("/login", 
    [
@@ -79,14 +88,19 @@ router.post("/login",
 /*
 ---------- /refresh route ------------
 
-Type: 
-   POST - gets a new user token
+Type:
+   POST — Issues a new user token
 
-Requires 0 arguments from body
+Expects:
+   No arguments in body
 
 Route description:
-   check validity of refresh tokens saved in cookies
-   create and send new user token to client
+   - Checks validity of refresh tokens in the client’s cookies
+   - Creates and sends a new user token
+
+Returns:
+   - 200 New user token sent
+   - 400 Arguments were provided or valid refresh token not found
 */
 router.post("/refresh", 
    [
@@ -105,12 +119,17 @@ router.post("/refresh",
 ---------- /logout route ------------
 
 Type:
-   POST - logs user out
+   POST — Logs the current user out
 
-Requires 0 arguments from body
+Expects:
+   No arguments in body
 
 Route description:
-   removes cookies from clients local storage
+   - Removes all cookies from the client’s browser
+
+Returns:
+   - 200 Cookies successfully removed
+   - 400 Arguments were provided with this request
 */
 router.post("/logout",
    [

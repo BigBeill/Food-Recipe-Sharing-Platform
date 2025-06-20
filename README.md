@@ -1,14 +1,15 @@
 ## Table of Contents
 1. [Program Overview](#program-overview)
-2. [General Overview](#general-overview)
-3. [Setting Up the Project](#setting-up-the-project)
-4. [Database Explanation](#database-explanation)
-   - [MongoDB](#mongodb)
-   - [PostgreSQL](#postgresql)
-5. [Security Features](#security-features)
-6. [Custom JSON Object Structures](#custom-json-object-structures)
-7. [Component Explanation](#component-explanation)
-   - [Notebook.jsx Explanation](#notebook.jsx-explanation)
+   - [General Overview](#general-overview)
+   - [Setting Up the Project](#setting-up-the-project)
+   - [Database Design](#database-design)
+   - [Security Features](#security-features)
+   - [JSON Object Models](#json-object-models)
+2. [API Documentation](#api-documentation)
+   - [/Authentication Route](#/authentication-route)
+
+3. [Component Documentation](#component-documentation)
+   - [Notebook.tsx Documentation](#notebook.tsx-documentation)
 
 # Program Overview
 Hi! I'm Mackenzie Neill, a COIS student at Trent University. This is a personal project I've been working on to sharpen my web development skills beyond coursework. It's been a great learning experience in full-stack development, cybersecurity, and server management. If you have questions, feedback, or suggestions, feel free to reach out at mackenzie.neill.359@gmail.com.
@@ -29,7 +30,7 @@ Architecture:
 ### Setting Up the Project
  1. Open the `run_website.txt` file in the root directory.
  2. Set the URL to the path where you saved this project.
- 3. Save the file with a `.bat` extension (or respective file type if your not using windows).
+ 3. Save the file with a `.bat` extension (or respective file type if you're not using windows).
  4. Inside the `client` folder, create a `.env` file and add:
 ```
 VITE_SERVER_LOCATION=http://localhost:4000
@@ -44,6 +45,7 @@ LOCAL_ENVIRONMENT=true
 
 Note: The application will run, but no data will be accessible until the databases are properly configured. Refer to the [Database Explanation](#database-explanation) section for more details.
 
+## Database Design
 This project uses two databases:
 
 - **MongoDB** is used to store larger and more dynamic data in a remote, cloud-hosted environment.
@@ -104,12 +106,7 @@ Client side:
 Server side:
  - Passwords are salted and hashed before storage
 
-
-
-
-
-
-## Custom JSON Object Structures
+## JSON Object Models
 Any JSON object being sent from the server to the client should follow one of these patterns
 
 ### foodGroupObject
@@ -201,19 +198,266 @@ Any JSON object being sent from the server to the client should follow one of th
 }
 ```
 
+# API Documentation
+This project uses REST API's for communication between client and server, this section of the documentation is dedicated to how to use them.
+
+## /Authentication Routes
+
+### /register
+```
+Type:
+   POST - Registers a new user
+
+Expects 3 arguments in body:
+   username: string
+   email: string
+   password: string
+
+Route description:
+   - Checks if the username or email is already registered
+   - Salts and hashes the password
+   - Creates a user object and saves it to the database
+   - Creates JSON Web Token cookies and sends them to the client
+
+Returns:
+   - 201 user was successfully registered
+   - 400 invalid or missing arguments
+   - 409 username or email is already registered
+```
+
+### /login
+```
+Type:
+   POST - Logs user in
+
+Expects 3 arguments in body:
+   username: string
+   password: string
+   rememberMe: boolean
+
+Route description:
+   - Retrieves user data from the database
+   - Verifies the password matches the hashed password
+   - Creates JWT cookies and sends them to the client
+   - If rememberMe is true, sets cookie max-age to 30 days
+
+Returns:
+   - 200 user verified and cookies sent
+   - 400 invalid or missing arguments
+   - 401 username or password is incorrect
+```
+
+### /refresh
+```
+Type:
+   POST - Issues a new user token
+
+Expects 0 arguments in body
+
+Route description:
+   - Checks validity of refresh tokens in the client’s cookies
+   - Creates and sends a new user token
+
+Returns:
+   - 200 new user token sent
+   - 400 arguments were provided
+   - 401 no valid refresh token was found
+```
+
+### /logout
+```
+Type:
+   POST - Logs the current user out
+
+Expects 0 arguments in body
+
+Route description:
+   - Removes all cookies from the client’s browser
+
+Returns:
+   - 200 cookies successfully removed
+   - 400 arguments were provided with this request
+```
+
+## /ingredient Routes
+
+### /getObject
+```
+Type:
+   GET - Returns a completed ingredient object
+
+Expects 3 arguments in params:
+   foodId: number
+   measureId: number (optional)
+   amount: number (optional)
+
+Route description
+   - Grabs ingredientObject for foodID from the database
+   - If both measureId and amount have been provided, attach nutrition field to the ingredientObject
+   - Returns ingredientObject to client
+
+Returns:
+   - 200 ingredientObject returned
+   - 400 invalid or missing arguments
+
+payload: IngredientObject
+```
+
+### /list
+```
+Type:
+   GET - returns a list of ingredientObjects
+
+Expects 4 arguments in params:
+   foodDescription: string (optional)
+   foodGroupId: string (optional)
+   skip: number (optional, default 0)
+   limit: number (optional, default 15)
+
+Route description:
+   - Collects a list of ingredientObjects from the postgres database
+   - List will skip over the first {skip} number of results
+   - List will be limited to {limit} number of results
+   - Convert the contents of the list into an ingredientObject array
+
+Returns:
+   - 200 ingredientObject array returned
+   - 400 Invalid arguments
+
+payload: {
+   ingredientObjectArray: ingredientObject[],
+   count: number
+}
+```
+
+### /conversionOptions
+```
+Type:
+   GET - returns a list of conversion options for a given foodId
+
+Expects 1 argument in params:
+   foodId: number
+
+Route description:
+   - Gathers a list of all conversion types associated with the foodId
+
+Returns:
+   - 200 conversionObject array
+   - 400 invalid or missing arguments
+
+payload: conversionObject[]
+```
+
+### /groups
+```
+Type:
+   GET - returns a list of all food groups inside postgres
+
+Expects 0 arguments in params
+
+Method 'GET' description:
+   - Gathers a list of all food groups inside the postgres database
+
+Method 'GET' returns:
+   - 200 foodGroupObject array returned
+   - 400 arguments were provided with this request
+
+payload: foodGroupObject[]
+```
+
+## /recipe routes
+
+### /getObject
+```
+Type:
+   GET - returns a completed recipe object
+
+Expects 1 argument from params:
+   recipeId: integer
+
+Route description:
+   - Builds a completed recipeObject using the recipeId provided
+   - Checks to make sure the client has read access to the recipe
+   - Returns the competed recipe object
+
+Returns:
+   - 200 recipeObject returned
+   - 400 invalid or missing arguments
+   - 401 client does not have read access to recipeObject being requested
+
+payload: recipeObject
+```
+
+### /find
+```
+Type: 
+   GET - returns a list of recipes from the database
+
+Expects 5 arguments from body:
+   title: string (optional)
+   ingredients: number[] (optional)
+   limit: number (optional, default 6)
+   skip: number (optional, default 0)
+   count: boolean (optional, default false)
+
+Route description:
+   - Collect a list of recipeObjects based on title and ingredients provided
+   - Skip the first {skip} number or recipeObjects found
+   - Limit the list to {limit} number of recipeObjects
+   - Return the list to the client
+   - If {count} is true, also return the total number of recipeObjects that match search criteria
+
+Returns:
+   - 200 recipeObject array returned
+   - 400 invalid or missing arguments
+
+payload: {
+   recipeObjectArray: recipeObject[], 
+   count: number
+}
+```
+
+### /edit
+```
+Type:
+   POST - Creates a new recipe in the database
+   PUT - Makes changes to an already existing recipe in the databases
+
+Expects 6 arguments from body:
+   _id: mongoose.SchemaTypes.ObjectId (Only for PUT method)
+   title: string
+   description: string
+   image: string
+   ingredients: ingredientObject[]
+   instructions: string[]
+
+Route Description:
+   - Packages arguments into a single json object
+   - Checks the json object to make sure it forms a valid RecipeObject
+   - If using POST method, saves the recipeObject to the database with current user as the recipe owner
+   - If using PUT method, checks to make sure client has write pillages for recipe with _id provided
+   - If using PUT method, replaces contents of the recipeObject in database with contents of the new recipeObject
+
+Returns: 
+   - 201 recipe was added/changed in the database
+   - 400 invalid or missing arguments
+   - 401 client does not have write access to the recipeObject (no/wrong user signed in)
+```
 
 
-## Client Side Component Explanations
+
+
+# Component Documentation
 On the client side, some components in this project can be a bit tricky to use at first. This section explains how to use them properly.
 
-### Notebook.jsx Explanation 
-location: (client/src/components/Notebook.jsx)
+## Notebook.tsx Documentation
+location: client/src/components/Notebook.jsx
 
 The Notebook component simulates a flip-book style UI for content you wish to display to the user.
 It will display two react components at a time, inside the notebook pages (each page sharing the screen space width wise).
 Any additional react components will be accessible through a pagination bar under the notebook.
 
-#### Using Notebook.jsx
+### Using Notebook.tsx
 
 Notebook accepts the following 4 props:
 - componentList
@@ -237,15 +481,15 @@ Notebook accepts the following 4 props:
 
 Note: looking at the naming conventions, you may notice that some props reference pages and others reference components, a page is just a set of 2 components. So the 5th and 6th components should be displayed on page 3.
 
-#### componentList Structure
+### componentList Structure
 ComponentList is an array of JSON objects. Two of these objects make up a single page. Each object consists of two fields:
  - content: the react component that will be displayed on the notebook page
  - props: an object containing the props being passed to the content component (field name is what the content component reads the prop as)
 
-#### requestNewPage structure
+### requestNewPage structure
 This is a function that accepts one numerical prop. When the Notebook tries to display a page that it doesn't currently have access to the components for (like trying to display components 5 and 6 when only having access to 4 components) this function will be called, passing the page trying to be accessed as a numerical value prop. Its then this functions job to figure out how to handle accessing the page that's not currently accessible.
 
-#### Example Code
+### Example Code
 Some sample code for creating a paginated list while utilizing Notebook.jsx:
 
 Note: in this example RecipePreview.jsx is a regular react component that takes a recipe as a prop

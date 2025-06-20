@@ -7,18 +7,23 @@ const { advancedCheckExact, runValidation } = require("../library/sanitationUtil
 /*
 ------------ /getObject route ------------
 
-One method type:
+Type:
    GET - returns a completed recipe object
 
-Requires 1 argument from param:
+Expects 1 argument from params:
    recipeId: integer
 
-Method 'GET' description:
-   builds a completed recipe object using data provided in the request
-   returns the competed recipe object
+Route description:
+   - Builds a completed recipeObject using the recipeId provided
+   - Checks to make sure the client has read access to the recipe
+   - Returns the competed recipe object
 
-Method 'GET' returns:
-   json object containing recipe data
+Returns:
+   - 200 recipeObject returned
+   - 400 invalid or missing arguments
+   - 401 client does not have read access to recipeObject being requested
+
+payload: recipeObject
 */
 router.get("getObject/:recipeId",
    [
@@ -33,26 +38,32 @@ router.get("getObject/:recipeId",
 
 /*
 ------------ /find route ------------
+
 Type: 
-   GET - collects a list of recipes from the database
+   GET - returns a list of recipes from the database
 
-Requires 0 arguments from body:
+Expects 5 arguments from body:
+   title: string (optional)
+   ingredients: number[] (optional)
+   limit: number (optional, default 6)
+   skip: number (optional, default 0)
+   count: boolean (optional, default false)
 
-Optionally accepts 5 arguments from body:
-   title: string (assumed to be "")
-   ingredients: [mongoDB objectId] (assumed to be [])
-   limit: int (assumed to be 6)
-   skip: int (assumed to be 0)
-   count: boolean (assumed to be false)
+Route description:
+   - Collect a list of recipeObjects based on title and ingredients provided
+   - Skip the first {skip} number or recipeObjects found
+   - Limit the list to {limit} number of recipeObjects
+   - Return the list to the client
+   - If {count} is true, also return the total number of recipeObjects that match search criteria
 
-method description:
-   if title is provided, search for recipes with title containing title
-   if ingredients is provided, search for recipes that contain all ingredients in ingredients
-   return a list of recipes that match the search criteria
+Returns:
+   - 200 recipeObject array returned
+   - 400 invalid or missing arguments
 
-method returns:
-   recipeObjectArray: recipeObject array
-   count: int (if count is true)
+payload: {
+   recipeObjectArray: recipeObject[], 
+   count: number
+}
 */
 
 router.get('/find',
@@ -81,40 +92,29 @@ router.get('/find',
 /*
 ---------- /edit routes ------------
 
-Two Method types:
-   POST - saving new recipe
-   PUT - saving over existing recipe
+Type:
+   POST - Creates a new recipe in the database
+   PUT - Makes changes to an already existing recipe in the databases
 
-requires 5 arguments from body:
+Expects 6 arguments from body:
+   _id: mongoose.SchemaTypes.ObjectId (Only for PUT method)
    title: string
    description: string
    image: string
-   ingredients: [{
-      foodId: number, 
-      foodDescription: string, 
-      portion: {
-         measureId: number,
-         measureDescription: string,
-         amount: number
-      }
-   }]
-   instructions: [string]
+   ingredients: ingredientObject[]
+   instructions: string[]
 
-method 'PUT' requires 1 additional argument from body:
-   recipeId: mongoDB objectId (recipe id)
+Route Description:
+   - Packages arguments into a single json object
+   - Checks the json object to make sure it forms a valid RecipeObject
+   - If using POST method, saves the recipeObject to the database with current user as the recipe owner
+   - If using PUT method, checks to make sure client has write pillages for recipe with _id provided
+   - If using PUT method, replaces contents of the recipeObject in database with contents of the new recipeObject
 
-Method 'ALL' description:
-   put relevant data from body into a json object
-   check the newly created recipe schema to make sure all data inserted into the object is valid and forms a completed recipe schema
-   if successful, store the approved recipe schema inside req.recipeSchema
-
-Method 'POST' description:
-   save recipe schema to database.
-   add recipes Id to current users list of owned recipe
-
-Method 'PUT' description:
-   check to make sure the current user is the owner of the recipe with req.body._id as its id
-   use the json object in req.recipeSchema to save over the recipe with the id req.body._id
+Returns: 
+   - 201 recipe was added/changed in the database
+   - 400 invalid or missing arguments
+   - 401 client does not have write access to the recipeObject (no/wrong user signed in)
 */
 
 router.route('/edit')

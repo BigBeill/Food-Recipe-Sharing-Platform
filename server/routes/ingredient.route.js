@@ -6,23 +6,24 @@ const { runValidation } = require("../library/sanitationUtils");
 /*
 ------------ /getObject route ------------
 
-One method type:
-   GET - returns a completed ingredient object
+Type:
+   GET - Returns a completed ingredient object
 
-Requires 1 argument from param:
+Expects 3 arguments in params:
    foodId: integer
+   measureId: integer (optional)
+   amount: integer (optional)
 
-Optionally accepts 2 arguments from param:
-   measureId: integer (must be included if amount is included)
-   amount: integer (must be included if measureId is included)
+Route description
+   - Grabs ingredientObject for foodID from the database
+   - If both measureId and amount have been provided, attach nutrition field to the ingredientObject
+   - Returns ingredientObject to client
 
-Method 'GET' description:
-   builds a completed ingredient object using data provided in the request
-   adds ingredient nutrition if measureId and amount are provided
-   returns the competed ingredientObject
+Returns:
+   - 200 IngredientObject returned
+   - 400 Invalid or missing arguments
 
-Method 'GET' returns:
-   ingredientObject
+payload: IngredientObject
 */
 router.get('/getObject/:foodId/:measureId?/:amount?', 
    [
@@ -43,27 +44,29 @@ router.get('/getObject/:foodId/:measureId?/:amount?',
 /*
 ------------ /list route ------------
 
-One method type:
-   GET - returns a list of ingredients found in the canadian nutrient file
+Type:
+   GET - returns a list of ingredientObjects
 
-Requires 0 argument
+Expects 4 arguments in params:
+   foodDescription: string (optional)
+   foodGroupId: string (optional)
+   skip: number (optional, default 0)
+   limit: number (optional, default 15)
 
-Optionally accepts 4 arguments from param:
-   foodDescription: string
-   foodGroupId: string
-   skip: integer (default 0)
-   limit: integer (default 15)
+Route description:
+   - Collects a list of ingredientObjects from the postgres database
+   - List will skip over the first {skip} number of results
+   - List will be limited to {limit} number of results
+   - Convert the contents of the list into an ingredientObject array
 
+Returns:
+   - 200 ingredientObject array returned
+   - 400 Invalid arguments
 
-Method 'GET' description:
-   collects a list of ingredients from the canadian nutrient file that match contents of the foodDescription and foodGroupId fields
-   list will skip over the first 'skip' number of results
-   list will be limited to 'limit' number of results
-   convert the contents of the list into an ingredientObject array
-
-Method 'GET' returns:
-   ingredientObject array
-
+payload: {
+   ingredientObjectArray: ingredientObject[],
+   count: number
+}
 */
 router.get('/list',
    [
@@ -81,17 +84,21 @@ router.get('/list',
 
 /*
 ------------ /conversionOptions route ------------
-One method type:
+
+Type:
    GET - returns a list of conversion options for a given foodId
 
-Requires 1 argument from param:
+Expects 1 argument in params:
    foodId: integer
 
-method 'GET' description:
-   returns a list of all conversion types found for given foodId in the canadian nutrient file database
+Route description:
+   - Gathers a list of all conversion types associated with the foodId
 
-returns:
-   conversionOptionObject array (with measureDescription field attached)
+Returns:
+   - 200 conversionObject array
+   - 400 Invalid or missing arguments
+
+payload: conversionObject[]
 */
 router.get('/conversionOptions/:foodId',
    [
@@ -107,16 +114,19 @@ router.get('/conversionOptions/:foodId',
 /*
 ------------ /groups route ------------
 
-One method type:
-   GET - returns a list of all ingredient groups fond in the canadian nutrient file
+Type:
+   GET - returns a list of all food groups inside postgres
 
-Requires 0 arguments
+Expects 0 arguments in params
 
 Method 'GET' description:
-   returns a list of all ingredient groups found in the canadian nutrient file
+   - Gathers a list of all food groups inside the postgres database
 
 Method 'GET' returns:
-   foodGroupObject array
+   - 200 foodGroupObject array returned
+   - 400 Arguments were provided with this request
+
+payload: foodGroupObject[]
 */
 router.get('/groups', ingredientController.groups);
 

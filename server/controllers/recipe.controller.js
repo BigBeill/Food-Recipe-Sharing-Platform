@@ -7,7 +7,8 @@ const users = require("../models/user");
 
 
 /*
-
+finds a recipeObject based of id provided
+@route: GET /recipe/getObject
 */
 exports.getObject = async (req, res) => {
    

@@ -24,10 +24,10 @@ exports.register = async (req, res) => {
    // check the database for any existing User with the same username or email
    try {
       const searchUsername = await User.findOne({ username: { $regex: `^${username}$`} });
-      if (searchUsername) { return res.status(400).json({ error: "username already taken" }); }
+      if (searchUsername) { return res.status(409).json({ error: "username already taken" }); }
 
       const searchEmail = await User.findOne({ email: { $regex: `^${email}$`} });
-      if (searchEmail) { return res.status(400).json({ error: "email already taken" }); }
+      if (searchEmail) { return res.status(409).json({ error: "email already taken" }); }
    }
    catch (error) {
       console.log("\x1b[31m%s\x1b[0m", "authentication.controller.register failed... unable to search database for existing username or email");
@@ -89,10 +89,10 @@ exports.login = async (req, res) => {
          { username: new RegExp(`^${username}$`, 'i') },
          { _id: 1, username: 1, email: 1, bio: 1, hash: 1, salt: 1 }
       );
-      if (!user) return res.status(400).json({ error: "username not found" });
+      if (!user) return res.status(401).json({ error: "username not found" });
 
       // check if password is correct
-      if (!passwordUtils.correctPassword(password, user.hash, user.salt)) { return res.status(400).json({ error: "incorrect password" }); }
+      if (!passwordUtils.correctPassword(password, user.hash, user.salt)) { return res.status(401).json({ error: "incorrect password" }); }
 
       // create new refresh tokens
       const tokens = createToken(user);
