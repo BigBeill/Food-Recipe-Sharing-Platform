@@ -6,10 +6,12 @@
    - [Security Features](#security-features)
    - [JSON Object Models](#json-object-models)
 2. [API Documentation](#api-documentation)
-   - [/Authentication Route](#/authentication-route)
-
+   - [/authentication Routes](#authentication-routes)
+   - [/ingredient Routes](#ingredient-routes)
+   - [/recipe Routes](#recipe-routes)
+   - [/user Routes](#user-routes)
 3. [Component Documentation](#component-documentation)
-   - [Notebook.tsx Documentation](#notebook.tsx-documentation)
+   - [Notebook.tsx Documentation](#notebooktsx-documentation)
 
 # Program Overview
 Hi! I'm Mackenzie Neill, a COIS student at Trent University. This is a personal project I've been working on to sharpen my web development skills beyond coursework. It's been a great learning experience in full-stack development, cybersecurity, and server management. If you have questions, feedback, or suggestions, feel free to reach out at mackenzie.neill.359@gmail.com.
@@ -281,7 +283,7 @@ Returns:
 
 ## /ingredient Routes
 
-### /getObject
+### /getObject/:foodId/:measureId?/:amount?
 ```
 Type:
    GET - Returns a completed ingredient object
@@ -308,7 +310,7 @@ payload: IngredientObject
 Type:
    GET - returns a list of ingredientObjects
 
-Expects 4 arguments in params:
+Expects 4 arguments in query:
    foodDescription: string (optional)
    foodGroupId: string (optional)
    skip: number (optional, default 0)
@@ -330,7 +332,7 @@ payload: {
 }
 ```
 
-### /conversionOptions
+### /conversionOptions/:foodId
 ```
 Type:
    GET - returns a list of conversion options for a given foodId
@@ -353,7 +355,7 @@ payload: conversionObject[]
 Type:
    GET - returns a list of all food groups inside postgres
 
-Expects 0 arguments in params
+Expects 0 arguments in query
 
 Method 'GET' description:
    - Gathers a list of all food groups inside the postgres database
@@ -365,9 +367,9 @@ Method 'GET' returns:
 payload: foodGroupObject[]
 ```
 
-## /recipe routes
+## /recipe Routes
 
-### /getObject
+### /getObject/:recipeId
 ```
 Type:
    GET - returns a completed recipe object
@@ -393,7 +395,7 @@ payload: recipeObject
 Type: 
    GET - returns a list of recipes from the database
 
-Expects 5 arguments from body:
+Expects 5 arguments from query:
    title: string (optional)
    ingredients: number[] (optional)
    limit: number (optional, default 6)
@@ -444,6 +446,167 @@ Returns:
    - 401 client does not have write access to the recipeObject (no/wrong user signed in)
 ```
 
+## /user Routes
+
+### /getObject/:userId?/:relationship?
+```
+Type:
+   GET - return a userObject from the database
+
+Expects 2 arguments from params:
+   userId: mongoose object id (optional)
+   relationship: boolean (optional, default false)
+
+Route Description:
+   - Gets a userObject based on userId provided
+   - If userId is not provided, get the userObject associated with the current signed in user
+   - If {relationship} is true, attach the relationship field to the userObject
+   - Reminder: the relationship field represents how the userObject feels about the current user
+
+Returns:
+   - 200 userObject returned
+   - 400 invalid arguments
+   - 401 userId and access token missing or relationship was requested without an access token
+
+payload: userObject
+```
+
+### /find
+```
+Type:
+   GET - return a list of users from the database
+
+Expects 6 arguments from query:
+   username: string (optional)
+   email: string (optional)
+   limit: number (optional, default 6)
+   skip: number (optional, default 0)
+   relationship: number (optional)
+   count: boolean (optional, default false)
+
+Route description:
+   - Collects a list of all users in the database that contain {username} and {email}
+   - If relationship field exists, only include userObjects that the current user has the given relationship with
+   - Reminder: 1 = friends, 2 = received friend requests, 3 = sent friend requests
+   - Skip over the first {skip} number of results found
+   - Limit the list size to the {limit} number of objects
+   - Return the list to the client
+   - If {count} is true, return the total number of items matching search criteria alongside count
+
+Returns: 
+   - 200 userObject array returned
+   - 400 missing or invalid arguments
+   - 401 relationship filed exists but no access token found
+
+payload: {
+   userObjectArray: userObject[]
+   count: number
+}
+```
+
+### /folder
+```
+Type: 
+   GET - return a list of folders from the database
+
+Expects 4 arguments from query:
+   folderId: mongoose object id (optional)
+   skip: number (optional, default 0)
+   limit: number (optional, default 6)
+   count: boolean (optional, default false)
+
+Route description:
+   - If folderId does not exits, Collects a list of all folders owned by the current user
+   - If folderId field exists, Collect a list of all folders that have {folderId} in the parent folder field
+   - Skip the first {skip} number of folderObjects
+   - Limit the list to the {limit} number of folders
+   - Return list to client
+   - If count is true, return the number of folderObjects that meet search criteria
+
+Returns:
+   - 200 folderObject array returned
+   - 400 invalid arguments
+   - 401 access token could not be found
+
+payload: {
+   folderObjectArray: folderObject[]
+   count: number
+}
+```
+
+### /updateAccount
+```
+Type:
+   POST - change the userObject saved in the database for current user
+
+Expects 3 arguments from body:
+   username: string
+   email: string
+   bio: string (optional)
+
+Route description:
+   - Make sure the username or email doesn't already exist in database
+   - Update usersObject associated with the signed in user inside the database
+
+Returns:
+   - 200 userObject associated with signed in user has been updated
+   - 400 missing or invalid arguments
+   - 401 access token could not be found
+```
+
+### /sendFriendRequest
+```
+Type:
+   POST - creates a friend request in server database
+
+Expects 1 arguments from body:
+   userId: mongoose object id
+
+Route description:
+   creates a friend request in the database, setting the current user as the sender and the {userId} as the receiver
+
+Returns:
+   - 201 friendRequestObject created and sent saved to the database
+   - 400 missing or invalid arguments
+   - 401 access token could not be found
+```
+
+### /processFriendRequest
+```
+Type:
+   POST - logs user out
+
+Expects 2 arguments from body:
+   requestId: mongoose object id
+   accept: boolean
+
+Route description:
+   - Checks the validity of the friend request
+   - If accept is true, create a friendship object between the sender and receiver of the request
+   - If accept is false, delete the friend request from the database
+
+Returns:
+   - 201 friendRequestObject has been deleted and friendObject has been created in the database
+   - 400 missing or invalid arguments
+   - 401 current user does not have write access to the friendRequestObject
+```
+
+### /deleteFriendRequest
+```
+Type:
+   POST - deletes a friendship object from the database
+
+Expects 1 argument from body:
+   relationshipId: mongoose object id
+
+Route description:
+   - Deletes the friendship object from the database
+
+Return:
+   - 200 friendshipObject removed from databases
+   - 400 missing or invalid arguments
+   - 401 current user doesn't have write access to the friendship object
+```
 
 
 
