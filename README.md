@@ -14,7 +14,7 @@
    - [Notebook.tsx Documentation](#notebooktsx-documentation)
 
 # Program Overview
-Hi! I'm Mackenzie Neill, a COIS student at Trent University. This is a personal project I've been working on to sharpen my web development skills beyond coursework. It's been a great learning experience in full-stack development, cybersecurity, and server management. If you have questions, feedback, or suggestions, feel free to reach out at mackenzie.neill.359@gmail.com.
+Hi! My name is Mackenzie Neill, I'm a graduating COIS student at Trent University. This is a personal project I've been working on to sharpen my web development skills beyond coursework. It's been a great learning experience in full-stack development, cybersecurity, and server management. If you have questions, feedback, or suggestions, feel free to reach out at mackenzie.neill.359@gmail.com.
 
 ## General Overview
 Author: Mackenzie Neill 
