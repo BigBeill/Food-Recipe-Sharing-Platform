@@ -41,9 +41,6 @@ app.use(logGeneralData)
 const authenticationRouter = require('./routes/authentication.route')
 app.use('/authentication', authenticationRouter)
 
-const adminRouter = require('./routes/admin.route')
-app.use('/admin', adminRouter)
-
 const ingredientRouter = require('./routes/ingredient.route')
 app.use('/ingredient', ingredientRouter)
 

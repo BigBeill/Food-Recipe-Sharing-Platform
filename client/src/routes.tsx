@@ -10,7 +10,6 @@ const Profile = lazy(() => import('./pages/Profile.tsx'))
 const Register = lazy(() => import('./pages/Register.tsx'))
 const Recipe = lazy(() => import('./pages/Recipe.tsx'))
 const SearchUser = lazy(() => import('./pages/SearchUser.tsx'))
-const Admin = lazy(() => import('./pages/Admin.tsx'))
 const NotFound = lazy(() => import('./pages/NotFound.tsx'))
 
 import Loading from './components/Loading.tsx'
@@ -61,10 +60,6 @@ export const routes = [
   {
     path: '/ingredients/:groupID?/:ingredientID?',
     element: withSuspense(Ingredients),
-  },
-  {
-    path: '/admin',
-    element: withSuspense(Admin),
   },
   {
     path: '*',
