@@ -4,55 +4,7 @@ import '../styles/componentSpecific/notebook.scss';
 import PageObject from '../interfaces/PageObject';
 import PaginationBar from './PaginationBar';
 
-/*
-using notebook component:
-
-a page that is calling notebook should be setup the following way...
-
-2 main component types:
-   parentComponent (the component that will be exported)
-   childComponents (contains the content that will be displayed on each page)
-
-parentComponent should be setup as follows:
-
-export default function ParentComponent() {
-
-   //all global javascript needs to be put here
-   const [exampleVariable, setExampleVariable] = useState()
-   function exampleFunction() {}
-
-   //continue reading documentation for pageList explanation
-   const pageList = [{}]
-
-   //no html should appear in the parent
-   return <Notebook pageList={pageList} />
-}
-
-childComponents are setup as normal components:
-
-function ChildComponent({text, setText, eventHandler}) {
-   //treat this as a normal component
-}
-    
-
-
-their are 4 props that can be given to Notebook.jsx by the parent component:
-   pageList: an array of json files (required)
-   parentPageNumber: a number that will be added to the page number
-   requestNewPage: a function that will be called when the last page is reached
-   pageCount: the total number of possible pages given to the notebook
-
-the pageList is an array of json objects
-each json file contains a childComponent and its props and should be setup as follows:
-{
-   content: ChildComponent,
-   props: {
-      search: exampleVariable,
-      setSearch: setExampleVariable, 
-      searchFunction: exampleFunction
-   }
-}
-*/
+// LOOK AT README.MD FILE IN THE ROOT FOLDER FOR INSTRUCTIONS ON HOW TO USE THIS COMPONENT
 
 interface NotebookProps {
    pageList: PageObject[];

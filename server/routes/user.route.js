@@ -8,20 +8,25 @@ const { runValidation } = require("../library/sanitationUtils");
 /*
 ------------ /getObject route ------------
 
-requires 0 arguments from query:
+Type:
+   GET - return a userObject from the database
 
-optionally accepts 2 argument from query:
-   userId: mongoose object id
-   relationship: boolean (assumed to be false)
+Expects 2 arguments from params:
+   userId: mongoose object id (optional)
+   relationship: boolean (optional, default false)
 
-route will:
-   returns a complete userObject for userId provided in params
-   if no userId is provided, it will return the userObject for the currently logged in user
-   if {relationship} is true, it will add a relationship field to the userObject
+Route Description:
+   - Gets a userObject based on userId provided
+   - If userId is not provided, get the userObject associated with the current signed in user
+   - If {relationship} is true, attach the relationship field to the userObject
+   - Reminder: the relationship field represents how the userObject feels about the current user
 
-returns:
-   userObject;
-   userObject.relationship ( if relationship is true)
+Returns:
+   - 200 userObject returned
+   - 400 invalid arguments
+   - 401 userId and access token missing or relationship was requested without an access token
+
+payload: userObject
 */
 router.get("/getObject/:userId?/:relationship?",
    [
@@ -39,31 +44,34 @@ router.get("/getObject/:userId?/:relationship?",
 ---------- /find route ------------
 
 Type:
-   GET - get a list of users
+   GET - return a list of users from the database
 
-Requires 0 arguments from body:
-
-Optionally accepts 5 arguments from body:
-   username: string (assumed to be "")
-   email: string (assumed to be "")
-   limit: int (assumed to be 6)
-   skip: int (assumed to be 0)
-   relationship: int (assumed to be 0):
-      0: all users
-      1: friends
-      2: received friend requests
-      3: sent friend requests
-   count: boolean (assumed to be false)
+Expects 6 arguments from query:
+   username: string (optional)
+   email: string (optional)
+   limit: number (optional, default 6)
+   skip: number (optional, default 0)
+   relationship: number (optional)
+   count: boolean (optional, default false)
 
 Route description:
-   get a count of all users in the database that match the search criteria
-   gathers a list of users of size {limit} that match the search criteria
-   skip over the first {skip} results found
-   return list and count to client
+   - Collects a list of all users in the database that contain {username} and {email}
+   - If relationship field exists, only include userObjects that the current user has the given relationship with
+   - Reminder: 1 = friends, 2 = received friend requests, 3 = sent friend requests
+   - Skip over the first {skip} number of results found
+   - Limit the list size to the {limit} number of objects
+   - Return the list to the client
+   - If {count} is true, return the total number of items matching search criteria alongside count
 
 Returns: 
-   userObjectList: userObject Array (including relationship fields)
-   count: int (if count is true)
+   - 200 userObject array returned
+   - 400 missing or invalid arguments
+   - 401 relationship filed exists but no access token found
+
+payload: {
+   userObjectArray: userObject[]
+   count: number
+}
 */
 router.get("/find",
    [
@@ -87,32 +95,32 @@ router.get("/find",
 /*
 ---------- /folder route ------------
 
-type: 
-   GET - get a list of folders
+Type: 
+   GET - return a list of folders from the database
 
-requires 0 arguments from body
-
-Optionally accepts 4 arguments from body:
-   skip: int (assumed to be 0)
-   limit: int (assumed to be 6)
-   folderId: mongoose object id
-   count: boolean (assumed to be false)
+Expects 4 arguments from query:
+   folderId: mongoose object id (optional)
+   skip: number (optional, default 0)
+   limit: number (optional, default 6)
+   count: boolean (optional, default false)
 
 Route description:
-   gets a list of all folders in the database that are owned by the user that is currently logged in
-   if folderId is provided, get the folders that are inside the folder with {folderId}
-   if count is true, return the count of folders that match the search criteria
+   - If folderId does not exits, Collects a list of all folders owned by the current user
+   - If folderId field exists, Collect a list of all folders that have {folderId} in the parent folder field
+   - Skip the first {skip} number of folderObjects
+   - Limit the list to the {limit} number of folders
+   - Return list to client
+   - If count is true, return the number of folderObjects that meet search criteria
 
 Returns:
-   folders:
-      [
-         {
-               _id: mongoose object id
-               name: string
-         }
-      ]
-   count: int (if count is true)
+   - 200 folderObject array returned
+   - 400 invalid arguments
+   - 401 access token could not be found
 
+payload: {
+   folderObjectArray: folderObject[]
+   count: number
+}
 */
 router.get("/folder",
    [
@@ -137,19 +145,21 @@ router.get("/folder",
 ---------- /updateAccount route ------------
 
 Type:
-   POST - change user profile data saved in database
+   POST - change the userObject saved in the database for current user
 
-Requires 2 arguments from body:
+Expects 3 arguments from body:
    username: string
    email: string
-
-Optionally takes 1 argument from body:
-   bio: string
+   bio: string (optional)
 
 Route description:
-   make sure username and email doesn't already exist in database
-   update users profile data in database
-   create and send new cookies to client
+   - Make sure the username or email doesn't already exist in database
+   - Update usersObject associated with the signed in user inside the database
+
+Returns:
+   - 200 userObject associated with signed in user has been updated
+   - 400 missing or invalid arguments
+   - 401 access token could not be found
 */
 router.post("/updateAccount", 
    [
@@ -168,11 +178,16 @@ router.post("/updateAccount",
 Type:
    POST - creates a friend request in server database
 
-Requires 1 arguments from body:
+Expects 1 arguments from body:
    userId: mongoose object id
 
 Route description:
-   creates a friend request in the database, setting the current user as the sender and {receiver} as the receiver
+   creates a friend request in the database, setting the current user as the sender and the {userId} as the receiver
+
+Returns:
+   - 201 friendRequestObject created and sent saved to the database
+   - 400 missing or invalid arguments
+   - 401 access token could not be found
 */
 router.post("/sendFriendRequest", 
    [
@@ -189,14 +204,19 @@ router.post("/sendFriendRequest",
 Type:
    POST - logs user out
 
-Requires 2 arguments from body:
+Expects 2 arguments from body:
    requestId: mongoose object id
    accept: boolean
 
 Route description:
-   checks the validity of the friend request
-   if accept is true, create a friendship object between the sender and receiver of the request
-   if accept is false, delete the friend request from the database
+   - Checks the validity of the friend request
+   - If accept is true, create a friendship object between the sender and receiver of the request
+   - If accept is false, delete the friend request from the database
+
+Returns:
+   - 201 friendRequestObject has been deleted and friendObject has been created in the database
+   - 400 missing or invalid arguments
+   - 401 current user does not have write access to the friendRequestObject
 */
 router.post("/processFriendRequest", 
    [
@@ -217,11 +237,16 @@ router.post("/processFriendRequest",
 Type:
    POST - deletes a friendship object from the database
 
-Requires 1 argument from body:
+Expects 1 argument from body:
    relationshipId: mongoose object id
 
 Route description:
-   deletes the friendship object from the database
+   - Deletes the friendship object from the database
+
+Return:
+   - 200 friendshipObject removed from databases
+   - 400 missing or invalid arguments
+   - 401 current user doesn't have write access to the friendship object
 */
 router.post("/deleteFriend", 
    [
