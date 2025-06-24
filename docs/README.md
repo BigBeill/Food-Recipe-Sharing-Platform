@@ -7,14 +7,19 @@ Beill's Greenhouse is a personalized project created by Mackenzie Neill, a gradu
 Author: Mackenzie Neill 
 Start date: December 15th, 2023
 
-Tech Stack
-   - Frontend: React (TypeScript) 
-   - Backend: Node.js
-   - Database: MongoDB (cloud-hosted) and PostgreSQL (local)
+### Features
+   - Create, read, update, and delete recipes
+   - User authentication (JWT, bcrypt password hashing)
+   - Responsive design (works on desktop + mobile)
+   - Deployed on Vercel + Render
+   - RESTful API design
 
-Architecture:
-   - frontend and backend communication: Client-server model
-   - file organization: model-view-controller
+### Tech Stack
+   - Frontend: React, TypeScript, SCSS, Vite
+   - Backend: Node.js, Express.js
+   - Database: MongoDB, PostgreSQL
+   - Auth: JSON Web Tokens (JWT), bcrypt
+   - Deployment: Vercel (frontend), Render (backend)
 
 ## Security Features
    - HTTPS connection (only on cloud deployment)
