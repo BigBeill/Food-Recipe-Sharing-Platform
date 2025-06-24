@@ -25,7 +25,7 @@ Returns:
 
 payload: recipeObject
 */
-router.get("getObject/:recipeId",
+router.get("/getObject/:recipeId",
    [
       param("recipeId").toInt().isInt({ min: 1 }).withMessage("recipeId must be a positive integer"),
       checkExact()

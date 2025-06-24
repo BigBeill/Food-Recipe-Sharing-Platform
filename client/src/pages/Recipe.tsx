@@ -18,7 +18,7 @@ export default function Recipe({recipe}: RecipeParams) {
       if (recipe) { setRecipeObject(recipe); }
       else if (!recipeId){ navigate("/home"); }
       else {
-         axios({ method:'get', url:`/recipe/getObject${recipeId}` })
+         axios({ method:'get', url:`/recipe/getObject/${recipeId}` })
          .then((Response) => { setRecipeObject(Response.data); })
          .catch((error) => { console.error(error); });
       }
@@ -48,6 +48,10 @@ export default function Recipe({recipe}: RecipeParams) {
             </>
             : null }
          </ul>
+
+         <h2>Description</h2>
+         <p>{recipeObject.description}</p>
+
          <h2>Ingredients</h2>
          <ul>
             {recipeObject.ingredients.map((ingredient, index) => (
