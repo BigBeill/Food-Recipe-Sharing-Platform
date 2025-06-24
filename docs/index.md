@@ -88,4 +88,4 @@ MONGO_DB_PASSWORD=
 Finally, setup Postgres:
 1. Go to `/canadian-nutrient-file/DB_Setup.md` for instructions and code.
 
-Run the `.bat` file and your good to go
+Run the `.bat` file and you're good to go
