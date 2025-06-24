@@ -11,9 +11,10 @@ const setCookieFlags = require ('./middleware/auth/cookieFlags');
 require("dotenv").config();
 
 // define cors settings
+const allowedOrigins = process.env.FRONTEND_URLS.split(',').map(url => url.trim());
 const corsOptions = {
    origin: function (origin, callback) {
-      if (origin && origin === process.env.FRONTEND_URL) {
+      if (origin && allowedOrigins.includes(origin)) {
          callback(null, true);
       } else {
          console.warn('CORS request from origin not allowed:', origin);
