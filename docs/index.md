@@ -51,14 +51,14 @@ The MongoDB database is cloud-hosted.
 
 > **Note:** MongoDB supports nested JSON objects, which don’t translate cleanly into relational diagrams. Any field labeled “nested” refers to embedded subdocuments, not independent objects.
 
-![MongoDB Diagram](/readmeImages/relationalDiagramMongoDb.png)
+![MongoDB Diagram](./database/diagrams/relationalDiagramMongoDb.png)
 
 ### PostgreSQL
 This is the PostgreSQL server, containing data from the Canadian Nutrient File. The software runs locally on the machine you're using to run the server and requires manual setup. Setup instructions can be found in:
 
 `/canadian-nutrient-file/DB_Setup.md`
 
-![PostgreSQL Diagram](/readmeImages/relationalDiagramPostgreSQL.png)
+![PostgreSQL Diagram](./database/diagrams/relationalDiagramPostgreSQL.png)
 
 ## Setting Up the Project
 Some simple steps for setting this project up in your own local environment:
