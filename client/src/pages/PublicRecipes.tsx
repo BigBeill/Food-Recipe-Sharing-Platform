@@ -14,46 +14,49 @@ export default function PublicRecipes() {
 
    const [searchParams, setSearchParams] = useSearchParams();
    const pageNumber: number = Number(searchParams.get('pageNumber')) || 1;
+   const titleParam: string | null = searchParams.get('title') || null;
    const foodIdParam: string | null = searchParams.get('foodIdList') || null;
    const foodIdList: number[] | null = foodIdParam ? foodIdParam.split(',').map(Number) : null;
 
+   // state variables for saving the current search parameters
    const [recipeTitle, setRecipeTitle] = useState<string>('');
    const [ingredientList, setIngredientList] = useState<IngredientObject[]>([]);
 
+   // state variables for saving the current recipe information
    const [recipeList, setRecipeList] = useState<RecipeObject[]>([]);
    const [recipeCount, setRecipeCount] = useState<number>(0);
 
+   // state variable for saving the actual components being sent to the notebook
    const [pageList, setPageList] = useState<PageObject[]>([]);
 
    // send parameters to the url
-   function handleSubmit() {
+   function handleSubmit(title: string, ingredients: IngredientObject[]) {
+
       // create params object
       let newParams: {title?: string, foodIdList?: string } = {};
-      if (recipeTitle) { newParams.title = recipeTitle; } // add the title field if applicable
-      if (ingredientList.length > 0) {  // add the foodIdList field if applicable
-         const foodIdList: string[] = ingredientList.map((ingredient) => { return ingredient.foodId;  }); // get a list of filed ids
+      if (title) { newParams.title = title; } // add the title field if applicable
+
+      if (ingredients.length > 0) {  // add the foodIdList field if applicable
+         const foodIdList: string[] = ingredients.map((ingredient) => { return ingredient.foodId;  }); // get a list of food ids
          newParams.foodIdList = foodIdList.join(','); // save them in the url as a comma separated string
       }
+      console.log("newParams:", newParams);
       setSearchParams(newParams); // update the url with the new params
+
+      setRecipeList([]); // clear the recipe list
+      setRecipeCount(0); // reset the recipe count
    }
 
-   // handle fetching page contents
-   function handlePageChange(newPage: number) {
-
-      const newParam = new URLSearchParams(searchParams.toString());
-      newParam.set('pageNumber', newPage.toString());
-      setSearchParams(newParam);
-
-      setRecipeList([]);
-
-      axios({method: 'get', url: `recipe/find?limit=${newPage == 1 ? 1 : 2}&skip=${newPage == 1 ? 0 : (((newPage - 1) * 2) - 1)}&count=true`})
+   // handle fetching any content needed from the server
+   function fetchRecipes(requestPage: number) {
+      axios({method: 'get', url: `recipe/find?${recipeTitle? `title=${recipeTitle }&` : "" }limit=${requestPage == 1 ? 1 : 2}&skip=${requestPage == 1 ? 0 : (((requestPage - 1) * 2) - 1)}&count=true`})
       .then((response) => {
          if (!response.count) { 
             console.error("server failed to return count"); 
             return;
          }
          const maxPages = Math.round(((response.count + 1) / 2));
-         if (maxPages >= newPage) {
+         if (maxPages >= requestPage) {
             setRecipeList(response.recipeObjectArray);
             setRecipeCount(response.count);
          }
@@ -61,19 +64,26 @@ export default function PublicRecipes() {
       });
    }
 
+   // handle the logic for changing the page
+   function handlePageChange(newPage: number) {
+      const newParam = new URLSearchParams(searchParams.toString());
+      newParam.set('pageNumber', newPage.toString());
+      setSearchParams(newParam);
+
+      fetchRecipes(newPage); // fetch the recipes for the new page
+   }
+
    // on object mount, add any ingredients inside the url to the ingredientList
    useEffect(() => {
+      if (titleParam) { setRecipeTitle(titleParam); } // set the recipe title if it exists
       if(!foodIdList) { return; } // if there are no foodIds, do nothing
       foodIdList?.forEach((foodId) => {
          axios({method: 'get', url: `ingredient/getObject/${foodId}`})
          .then(response => { setIngredientList((list: IngredientObject[]) => [...list, response]); });
       });
-   }, []);
 
-   // when ingredientList changes, request new recipeList
-   useEffect(() => {
-      handlePageChange(pageNumber);
-   }, [ingredientList]);
+      fetchRecipes(pageNumber); // fetch the recipes for the current page
+   }, [searchParams]);
 
    // useEffect for converting contents of recipeList into a PageObject array and saving it to pageList
    useEffect(() => {
@@ -101,22 +111,21 @@ export default function PublicRecipes() {
       })
 
       setPageList(newPageList);
-   }, [recipeList]);
-
+   }, [recipeList, recipeTitle, ingredientList, pageNumber]);
+   
    return <Notebook pageList={pageList} parentPageNumber={pageNumber} requestNewPage={handlePageChange} pageCount={recipeCount + 1}/>
 }
 
 interface MainPageProps {
-   recipeTitle: string;
-   setRecipeTitle: React.Dispatch<React.SetStateAction<string>>;
-   ingredientList: IngredientObject[];
-   setIngredientList: React.Dispatch<React.SetStateAction<IngredientObject[]>>;
-   handleSubmit: () => void;
+   handleSubmit: (recipeTitle: string, ingredientList: IngredientObject[]) => void;
 }
 
-function MainPage({recipeTitle, setRecipeTitle, ingredientList, setIngredientList, handleSubmit}: MainPageProps) {
-   
+function MainPage({handleSubmit}: MainPageProps) {
 
+   // variables for saving whats currently being typed into the text inputs
+   const [recipeTitle, setRecipeTitle] = useState<string>('');
+   const [ingredientList, setIngredientList] = useState<IngredientObject[]>([]);
+   
    const [newIngredient, setNewIngredient] = useState<IngredientObject>({foodId:"", foodDescription:""});
    const [ingredientsAvailable, setIngredientsAvailable] = useState<IngredientObject[]>([]);
 
@@ -156,6 +165,10 @@ function MainPage({recipeTitle, setRecipeTitle, ingredientList, setIngredientLis
       setIngredientList(tempArray);
    }
 
+   function submitChanges() {
+      handleSubmit(recipeTitle, ingredientList);
+   }
+
    return (
       <div className='standardPage'>
          <h1>Public Recipes</h1>
@@ -192,7 +205,7 @@ function MainPage({recipeTitle, setRecipeTitle, ingredientList, setIngredientLis
             ))}
          </ul>
 
-         <button className='additionalMargin' onClick={handleSubmit}> search </button>
+         <button className='additionalMargin' onClick={submitChanges}> search </button>
       </div>
    )
 }
