@@ -10,7 +10,7 @@ function setCookieFlags(req, res, next) {
 			httpOnly: true,
 			secure: process.env.LOCAL_ENVIRONMENT == 'true' ? false : true, // Use secure cookies in production
 			sameSite: process.env.LOCAL_ENVIRONMENT == 'true' ? 'strict': 'none', // Use 'none' for cross-site cookies in production
-			...options,                // Keep any custom options passed by route handlers
+			...options, // Keep any custom options passed by route handlers
 		};
 
 		// Call the original res.cookie to actually set the cookie

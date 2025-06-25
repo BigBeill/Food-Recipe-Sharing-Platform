@@ -122,15 +122,15 @@ exports.login = async (req, res) => {
 
 exports.refresh = async (req, res) => {
 
-   if (!req.cookies) { return res.status(403).json({ error: "no cookies found" }); }
+   if (!req.cookies) { return res.status(401).json({ error: "no cookies found" }); }
    const refreshToken = req.cookies.refreshToken;
-   if (!refreshToken) { return res.status(403).json({ error: "no refresh token found" }); }
+   if (!refreshToken) { return res.status(401).json({ error: "no refresh token found" }); }
    
    try {
       // make sure refresh token exists in database
       const databaseToken = await RefreshToken.findOne({ token: refreshToken });
       if (!databaseToken)
-         return res.status(403).json({ error: "invalid refresh token" });
+         return res.status(401).json({ error: "invalid refresh token" });
    
       // validate the refresh token and send a new access token
       const validToken = verify(refreshToken, process.env.SESSION_SECRET);
