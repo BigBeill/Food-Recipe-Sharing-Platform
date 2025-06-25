@@ -76,14 +76,17 @@ export default function PublicRecipes() {
    // on object mount, add any ingredients inside the url to the ingredientList
    useEffect(() => {
       if (titleParam) { setRecipeTitle(titleParam); } // set the recipe title if it exists
-      if(!foodIdList) { return; } // if there are no foodIds, do nothing
-      foodIdList?.forEach((foodId) => {
-         axios({method: 'get', url: `ingredient/getObject/${foodId}`})
-         .then(response => { setIngredientList((list: IngredientObject[]) => [...list, response]); });
-      });
-
-      fetchRecipes(pageNumber); // fetch the recipes for the current page
+      if(foodIdList) { 
+         foodIdList?.forEach((foodId) => {
+            axios({method: 'get', url: `ingredient/getObject/${foodId}`})
+            .then(response => { setIngredientList((list: IngredientObject[]) => [...list, response]); });
+         });
+      }
    }, [searchParams]);
+
+   useEffect(() => {
+      fetchRecipes(pageNumber); // fetch the recipes for the current page
+   }, [recipeTitle, ingredientList]);
 
    // useEffect for converting contents of recipeList into a PageObject array and saving it to pageList
    useEffect(() => {
@@ -111,7 +114,7 @@ export default function PublicRecipes() {
       })
 
       setPageList(newPageList);
-   }, [recipeList, recipeTitle, ingredientList, pageNumber]);
+   }, [recipeList]);
    
    return <Notebook pageList={pageList} parentPageNumber={pageNumber} requestNewPage={handlePageChange} pageCount={recipeCount + 1}/>
 }
