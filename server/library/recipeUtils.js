@@ -29,19 +29,29 @@ async function verifyObject (recipe, insideDatabase = true) {
       if (!recipeObject.title || typeof recipeObject.title != 'string') { found.push('title'); }
       if (!recipeObject.description || typeof recipeObject.description != 'string') { found.push('description'); }
       if (!recipeObject.image || typeof recipeObject.image != 'string') { found.push('image'); }
-      try { recipeObject.ingredients = await Promise.all(recipeObject.ingredients.map(async (ingredient) => {
-         const checkedIngredient = await ingredientUtils.verifyObject(ingredient, false); // call verifyObject from ingredientUtils
-         if (!checkedIngredient.portion) { throw new Error('missing portion field in ingredient object'); } //make sure ingredient has a portion attached
-         return checkedIngredient;
-      }));}
-      catch (error) { 
-         found.push('ingredients'); 
-         console.error(error); 
+      if (!recipeObject.ingredients || !Array.isArray(recipeObject.ingredients)) { found.push('ingredients'); }
+      else {
+         try { 
+            recipeObject.ingredients = await Promise.all(recipeObject.ingredients.map(async (ingredient) => {
+               const checkedIngredient = await ingredientUtils.verifyObject(ingredient, false); // call verifyObject from ingredientUtils
+               if (!checkedIngredient.portion) { throw new Error('missing portion field in ingredient object'); } //make sure ingredient has a portion attached
+               return checkedIngredient;
+            }));
+         }
+         catch (error) { 
+            found.push('ingredients'); 
+            console.error(error); 
+         }
       }
-      try { recipeObject.instructions.forEach((instruction) => { if (typeof instruction != 'string') found.push('instructions'); }); } 
-      catch (error) { 
-         found.push('instructions'); 
-         console.error(error); 
+      if (!recipeObject.instructions || !Array.isArray(recipeObject.instructions)) { found.push('instructions'); }
+      else {
+         try { 
+            recipeObject.instructions.forEach((instruction) => { if (typeof instruction != 'string') found.push('instructions'); }); 
+         } 
+         catch (error) { 
+            found.push('instructions'); 
+            console.error(error); 
+         }
       }
       return found;
    }

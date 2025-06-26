@@ -15,13 +15,19 @@ export default function Recipe({recipe}: RecipeParams) {
    const [recipeObject, setRecipeObject] = useState<RecipeObject | null>(null);
 
    useEffect(() => {
-      if (recipe) { setRecipeObject(recipe); }
-      else if (!recipeId){ navigate("/home"); }
-      else {
-         axios({ method:'get', url:`/recipe/getObject/${recipeId}` })
-         .then((Response) => { setRecipeObject(Response.data); })
-         .catch((error) => { console.error(error); });
+      // If recipe is passed as a prop, use it directly
+      if (recipe) { 
+         setRecipeObject(recipe);
+         return;
       }
+      // Otherwise, fetch the recipe by ID from the URL
+      if (!recipeId){ 
+         navigate("/home"); 
+         return;
+      }
+      axios({ method:'get', url:`/recipe/getObject/${recipeId}` })
+      .then((response) => { setRecipeObject(response); })
+      .catch((error) => { console.error(error); });
    }, [recipeId, recipe]);
 
    if ( !recipeObject ) {
@@ -29,7 +35,7 @@ export default function Recipe({recipe}: RecipeParams) {
    }
 
    return (
-      <div>
+      <div className="standardPage">
          <h1>{recipeObject.title}</h1>
          <p>{recipeObject.image}</p>
          <h2>Nutrition</h2>

@@ -18,6 +18,8 @@ exports.getObject = async (req, res) => {
       _id: recipeId
    }
 
+   console.log("searching for recipe: ", recipe);
+
    try {
       const recipeObject = await recipeUtils.verifyObject(recipe, true);
       return res.status(200).json({ message: "recipe object created", payload: recipeObject });
