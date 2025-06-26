@@ -22,6 +22,8 @@ export default function PublicRecipes() {
    const [recipeTitle, setRecipeTitle] = useState<string>('');
    const [ingredientList, setIngredientList] = useState<IngredientObject[]>([]);
 
+   const [useStatesDefined, setUseStatesDefined] = useState<boolean>(false); // used to ensure that the useStates are defined before running the useEffects
+
    // state variables for saving the current recipe information
    const [recipeList, setRecipeList] = useState<RecipeObject[]>([]);
    const [recipeCount, setRecipeCount] = useState<number>(0);
@@ -42,9 +44,6 @@ export default function PublicRecipes() {
       }
       console.log("newParams:", newParams);
       setSearchParams(newParams); // update the url with the new params
-
-      setRecipeList([]); // clear the recipe list
-      setRecipeCount(0); // reset the recipe count
    }
 
    // handle fetching any content needed from the server
@@ -75,30 +74,38 @@ export default function PublicRecipes() {
 
    // on object mount, add any ingredients inside the url to the ingredientList
    useEffect(() => {
-      if (titleParam) { setRecipeTitle(titleParam); } // set the recipe title if it exists
+      console.log("useEffect 1 called");
+      setRecipeTitle(titleParam || ""); // set the recipe title if it exists
       if(foodIdList) { 
          foodIdList?.forEach((foodId) => {
             axios({method: 'get', url: `ingredient/getObject/${foodId}`})
             .then(response => { setIngredientList((list: IngredientObject[]) => [...list, response]); });
          });
       }
+      else { setIngredientList([]); } // if no foodIdList, set ingredientList to empty
+      console.log("useEffect 1 finished, titleParam:", titleParam, "foodIdList:", foodIdList);
+      setUseStatesDefined(true); // set the useStatesDefined to true so that the other useEffects can run
    }, [searchParams]);
 
    useEffect(() => {
+      console.log("useEffect 2 noticed a change")
+      if (!useStatesDefined) { return; } // if the useStates are not defined, do not run this useEffect
+      console.log("useEffect 2 called", "recipeTitle:", recipeTitle, "ingredientList:", ingredientList);
       fetchRecipes(pageNumber); // fetch the recipes for the current page
-   }, [recipeTitle, ingredientList]);
+      console.log("useEffect 2 finished", "recipeTitle:", recipeTitle, "ingredientList:", ingredientList);
+   }, [recipeTitle, ingredientList, useStatesDefined]);
 
    // useEffect for converting contents of recipeList into a PageObject array and saving it to pageList
    useEffect(() => {
+      if (!useStatesDefined) { return; } // if the useStates are not defined, do not run this useEffect
+      console.log("useEffect 3 called");
       let newPageList: PageObject[] = [];
       if (pageNumber == 1) {
          newPageList = [{
             content: MainPage,
             props: {
-               recipeTitle,
-               setRecipeTitle,
-               ingredientList,
-               setIngredientList,
+               parentTitle: recipeTitle,
+               parentIngredientList: ingredientList,
                handleSubmit
             }
          }]
@@ -114,20 +121,23 @@ export default function PublicRecipes() {
       })
 
       setPageList(newPageList);
+      console.log("useEffect 3 finished");
    }, [recipeList]);
    
    return <Notebook pageList={pageList} parentPageNumber={pageNumber} requestNewPage={handlePageChange} pageCount={recipeCount + 1}/>
 }
 
 interface MainPageProps {
+   parentTitle: string;
+   parentIngredientList: IngredientObject[];
    handleSubmit: (recipeTitle: string, ingredientList: IngredientObject[]) => void;
 }
 
-function MainPage({handleSubmit}: MainPageProps) {
+function MainPage({parentTitle, parentIngredientList, handleSubmit}: MainPageProps) {
 
    // variables for saving whats currently being typed into the text inputs
-   const [recipeTitle, setRecipeTitle] = useState<string>('');
-   const [ingredientList, setIngredientList] = useState<IngredientObject[]>([]);
+   const [recipeTitle, setRecipeTitle] = useState<string>(parentTitle || '');
+   const [ingredientList, setIngredientList] = useState<IngredientObject[]>(parentIngredientList || []);
    
    const [newIngredient, setNewIngredient] = useState<IngredientObject>({foodId:"", foodDescription:""});
    const [ingredientsAvailable, setIngredientsAvailable] = useState<IngredientObject[]>([]);
