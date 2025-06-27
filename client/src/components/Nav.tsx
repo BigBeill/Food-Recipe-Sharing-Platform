@@ -44,8 +44,7 @@ function Nav({userData}: NavProps) {
 
             <h3>Find Recipes</h3>
             <NavLink className="navLink" to="/publicRecipes" onClick={() => setOpen(false)}>Public</NavLink>
-            <NavLink className="navLink" to="/index" onClick={() => setOpen(false)}>Following</NavLink>
-            <NavLink className="navLink" to="/index" onClick={() => setOpen(false)}>Search</NavLink>
+            <NavLink className="navLink" to="/index" onClick={() => setOpen(false)}>Friends</NavLink>
 
             {   
                 userData ?

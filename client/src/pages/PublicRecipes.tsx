@@ -183,7 +183,7 @@ function MainPage({parentTitle, parentIngredientList, handleSubmit}: MainPagePro
    }
 
    return (
-      <div className='standardPage'>
+      <div className='standardContent'>
          <h1>Public Recipes</h1>
 
          <div className='textInput additionalMargin'>

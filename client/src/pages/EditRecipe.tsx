@@ -130,7 +130,7 @@ interface GeneralInfoPageProps {
 
 function GeneralInfoPage ({newRecipe, title, setTitle, description, setDescription}: GeneralInfoPageProps) {
 	return (
-		<div className='standardPage'>
+		<div className='standardContent'>
 			<h1>{newRecipe ? 'New Recipe' : 'Edit Recipe'}</h1>
 
 			<div className='textInput center extraBottom additionalMargin'>
@@ -157,7 +157,7 @@ interface ImagePageProps {
 function ImagePage ({image, setImage}: ImagePageProps) {
 	const imageOptions = ['🧀', '🥞', '🍗', '🍔','🍞', '🥯', '🥐','🥨','🍗','🥓','🥩','🍟','🍕','🌭','🥪','🌮','🌯','🥙','🥚','🍳','🥘','🥣','🥗','🍿','🧂','🥫']
 	return (
-		<div className='standardPage'>
+		<div className='standardContent'>
 			<p>page two</p>
 			<label htmlFor='image'>image</label>
 			<select id='image' value={image} onChange={(event) => setImage(event.target.value)}>
@@ -235,7 +235,7 @@ function IngredientPage ({ingredientList, setIngredientList}: IngredientPageProp
 	}
 
 	return (
-		<div className='standardPage'>
+		<div className='standardContent'>
 			<h2>Recipe Ingredients</h2>
 
 			{/* ingredients list */}
@@ -315,7 +315,7 @@ function InstructionPage ({instructionList, setInstructionList}: InstructionPage
 	}
 
 	return (
-		<div className='standardPage'>
+		<div className='standardContent'>
 			<h2>Recipe Instructions</h2>
 			<Reorder.Group className='displayList' axis='y' values={instructionList} onReorder={setInstructionList}>
 			{instructionList.map((item, index) => (
@@ -350,9 +350,9 @@ interface SubmissionPageProps {
 
 function SubmissionPage({submitRecipe}: SubmissionPageProps) {
 	return (
-		<>
+		<div className='standardContent'>
 			<h2>Save Recipe</h2>
 			<button className="darkText additionalMargin" onClick={() => submitRecipe()}>Save recipe</button>
-		</>
+		</div>
 	)
 }
