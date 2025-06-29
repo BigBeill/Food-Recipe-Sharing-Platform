@@ -27,6 +27,8 @@ export default function NewEditRecipe () {
 	const [ingredientList, setIngredientList] = useState<{id: number, content: IngredientObject}[]>([]);
 	const [instructionList, setInstructionList] = useState<{id: number, content: string}[]>([]);
 
+	const [errorMessage, setErrorMessage] = useState<string>("");
+
 	//run useEffect on page start
 	useEffect (() => {
 		// make sure current user is signed in, otherwise redirect to login
@@ -48,6 +50,27 @@ export default function NewEditRecipe () {
 
 	//function for sending recipe changes to server
 	function submitRecipe(){
+		// check for any empty fields
+		if (!title) { 
+			setErrorMessage("your recipe must have a title");
+			return; 
+		}
+		if (!description) { 
+			setErrorMessage("your recipe must have a description"); 
+			return; 
+		}
+		if (!image) { 
+			setErrorMessage("your recipe must have an image"); 
+			return; 
+		}
+		if (ingredientList.length == 0) { 
+			setErrorMessage("your recipe must have at least one ingredient");
+			return; 
+		}
+		if (instructionList.length == 0) { 
+			setErrorMessage("your recipe must have at least one instruction");
+			return; 
+		}
 
 		//define what type of request is being sent to the server
 		let method: string;
@@ -63,8 +86,6 @@ export default function NewEditRecipe () {
 			ingredients: removeIds(ingredientList),
 			instructions: removeIds(instructionList)
 		}
-
-		console.log("recipeData:", recipeData);
 
 		//send request to the server
 		axios({ method:method, url:'recipe/edit', data: recipeData })
@@ -108,7 +129,8 @@ export default function NewEditRecipe () {
 		{
 			content: SubmissionPage,
 			props: {
-			submitRecipe
+				errorMessage,
+				submitRecipe
 			}
 		}
 	]
@@ -345,14 +367,16 @@ function InstructionPage ({instructionList, setInstructionList}: InstructionPage
 
 
 interface SubmissionPageProps {
+	errorMessage: string;
   	submitRecipe: () => void;
 }
 
-function SubmissionPage({submitRecipe}: SubmissionPageProps) {
+function SubmissionPage({errorMessage, submitRecipe}: SubmissionPageProps) {
 	return (
 		<div className='standardContent'>
 			<h2>Save Recipe</h2>
 			<button className="darkText additionalMargin" onClick={() => submitRecipe()}>Save recipe</button>
+			<p className={errorMessage ? "error" : "hidden"} area-live="assertive">{errorMessage}</p>
 		</div>
 	)
 }
