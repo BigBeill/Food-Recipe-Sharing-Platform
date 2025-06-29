@@ -1,4 +1,5 @@
 const recipeUtils = require("../library/recipeUtils");
+const userUtils = require("../library/userUtils");
 const recipes = require("../models/recipe");
 const users = require("../models/user");
 
@@ -143,7 +144,7 @@ exports.update = async (req, res) => {
       const recipe = await recipes.findOne({ _id: recipeObject._id });
 
       // make sure current user is the owner of found recipe
-      if (!recipe.owner == req.user) { return res.status(401).json({ error: 'current user is not the owner of the recipe' }); }
+      if (!recipe.owner == req.user) { return res.status(403).json({ error: 'current user is not the owner of the recipe' }); }
 
       // update recipe in database
       await recipes.updateOne({ _id: req.body._id }, { $set: req.recipeSchema });

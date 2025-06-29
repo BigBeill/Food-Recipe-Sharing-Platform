@@ -133,7 +133,7 @@ returns a folderObject array containing all the folders in the database that mat
 @route: GET /user/folder
 */
 exports.folder = async (req, res) => {
-
+   // make sure user is signed in
    if (!req.user) return res.status(401).json({ error: "user not signed in" });
 
    const _id = req.user._id;
@@ -161,176 +161,6 @@ exports.folder = async (req, res) => {
    catch (error) {
       console.error(error);
       return res.status(500).json({ error: "server failed to find folders" });
-   }
-}
-
-
-
-/*
-creates a friend request object in the database between the signed in user and the userId provided in the request body
-@route: POST /user/sendFriendRequest
-*/
-exports.sendFriendRequest = async (req, res) => {
-   if (!req.user) return res.status(401).json({ error: "user not signed in" });
-
-   const _id = req.user._id;
-   const { userId } = req.body;
-
-   // check if user is signed in
-   if (!_id) return res.status(401).json({ error: "user not signed in" });
-
-   // check for any missing or invalid fields in the request
-   if (!userId) return res.status(400).json({error: 'missing userId field in body'});
-   if (userId == _id) return res.status(400).json({ error: "user cannot send friend request to self" });
-
-   try {
-      // make sure user exists in database
-      const senderData = await User.findOne({ _id });
-      if (!senderData) return res.status(400).json({ error: "signed in user not found in database" });
-
-      // make sure receiver exists in database
-      const receiverData = await User.findOne({ _id: userId });
-      if (!receiverData) return res.status(400).json({ error: "receiver not found" });
-
-      // make sure friend request doesn't already exist in database
-      const sentRequest = await FriendRequest.findOne({ senderId: _id, receiverId: userId });
-      if (sentRequest) return res.status(400).json({ error: "friend request already sent" });
-      const receivedRequest = await FriendRequest.findOne({ senderId: userId, receiverId: _id });
-      if (receivedRequest) return res.status(400).json({ error: "friend request already received" });
-
-      // make sure friendship doesn't already exist in database
-      const existingFriendship = await Friendship.findOne({ friendIds: { $all: [senderData._id, receiverData._id] } });
-      if (existingFriendship) return res.status(400).json({ error: "friendship already exists" });
-
-      // create friend request
-      const newRequest = {
-         senderId: _id,
-         receiverId: userId,
-      };
-
-      // save friend request to database
-      const friendship = await new FriendRequest(newRequest)
-      .save();
-
-      return res.status(200).json({ message: "friend request sent", payload: friendship });
-   }
-
-   // handle any errors caused by the controller
-   catch (error) {
-      console.error(error);
-      return res.status(500).json({ error: "server failed to send friend request" });
-   }
-}
-
-
-
-/*
-Removes a friend request from the database and creates a friendshipObject if the request is accepted
-@route: POST /user/processFriendRequest
-*/
-exports.processFriendRequest = async (req, res) => {
-   if (!req.user) return res.status(401).json({ error: "user not signed in" });
-
-   const _id = req.user._id;
-   const { requestId, accept } = req.body;
-
-   // check if user is signed in
-   if (!_id) return res.status(401).json({ error: "user not signed in" });
-
-   // check for any missing fields in the request
-   if (!requestId) { return res.status(400).json({ error: 'missing sender field in body' }); }
-   if (accept === undefined) { return res.status(400).json({ error: 'missing accept field in body' }); }
-
-   try {
-
-      // make sure friend request exists in database
-      const requestData = await FriendRequest.findOne({ _id: requestId });
-      if (!requestData) { return res.status(400).json({ error: "request not found in database" }); }
-      // check if sender is current user
-      if (requestData.senderId == _id) {
-         if (accept) { return res.status(401).json({ error: "you cant accept a friend request sent by you" }); }
-         await FriendRequest.deleteOne({ _id: requestData._id });
-         return res.status(200).json({ message: "friend request canceled" });
-      }
-      // check that current user is the receiver of the request
-      if (!requestData.receiverId == _id) { return res.status(401).json({ error: "current user is not the receiver of this request" }); }
-
-      // check if user accepted the friend request
-      if (!accept) {
-         // delete friend request from database
-         await FriendRequest.deleteOne({ _id: requestData._id });
-         return res.status(200).json({ message: "friend request denied" });
-      }
-
-      // make sure user exists in database
-      const receiverData = await User.findOne({ _id });
-      if (!receiverData) { return res.status(400).json({ error: "signed in user not found in database" }); }
-
-      // make sure receiver exists in database
-      const senderData = await User.findOne({ _id: requestData.senderId });
-      if (!senderData) { return res.status(400).json({ error: "request sender not found in database" }); }
-
-      // make sure friendship doesn't already exist in database
-      const existingFriendship = await Friendship.findOne({ friends: { $all: [senderData._id, _id] }});
-      if (existingFriendship) {
-         await FriendRequest.deleteOne({ _id: request });
-         return res.status(400).json({ error: "friendship already exists" });
-      }
-
-      // delete friend request from database
-      await FriendRequest.deleteOne({ _id: requestId });
-
-      // create friendship and save to database
-      const newFriendship = await new Friendship({
-         friendIds: [senderData._id, _id]
-      })
-      .save();
-
-      return res.status(200).json({ message: "friend request accepted", payload: newFriendship });
-   }
-
-   // handle any errors caused by the controller
-   catch (error) {
-      console.error(error);
-      return res.status(500).json({ error: "server failed to accept friend request" });
-   }
-}
-
-
-
-/*
-removes a friendshipObject from the database
-@route: POST /user/deleteFriend
-*/
-exports.deleteFriend = async (req, res) => {
-   if (!req.user) return res.status(401).json({ error: "user not signed in" });
-
-   const _id = req.user._id;
-   const { relationshipId } = req.body;
-
-   // check if user is signed in
-   if (!_id) return res.status(401).json({ error: "user not signed in" });
-
-   // check for any missing fields in the request
-   if (!relationshipId) return res.status(400).json({ error: 'missing relationshipId field in body' });
-
-   try {
-      // make sure friendship exists in database
-      const friendship = await Friendship.findOne({ _id: relationshipId });
-      if (!friendship) return res.status(400).json({ error: "friendship not found in database" });
-
-      // make sure user is part of the friendship
-      if (!friendship.friendIds.includes(_id)) return res.status(401).json({ error: "user is not part of this friendship" });
-
-      // delete friendship from database
-      await Friendship.deleteOne({ _id: relationshipId });
-      return res.status(200).json({ message: "friendship deleted successfully" });
-   }
-
-   // handle any errors caused by the controller
-   catch (error) {
-      console.error(error);
-      return res.status(500).json({ error: "server failed to delete friendship" });
    }
 }
 
@@ -373,5 +203,171 @@ exports.updateAccount = async (req, res) => {
    catch(error){
       console.error(error);
       return res.status(500).json({ error: "server failed to update user account" });
+   }
+}
+
+
+
+/*
+creates a friend request object in the database between the signed in user and the userId provided in the request body
+@route: POST /user/sendFriendRequest
+*/
+exports.sendFriendRequest = async (req, res) => {
+   // make sure user is signed in
+   if (!req.user) return res.status(401).json({ error: "user not signed in" });
+
+   const userId = req.user._id;
+   const { receiverId } = req.body;
+
+   // find receiver in the database
+   try {
+      const receiverData = await User.findOne({ _id: receiverId });
+      if (!receiverData) { return res.status(404).json({ error: "user receiving friend request not found" }); }
+   }
+   catch (error) {
+      console.log("\x1b[31m%s\x1b[0m", "user.controller.sendFriendRequest failed... unable to find receiver in database");
+      console.error(error);
+      return res.status(500).json({ error: "server failed to find user receiving friend request" });
+   }
+
+   // check if friend request or friendship already exist inside the database
+   try {
+      const sentRequest = await FriendRequest.findOne({ senderId: userId, receiverId: receiverId });
+      if (sentRequest) return res.status(409).json({ error: "friend request already sent to this user" });
+
+      const receivedRequest = await FriendRequest.findOne({ senderId: receiverId, receiverId: userId });
+      if (receivedRequest) return res.status(409).json({ error: "friend request already received from this user" });
+
+      // make sure friendship doesn't already exist in database
+      const existingFriendship = await Friendship.findOne({ friendIds: { $all: [receiverId, userId] } });
+      if (existingFriendship) return res.status(409).json({ error: "friendship already created with this user" });
+   }
+   catch (error) {
+      console.log("\x1b[31m%s\x1b[0m", "user.controller.sendFriendRequest failed... unable to check for existing friend requests or friendships in database");
+      console.error(error);
+      return res.status(500).json({ error: "server failed to check if friendRequest or friendship already exist" });
+   }
+
+   // create the friend request and save to the database
+   try {
+      const newRequest = { senderId: userId, receiverId: receiverId };
+      const friendship = await new FriendRequest(newRequest)
+      .save();
+
+      return res.status(201).json({ message: "friend request sent", payload: friendship });
+   }
+   catch (error) {
+      console.log("\x1b[31m%s\x1b[0m", "user.controller.sendFriendRequest failed... unable to create friend request in database");
+      console.error(error);
+      return res.status(500).json({ error: "server failed to create friend request inside the database" });
+   }
+}
+
+
+
+/*
+Removes a friend request from the database and creates a friendshipObject if the request is accepted
+@route: POST /user/processFriendRequest
+*/
+exports.processFriendRequest = async (req, res) => {
+   // make sure user is signed in
+   if (!req.user) return res.status(401).json({ error: "no valid access token provided" });
+
+   const userId = req.user._id;
+   const { requestId, accept } = req.body;
+
+   let friendRequestData;
+
+   // find fiend request in the database
+   try {
+      friendRequestData = await FriendRequest.findOne({ _id: requestId });
+      if (!friendRequestData) { return res.status(404).json({ error: "friend request not found in database" }); }      
+   }
+   catch (error) {
+      console.log("\x1b[31m%s\x1b[0m", "user.controller.processFriendRequest failed... unable to find friend request in database");
+      console.error(error);
+      return res.status(500).json({ error: "server failed to find friend request in database" });
+   }
+
+   // instructions for accepting the friend request
+   try {
+      if (accept) { 
+         if (friendRequestData.receiverId != userId) { return res.status(403).json({ error: "current user is not the receiver of this request" }); }
+         const existingFriendship = await Friendship.findOne({ friendIds: { $all: [friendRequestData.senderId, userId] } });
+
+         if (existingFriendship) {
+            // delete friend request from database and return an error message
+            await FriendRequest.deleteOne({ _id: requestId });
+            return res.status(409),json({ error: "friendship already exists inside the database" }); 
+         }
+
+         // add friendship to the database
+         const newFriendship = await new Friendship({ friendIds: [friendRequestData.senderId, userId] })
+         .save();
+         
+         // delete friend request from database
+         await FriendRequest.deleteOne({ _id: requestId });
+
+         return res.status(201).json({ message: "friendship  created successfully", payload: newFriendship });
+      }
+   }
+   catch (error) {
+      console.log("\x1b[31m%s\x1b[0m", "user.controller.processFriendRequest failed... unable to approve friend request");
+      console.error(error);
+      return res.status(500).json({ error: "server failed to approve friend request" });
+   }
+
+   // instructions for denying or canceling the friend request
+   try {
+      // check if the client has write access to the friend request
+      if (friendRequestData.senderId != userId && friendRequestData.receiverId != userId) { return res.status(403).json({ error: "current user does not have write access to this request" }); }
+
+      // delete friend request from database
+      await FriendRequest.deleteOne({ _id: requestId });
+
+      return res.status(204).json({ message: "friendRequest removed from the database" });
+   }
+   catch (error) {
+      console.log("\x1b[31m%s\x1b[0m", "user.controller.processFriendRequest failed... unable to remove friend request from database");
+      console.error(error);
+      return res.status(500).json({ error: "server failed to remove friend request from the database" });
+   }
+}
+
+
+
+/*
+removes a friendshipObject from the database
+@route: POST /user/deleteFriend
+*/
+exports.deleteFriend = async (req, res) => {
+
+   // make sure user is signed in
+   if (!req.user) { return res.status(401).json({ error: "user not signed in" }); }
+
+   const userId = req.user._id;
+   const { relationshipId } = req.body;
+
+   // check for any missing fields in the request
+   if (!relationshipId) return res.status(400).json({ error: 'missing relationshipId field in body' });
+
+   try {
+      // find friendship in the database
+      const friendship = await Friendship.findOne({ _id: relationshipId });
+      if (!friendship) { return res.status(400).json({ error: "friendship not found in database" }); }
+
+      // check if client has write access to the friendship
+      if (!friendship.friendIds.includes(userId)) { return res.status(403).json({ error: "client does not have write access to this friendship" }); }
+
+      // delete friendship from database
+      await Friendship.deleteOne({ _id: relationshipId });
+      return res.status(204).json({ message: "friendship deleted successfully" });
+   }
+
+   // handle any errors caused by the controller
+   catch (error) {
+      console.log("\x1b[31m%s\x1b[0m", "user.controller.deleteFriend failed... unable to delete friendship from database");
+      console.error(error);
+      return res.status(500).json({ error: "server failed to delete friendship" });
    }
 }

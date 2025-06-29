@@ -179,19 +179,22 @@ Type:
    POST - creates a friend request in server database
 
 Expects 1 arguments from body:
-   userId: mongoose object id
+   receiverId: mongoose object id
 
 Route description:
    creates a friend request in the database, setting the current user as the sender and the {userId} as the receiver
 
 Returns:
-   - 201 friendRequestObject created and sent saved to the database
+   - 201 friendRequestObject created and saved in the database
    - 400 missing or invalid arguments
    - 401 access token could not be found
+   - 409 friendRequestObject or friendshipObject already exists in the database
+
+payload: friendRequestObject
 */
 router.post("/sendFriendRequest", 
    [
-      body("userId").isString().isLength({ min: 24, max: 24 }).withMessage("userId must be a string of 24 characters"),
+      body("receiverId").isString().isLength({ min: 24, max: 24 }).withMessage("userId must be a string of 24 characters"),
       checkExact()
    ],
    runValidation,
@@ -215,13 +218,19 @@ Route description:
 
 Returns:
    - 201 friendRequestObject has been deleted and friendObject has been created in the database
+   - 204 friendRequestObject has been deleted from the database
    - 400 missing or invalid arguments
-   - 401 current user does not have write access to the friendRequestObject
+   - 401 client did not provide a valid access token
+   - 403 client does not have write access to the friendRequestObject
+   - 404 requestId not found in database
+   - 409 the approved friendship already exists in the database
+
+payload: friendshipObject
 */
 router.post("/processFriendRequest", 
    [
-      body("requestId").isString().isLength({ min: 24, max: 24 }).withMessage("requestId must be a string of 24 characters"),
-      body("accept").isBoolean().withMessage("accept must be a boolean"),
+      body("requestId").isString().isLength({ min: 24, max: 24 }).withMessage("requestId field must be a string of 24 characters"),
+      body("accept").isBoolean().withMessage("accept field must be a boolean"),
       checkExact()
    ],
    runValidation,
@@ -244,9 +253,10 @@ Route description:
    - Deletes the friendship object from the database
 
 Return:
-   - 200 friendshipObject removed from databases
+   - 204 friendshipObject removed from databases
    - 400 missing or invalid arguments
-   - 401 current user doesn't have write access to the friendship object
+   - 401 client did not provide a valid access token
+   - 403 client doesn't have write access to the friendship object
 */
 router.post("/deleteFriend", 
    [

@@ -21,7 +21,8 @@ Route description:
 Returns:
    - 200 recipeObject returned
    - 400 invalid or missing arguments
-   - 401 client does not have read access to recipeObject being requested
+   - 401 client is attempting to access a private recipeObject without an access token
+   - 403 client does not have read access to recipeObject being requested
 
 payload: recipeObject
 */
@@ -59,6 +60,7 @@ Route description:
 Returns:
    - 200 recipeObject array returned
    - 400 invalid or missing arguments
+   - 401 client is attempting to search for a private recipeObjects without an access token
 
 payload: {
    recipeObjectArray: recipeObject[], 
@@ -78,6 +80,7 @@ router.get('/find',
       query("limit").optional().toInt().isInt({ min: 1, max: 90 }).withMessage("limit must be an integer between 1 and 90"),
       query("skip").optional().toInt().isInt({ min: 0, max: 900 }).withMessage("skip must be an integer between 0 and 900"),
       query("count").optional().isBoolean().withMessage("count must be a boolean"),
+      query("category").optional().isString().isIn(["public", "friends", "personal"]).withMessage("category must be one of the following: public, private, personal"),
       checkExact()
    ],
    runValidation,
@@ -114,7 +117,8 @@ Route Description:
 Returns: 
    - 201 recipe was added/changed in the database
    - 400 invalid or missing arguments
-   - 401 client does not have write access to the recipeObject (no/wrong user signed in)
+   - 401 client did not provide a valid access token
+   - 403 client does not have write access to the recipeObject
 */
 
 router.route('/edit')

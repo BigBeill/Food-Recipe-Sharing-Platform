@@ -43,9 +43,9 @@ export default function UserPin({ userObject }: UserPinProps) {
 
    function sendFriendRequest () {
       setIconsHidden(true);
-      axios({ method: 'post', url: 'user/sendFriendRequest', data: {userId: userObject._id} })
+      axios({ method: 'post', url: 'user/sendFriendRequest', data: {receiverId: userObject._id} })
       .then((response) => {
-         setRelationship({ _id: response._id, target: userObject._id, type: 3 });
+         setRelationship({ _id: response._id, target: userObject._id, type: 2 });
       });
    }
    
