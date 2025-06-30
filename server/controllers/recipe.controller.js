@@ -112,7 +112,7 @@ exports.add = async (req, res) => {
    try {
       // create new recipe and save to database
       const newRecipe = await new recipes(req.recipeObject)
-         .save();
+      .save();
 
       // add recipe to user's ownedRecipes list in database
       await users.updateOne({ _id: req.user._id }, { $push: { ownedRecipes: newRecipe._id } })
@@ -133,21 +133,24 @@ changes the contents of an existing recipe in the database
 */
 exports.update = async (req, res) => {
 
-   // check if recipe _id was provided
-   if (!req.body._id) return res.status(400).json({ error: 'recipe _id was provided' });
+   recipeId = req.body._id;
 
-   // grab recipe objet from req and attach _id to it
-   const recipeObject = { ...req.recipeObject, _id: req.body._id };
+   // check if recipe _id was provided
+   if (!recipeId) return res.status(400).json({ error: 'recipe _id needs to be provided' });
+
+   // grab recipe object from req and attach _id to it
+   const recipeObject = req.recipeObject;
+   console.log("Recipe Object: ", recipeObject);
 
    try {
       // find recipe being updated in database
-      const recipe = await recipes.findOne({ _id: recipeObject._id });
+      const recipe = await recipes.findOne({ _id: recipeId });
 
       // make sure current user is the owner of found recipe
-      if (!recipe.owner == req.user) { return res.status(403).json({ error: 'current user is not the owner of the recipe' }); }
+      if (!recipe.owner == req.user) { return res.status(403).json({ error: 'current user does not have write access to this recipe' }); }
 
       // update recipe in database
-      await recipes.updateOne({ _id: req.body._id }, { $set: req.recipeSchema });
+      await recipes.updateOne({ _id: recipeId }, { $set: recipeObject });
 
       return res.status(201).json({ message: 'recipe saved successfully' });
    }

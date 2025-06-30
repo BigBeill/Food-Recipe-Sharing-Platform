@@ -205,7 +205,7 @@ function MainPage({parentTitle, parentIngredientList, handleSubmit}: MainPagePro
             </div>
          </div>
 
-         <ul className='displayList '>
+         <ul className='displayList'>
             {ingredientList.map((ingredient, index) => (
                <li key={index} className='listItemContainer'>
                   <div className='itemOptions'>

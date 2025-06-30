@@ -217,7 +217,7 @@ async function attachNutritionField (ingredient) {
          const brokenMeasureDescription = breakupMeasureDescription(data.rows[0].measure_description);
 
          // divide the nutrients by the number of items in the measureDescription
-         nutrients.map((nutrient) => { return nutrient / brokenMeasureDescription.integer });
+         Object.keys(nutrients).forEach((key) => { nutrients[key] /= brokenMeasureDescription.integer });
       }
       catch (error) {
          console.log('failed to apply conversion factor to ingredient:', ingredient);
