@@ -2,7 +2,7 @@ import IngredientObject from './IngredientObject'
 
 export default interface RecipeObject {
    _id: string | null | undefined;
-   owner: string;
+   owner?: string;
    title: string;
    description: string;
    image: string;

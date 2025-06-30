@@ -80,7 +80,6 @@ export default function NewEditRecipe () {
 		//package relevant data into recipeData
 		const recipeData: RecipeObject = {
 			_id: recipeId,
-			owner: userData?._id || '',
 			title: title,
 			description: description,
 			image: image,
