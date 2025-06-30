@@ -140,7 +140,6 @@ exports.update = async (req, res) => {
 
    // grab recipe object from req and attach _id to it
    const recipeObject = req.recipeObject;
-   console.log("Recipe Object: ", recipeObject);
 
    try {
       // find recipe being updated in database
