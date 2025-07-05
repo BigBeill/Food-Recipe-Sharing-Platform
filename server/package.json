@@ -4,7 +4,8 @@
   "description": "personal project im working on",
   "main": "server.js",
   "scripts": {
-    "production-server": "node server.js",
+    "start": "node server.js",
+    "build": "echo 'No build step'",
     "server": "nodemon server.js",
     "client": "npm run client --prefix ../client",
     "dev": "concurrently --kill-other-on-fail \"npm run server\" \"npm run client\""
