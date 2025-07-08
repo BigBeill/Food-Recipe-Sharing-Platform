@@ -1,12 +1,13 @@
 import React, { Suspense, lazy } from 'react'
 
 const LandingPage = lazy(() => import('./pages/LandingPage.tsx'))
-const PublicRecipes = lazy(() => import('./pages/PublicRecipes.tsx'))
+const AboutMe = lazy(() => import('./pages/AboutMe.tsx'))
 const EditRecipe = lazy(() => import('./pages/EditRecipe.tsx'))
 const FriendsList = lazy(() => import('./pages/FriendsList.tsx'))
 const Ingredients = lazy(() => import('./pages/Ingredients.tsx'))
 const Login = lazy(() => import('./pages/Login.tsx'))
 const Profile = lazy(() => import('./pages/Profile.tsx'))
+const PublicRecipes = lazy(() => import('./pages/PublicRecipes.tsx'))
 const Register = lazy(() => import('./pages/Register.tsx'))
 const Recipe = lazy(() => import('./pages/Recipe.tsx'))
 const SearchUser = lazy(() => import('./pages/SearchUser.tsx'))
@@ -26,8 +27,8 @@ export const routes = [
     element: withSuspense(LandingPage),
   },
   {
-    path: '/publicRecipes',
-    element: withSuspense(PublicRecipes),
+    path: '/aboutMe',
+    element: withSuspense(AboutMe),
   },
   {
     path: '/editRecipe/:recipeId?',
@@ -44,6 +45,10 @@ export const routes = [
   {
     path: '/profile/:userId?',
     element: withSuspense(Profile),
+  },
+  {
+    path: '/publicRecipes',
+    element: withSuspense(PublicRecipes),
   },
   {
     path: '/register',

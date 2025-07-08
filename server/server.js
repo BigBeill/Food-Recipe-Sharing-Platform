@@ -39,6 +39,9 @@ app.use(validateToken);
 const logGeneralData = require('./middleware/debugging/logGeneralData')
 app.use(logGeneralData)
 
+const aiRouter = require('./routes/ai.route');
+app.use('/ai', aiRouter);
+
 const authenticationRouter = require('./routes/authentication.route')
 app.use('/authentication', authenticationRouter)
 

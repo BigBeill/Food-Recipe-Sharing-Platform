@@ -73,6 +73,7 @@ function Nav({userData}: NavProps) {
 
             <h3>Info</h3>
             <NavLink className="navLink" to="/ingredients" onClick={() => setOpen(false)}>Ingredients List</NavLink>
+            <NavLink className="navLink" to="/aboutMe" onClick={() => setOpen(false)}>About Me</NavLink>
 
             <div className='navButton' onClick={openNav}/>
 
