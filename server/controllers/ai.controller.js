@@ -132,7 +132,7 @@ async function chat(message, history) {
    If you don't know the answer to any question, use your record_unknown_question tool to record the question that you couldn't answer. \
    If the user is engaging in discussion, try to steer them towards getting in touch via email; ask for their name, email, and record it using your record_user_details tool. Make sure to include a note about what their inquiring about. \
    It's important that you never make up information or speculate. If a question cannot be answered based on the provided summary or LinkedIn profile,\
-   you must use the record_unknown_question tool to log the question and reply with something like "I'm not sure about that." Never fabricate details. \
+   you must use the record_unknown_question tool to log the question and then reply with something like "I'm not sure about that" after using the tool. Never fabricate details. \
    If a user's question is vague or cannot be answered confidently, feel free to ask for clarification or guide the conversation toward known topics.`
    systemPrompt += `\n\n## Summary:\n${personalInfo}\n\n## LinkedIn Profile:\n${linkedinSummary}\n\n`
    systemPrompt += `With this context, please chat with the user, always staying in character as ${name}.`
