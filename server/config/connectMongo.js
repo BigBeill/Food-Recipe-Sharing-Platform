@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-const { MongoClient, ServerApiVersion } = require('mongodb');
 require('dotenv').config()
 
 mongoose.connect("mongodb+srv://BigBeill:" + process.env.MONGO_DB_PASSWORD + "@beillsgreenhouse.oull8qn.mongodb.net/Main-Database?retryWrites=true&w=majority") 

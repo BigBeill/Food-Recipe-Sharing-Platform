@@ -17,16 +17,14 @@ const name = "Mackenzie Neill";
 // async function for sending a message to my pushover account
 async function sendToPushover(message) {
    const payload = new URLSearchParams({ token: pushover_token, user: pushover_user, message: message });
-
-   const response = await fetch( pushover_url, {
+   
+   await fetch( pushover_url, {
       method: "POST",
       headers: {
          "Content-Type": "application/x-www-form-urlencoded"
       },
       body: payload
    });
-
-   console.log("Pushover response: ", response.status, response.statusText);
 }
 
 // code for tools the AI can use
@@ -102,7 +100,6 @@ async function handleToolCall(toolCall) {
 
    for (let call of toolCall) {
       call.function.arguments = JSON.parse(call.function.arguments);
-      console.log("Tool call: ", call);
       if (call.function.name == "record_user_details") { 
          await recordUserDetails(call.function.arguments.email, call.function.arguments.name, call.function.arguments.notes);
          results.push({"role":"tool", "content": "", "tool_call_id": call.id});
@@ -147,14 +144,11 @@ async function chat(message, history) {
    let finalMessage = "";
 
    while(!done) {
-      console.log("Updated chat: ", updatedChat);
       const response  = await personalAI.chat.completions.create({
          model: "gpt-4o-mini", 
          messages: updatedChat, 
          tools:tools
       });
-      console.log("AI response: ", response);
-      console.log("AI response choice message: ", response.choices[0].message);
       const finishReason = response.choices[0].finish_reason;
       finalMessage = response.choices[0].message.content;
       
@@ -163,7 +157,6 @@ async function chat(message, history) {
          const responseMessage = response.choices[0].message;
          const toolCalls = responseMessage.tool_calls;
          const toolResponse = await handleToolCall(toolCalls);
-         console.log("toolCalls: ", toolCalls[0]);
 
          updatedChat.push(responseMessage);
          updatedChat.push(...toolResponse);
