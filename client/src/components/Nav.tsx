@@ -43,31 +43,29 @@ function Nav({userData}: NavProps) {
 
 
             <h3>Find Recipes</h3>
-            <NavLink className="navLink" to="/publicRecipes" onClick={() => setOpen(false)}>Public</NavLink>
-            <NavLink className="navLink" to="/index" onClick={() => setOpen(false)}>Friends</NavLink>
+            <NavLink className="navLink" to="/searchRecipes/public" onClick={() => setOpen(false)}>Public Recipes</NavLink>
 
-            {   
-                userData ?
+            { userData ?
                 <>
+                    <NavLink className="navLink" to="/searchRecipes/friends" onClick={() => setOpen(false)}>Friends Recipes</NavLink>
 
-                <h3>Your Recipes</h3>
-                <NavLink className="navLink" to="/recipeBook" onClick={() => setOpen(false)}>Personal</NavLink>
-                <NavLink className="navLink" to="/index" onClick={() => setOpen(false)}>Saved</NavLink>
-                <NavLink className="navLink" to="/editRecipe" onClick={() => setOpen(false)}>New Recipe</NavLink>
+                    <h3>Your Recipes</h3>
+                    <NavLink className="navLink" to="/searchRecipes/personal" onClick={() => setOpen(false)}>My Recipes</NavLink>
+                    <NavLink className="navLink" to="/index" onClick={() => setOpen(false)}>Saved Recipes</NavLink>
+                    <NavLink className="navLink" to="/editRecipe" onClick={() => setOpen(false)}>Create Recipe</NavLink>
 
-                <h3>Social</h3>
-                <NavLink className="navLink" to="/friendsList" onClick={() => setOpen(false)}>Friends</NavLink>
-                <NavLink className="navLink" to="/searchUser" onClick={() => setOpen(false)}>Search Users</NavLink>
+                    <h3>Social</h3>
+                    <NavLink className="navLink" to="/friendsList" onClick={() => setOpen(false)}>My Friends</NavLink>
+                    <NavLink className="navLink" to="/searchUser" onClick={() => setOpen(false)}>Search Users</NavLink>
 
-                <h3>Account</h3>
-                <NavLink className="navLink" to="/profile" onClick={() => setOpen(false)}>Profile</NavLink>
-                
-                </> : <>
-                
-                <h3>Account</h3>
-                <NavLink className="navLink" to="/login" onClick={() => setOpen(false)}>Login</NavLink>
-                <NavLink className="navLink" to="/register" onClick={() => setOpen(false)}>Create Account</NavLink>
-                
+                    <h3>Account</h3>
+                    <NavLink className="navLink" to="/profile" onClick={() => setOpen(false)}>Profile</NavLink>
+                </> 
+            :
+                <>
+                    <h3>Account</h3>
+                    <NavLink className="navLink" to="/login" onClick={() => setOpen(false)}>Login</NavLink>
+                    <NavLink className="navLink" to="/register" onClick={() => setOpen(false)}>Create Account</NavLink>
                 </>
             }
 

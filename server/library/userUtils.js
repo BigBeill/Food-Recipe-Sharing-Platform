@@ -130,7 +130,86 @@ async function attachRelationshipField (user, targetId) {
    }
 }
 
+
+async function isFriend (user, targetId) {
+   console.log("function called: " + "\x1b[36m%s\x1b[0m", "server/library/userUtils.isFriend");
+
+   // make sure userId and targetId are provided
+   if (!user || !user._id) { throw new Error('no user._id provided to isFriend'); }
+   if (!targetId) { throw new Error('no targetId provided to isFriend'); }
+
+   // make sure user and target are not the same
+   if (user._id == targetId) { throw new Error('user._id and targetId are the same'); }
+
+   try {
+      // check if users are friends
+      const friendship = await Friendship.findOne({ friendIds: { $all: [user._id, targetId] } });
+      if (friendship) { return true; }
+      else { return false; }
+   }
+   catch (error) {
+      console.log("failed to check if user:", user, "is friends with targetId:", targetId);
+      console.error(error);
+      throw new Error('failed to check if user is friends with target');
+   }
+}
+
+/*
+minimum expected input:
+user: {
+   _id: mongoose.Schema.Types.ObjectId,
+}
+flags:
+   returnObjects: boolean (default: false) - if true, the function will return an array of userObjects instead of just _id fields
+
+this function will return an array containing the _id field of every userObject {user} is friends with.
+if returnObjects is true, the function will convert each _id into a userObject using the verifyObject function
+*/
+async function getFriendList (user, returnAsObjects = false) {
+   console.log("function called: " + "\x1b[36m%s\x1b[0m", "server/library/userUtils.getRelationshipList");
+
+   // make sure userId is provided
+   if (!user || !user._id) { throw new Error('no user._id provided to getRelationshipList'); }
+
+   let friendIdList = [];
+
+   // get the _id values of all users that {user} is friends with
+   try {
+      // find all friendships where user._id is in the friendIds array
+      const friendshipList = await Friendship.find({ friendIds: user._id });
+
+      // collect a list of _id values from the friendIds array that does not include _id of {user}
+      friendIdList = friendshipList.map(friendship => {
+         return friendship.friendIds.find(id => !id.equals(user._id));
+      });
+   }
+   catch (error) {
+      console.log("failed to get friend list for user:", user);
+      console.error(error);
+      throw new Error('failed to get friend list for user');
+   }
+
+   if (!returnAsObjects) { return friendIdList; }
+
+   // if returnObjects is true, convert each _id into a userObject
+   const userObjectList = [];
+   try {
+      userObjectList = await Promise.all(friendIdList.map(async (friendId) => {
+         return await verifyObject({ _id: friendId }, true);
+      }));
+   }
+   catch (error) {
+      console.log("failed to convert friendIdList into userObjects for user:", user);
+      console.error(error);
+      throw new Error('failed to convert friendIdList into userObjects');
+   }
+
+   return userObjectList;
+}
+
 module.exports = {
    verifyObject,
-   attachRelationshipField
+   attachRelationshipField,
+   isFriend,
+   getFriendList
 }

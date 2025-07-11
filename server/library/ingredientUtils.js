@@ -44,7 +44,7 @@ async function verifyObject (ingredient, includeNutrition = true) {
       catch (error) {
          console.log('failed to collect foodDescription from database for ingredient:', ingredient);
          console.error(error);
-         throw new Error('failed to collect foodDescription from database');
+         throw new Error('failed to collect foodDescription from database');                 
       }
    }
 

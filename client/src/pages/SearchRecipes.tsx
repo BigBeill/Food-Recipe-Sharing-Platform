@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useParams } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCircleCheck, faCircleXmark } from '@fortawesome/free-regular-svg-icons';
 
@@ -12,6 +12,7 @@ import axios from '../api/axios';
 
 export default function PublicRecipes() {
 
+   const { category } = useParams<{ category: "public" | "friends" | "personal" }>();
    const [searchParams, setSearchParams] = useSearchParams();
    const pageNumber: number = Number(searchParams.get('pageNumber')) || 1;
    const titleParam: string | null = searchParams.get('title') || null;
@@ -48,9 +49,9 @@ export default function PublicRecipes() {
 
    // handle fetching any content needed from the server
    function fetchRecipes(requestPage: number) {
-      axios({method: 'get', url: `recipe/find?${recipeTitle? `title=${recipeTitle }&` : "" }limit=${requestPage == 1 ? 1 : 2}&skip=${requestPage == 1 ? 0 : (((requestPage - 1) * 2) - 1)}&count=true`})
+      axios({method: 'get', url: `recipe/find?category=${category}${recipeTitle? `&title=${recipeTitle }` : "" }&limit=${requestPage == 1 ? 1 : 2}&skip=${requestPage == 1 ? 0 : (((requestPage - 1) * 2) - 1)}&count=true`})
       .then((response) => {
-         if (!response.count) { 
+         if (response.count == undefined) { 
             console.error("server failed to return count"); 
             return;
          }
@@ -74,7 +75,6 @@ export default function PublicRecipes() {
 
    // on object mount, add any ingredients inside the url to the ingredientList
    useEffect(() => {
-      console.log("useEffect 1 called");
       setRecipeTitle(titleParam || ""); // set the recipe title if it exists
       if(foodIdList) { 
          foodIdList?.forEach((foodId) => {
@@ -83,22 +83,16 @@ export default function PublicRecipes() {
          });
       }
       else { setIngredientList([]); } // if no foodIdList, set ingredientList to empty
-      console.log("useEffect 1 finished, titleParam:", titleParam, "foodIdList:", foodIdList);
       setUseStatesDefined(true); // set the useStatesDefined to true so that the other useEffects can run
-   }, [searchParams]);
+   }, [searchParams, category]);
 
    useEffect(() => {
-      console.log("useEffect 2 noticed a change")
       if (!useStatesDefined) { return; } // if the useStates are not defined, do not run this useEffect
-      console.log("useEffect 2 called", "recipeTitle:", recipeTitle, "ingredientList:", ingredientList);
       fetchRecipes(pageNumber); // fetch the recipes for the current page
-      console.log("useEffect 2 finished", "recipeTitle:", recipeTitle, "ingredientList:", ingredientList);
    }, [recipeTitle, ingredientList, useStatesDefined]);
 
    // useEffect for converting contents of recipeList into a PageObject array and saving it to pageList
    useEffect(() => {
-      if (!useStatesDefined) { return; } // if the useStates are not defined, do not run this useEffect
-      console.log("useEffect 3 called");
       let newPageList: PageObject[] = [];
       if (pageNumber == 1) {
          newPageList = [{

@@ -43,13 +43,13 @@ router.get("/getObject/:recipeId",
 Type: 
    GET - returns a list of recipes from the database
 
-Expects 5 arguments from body:
+Expects 6 arguments from query:
+   category: enum["public", "friends", "personal"] (optional, default "public")
    title: string (optional)
    ingredients: number[] (optional)
    limit: number (optional, default 6)
    skip: number (optional, default 0)
    count: boolean (optional, default false)
-
 Route description:
    - Collect a list of recipeObjects based on title and ingredients provided
    - Skip the first {skip} number or recipeObjects found
@@ -60,7 +60,7 @@ Route description:
 Returns:
    - 200 recipeObject array returned
    - 400 invalid or missing arguments
-   - 401 client is attempting to search for a private recipeObjects without an access token
+   - 401 client is attempting to use a category other than "all" without an access token
 
 payload: {
    recipeObjectArray: recipeObject[], 
@@ -70,6 +70,7 @@ payload: {
 
 router.get('/find',
    [
+      query("category").optional().isString().isIn(["public", "friends", "personal"]).withMessage("category must be one of the following: all, friends, personal"),
       query("title").optional().isString().isLength({ min: 3, max: 90 }).withMessage("title must be a string between 3 and 100 characters"),
       query("ingredients").optional().isArray().withMessage("ingredients must be an array")
       .custom((ingredients) => {
@@ -80,7 +81,6 @@ router.get('/find',
       query("limit").optional().toInt().isInt({ min: 1, max: 90 }).withMessage("limit must be an integer between 1 and 90"),
       query("skip").optional().toInt().isInt({ min: 0, max: 900 }).withMessage("skip must be an integer between 0 and 900"),
       query("count").optional().isBoolean().withMessage("count must be a boolean"),
-      query("category").optional().isString().isIn(["public", "friends", "personal"]).withMessage("category must be one of the following: public, private, personal"),
       checkExact()
    ],
    runValidation,
@@ -106,6 +106,7 @@ Expects 6 arguments from body:
    image: string
    ingredients: ingredientObject[]
    instructions: string[]
+   visibility: enum["public", "friends", "personal"] (optional, default "public")
 
 Route Description:
    - Packages arguments into a single json object
@@ -138,6 +139,7 @@ router.route('/edit')
       body("ingredients.*.portion.amount").toFloat().isFloat({ min: 0.01, max: 90000 }).withMessage("All ingredients portion field must have an amount that is a float between 0.01 and 90000"),
       body("instructions").isArray().withMessage("instructions must be an array"),
       body("instructions.*").isString().isLength({ min: 3, max: 10000 }).withMessage("instructions must be an array of strings"),
+      body("visibility").optional().isString().isIn(["public", "private", "personal"]).withMessage("visibility must be one of the following: public, private, personal"),
       body("_id").optional().isString().isLength({ min: 24, max: 24 }).withMessage("_id must be a string of 24 characters"),
       checkExact(),
       advancedCheckExact({
@@ -146,6 +148,7 @@ router.route('/edit')
          image: true,
          ingredients: [{foodId: true, label: true, foodDescription: true, portion: {measureId: true, measureDescription: true, amount: true}}],
          instructions: [],
+         visibility: true,
          _id: true
       }, "body" )
    ],

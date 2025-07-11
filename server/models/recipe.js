@@ -24,7 +24,8 @@ const recipeSchema = new mongoose.Schema({
         fibre: Number,
         sugar: Number,
         protein: Number,
-    }
+    },
+    visibility: {type: String, enum: ['public', 'private', 'personal'], default: 'public'},
 })
 
 module.exports = mongoose.model("recipe", recipeSchema)

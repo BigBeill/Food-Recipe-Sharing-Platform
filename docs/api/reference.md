@@ -194,7 +194,8 @@ payload: recipeObject
 Type: 
    GET - returns a list of recipes from the database
 
-Expects 5 arguments from query:
+Expects 6 arguments from query:
+   category: enum["public", "private", "personal"] (optional, default "public")
    title: string (optional)
    ingredients: number[] (optional)
    limit: number (optional, default 6)

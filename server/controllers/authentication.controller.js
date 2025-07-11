@@ -15,6 +15,17 @@ const cookieAge = 1000 * 60 * 60 * 24 * 30; // 30 days in milliseconds
 
 
 
+exports.status = async (req, res) => {
+   // check if user is logged in
+   if (req.user?._id) { return res.status(200).json({ message: "user is logged in", user: req.user }); }
+   else { return res.status(401).json({ error: "user is not logged in" }); }
+}
+
+
+
+
+
+
 exports.register = async (req, res) => {
    const { username, email, password } = req.body;
 

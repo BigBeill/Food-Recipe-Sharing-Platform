@@ -7,7 +7,7 @@ const FriendsList = lazy(() => import('./pages/FriendsList.tsx'))
 const Ingredients = lazy(() => import('./pages/Ingredients.tsx'))
 const Login = lazy(() => import('./pages/Login.tsx'))
 const Profile = lazy(() => import('./pages/Profile.tsx'))
-const PublicRecipes = lazy(() => import('./pages/PublicRecipes.tsx'))
+const SearchRecipes = lazy(() => import('./pages/SearchRecipes.tsx'))
 const Register = lazy(() => import('./pages/Register.tsx'))
 const Recipe = lazy(() => import('./pages/Recipe.tsx'))
 const SearchUser = lazy(() => import('./pages/SearchUser.tsx'))
@@ -47,8 +47,8 @@ export const routes = [
     element: withSuspense(Profile),
   },
   {
-    path: '/publicRecipes',
-    element: withSuspense(PublicRecipes),
+    path: '/searchRecipes/:category',
+    element: withSuspense(SearchRecipes),
   },
   {
     path: '/register',

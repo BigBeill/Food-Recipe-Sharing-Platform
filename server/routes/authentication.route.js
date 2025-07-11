@@ -10,6 +10,25 @@ const { runValidation } = require("../library/sanitationUtils");
 
 
 /*
+---------- /status route ------------
+Type: GET — Checks if user is logged in
+
+Expects 0 arguments in query
+
+Route description:
+   - Checks if the user is logged in by verifying the JWT token
+   - If logged in, returns user data
+
+Returns:
+   - 200 User is logged in, returns user data
+   - 401 User is not logged in
+*/
+
+
+
+
+
+/*
 ---------- /register route ------------
 
 Type:

@@ -8,6 +8,7 @@ import { Reorder } from 'framer-motion';
 import axios from '../api/axios';
 import Notebook from '../components/Notebook'
 import { assignIds, removeIds } from '../tools/general'
+import LoadingPage from '../components/Loading';
 
 import RecipeObject from '../interfaces/RecipeObject';
 import UserObject from '../interfaces/UserObject';
@@ -20,12 +21,15 @@ export default function NewEditRecipe () {
 	const { userData } = useOutletContext<{userData: UserObject}>();
 	const { recipeId } = useParams(); //get recipeId if in url
 
+	const [loadingContent, setLoadingContent] = useState<boolean>(false);
+
 	//define required useStates
-	const [title, setTitle] = useState<string>('');
-	const [description, setDescription] = useState<string>('');
-	const [image, setImage] = useState<string>('');
-	const [ingredientList, setIngredientList] = useState<{id: number, content: IngredientObject}[]>([]);
-	const [instructionList, setInstructionList] = useState<{id: number, content: string}[]>([]);
+	const [recipeObject, setRecipeObject] = useState<RecipeObject>({_id: 'unassignedRecipe', title: '', description: '', image: '', ingredients: [], instructions: []});
+	function setTitle(title: string) { setRecipeObject((oldRecipe) => ({ ...oldRecipe, title })); }
+	function setDescription(description: string) { setRecipeObject((oldRecipe) => ({ ...oldRecipe, description })); }
+	function setImage(image: string) { setRecipeObject((oldRecipe) => ({ ...oldRecipe, image })); }
+	function setIngredients(ingredients: IngredientObject[]) { setRecipeObject((oldRecipe) => ({ ...oldRecipe, ingredients })); }
+	function setInstructions(instructions: string[]) { setRecipeObject((oldRecipe) => ({ ...oldRecipe, instructions })); }
 
 	const [errorMessage, setErrorMessage] = useState<string>("");
 
@@ -36,13 +40,11 @@ export default function NewEditRecipe () {
 
 		// if recipeId exists, populate the page with data from server for associated recipe
 		if (recipeId) {
+			setLoadingContent(true);
 			axios({ method:'get', url:`recipe/getObject/${recipeId}` })
-			.then (response => {
-			setTitle(response.title);
-			setDescription(response.description);
-			setImage(response.image);
-			setIngredientList(assignIds(response.ingredients));
-			setInstructionList(assignIds(response.instructions));
+			.then ((returnObject) => {
+				setRecipeObject(returnObject);
+				setLoadingContent(false);
 			})
 			.catch(console.error);
 		}
@@ -50,24 +52,25 @@ export default function NewEditRecipe () {
 
 	//function for sending recipe changes to server
 	function submitRecipe(){
+
 		// check for any empty fields
-		if (!title) { 
+		if (!recipeObject.title) { 
 			setErrorMessage("your recipe must have a title");
 			return; 
 		}
-		if (!description) { 
+		if (!recipeObject.description) { 
 			setErrorMessage("your recipe must have a description"); 
 			return; 
 		}
-		if (!image) { 
+		if (!recipeObject.image) { 
 			setErrorMessage("your recipe must have an image"); 
 			return; 
 		}
-		if (ingredientList.length == 0) { 
+		if (recipeObject.ingredients.length == 0) { 
 			setErrorMessage("your recipe must have at least one ingredient");
 			return; 
 		}
-		if (instructionList.length == 0) { 
+		if (recipeObject.instructions.length == 0) { 
 			setErrorMessage("your recipe must have at least one instruction");
 			return; 
 		}
@@ -77,18 +80,8 @@ export default function NewEditRecipe () {
 		if (!recipeId) method = 'post';
 		else method = 'put';
 
-		//package relevant data into recipeData
-		const recipeData: RecipeObject = {
-			_id: recipeId,
-			title: title,
-			description: description,
-			image: image,
-			ingredients: removeIds(ingredientList),
-			instructions: removeIds(instructionList)
-		}
-
 		//send request to the server
-		axios({ method:method, url:'recipe/edit', data: recipeData })
+		axios({ method:method, url:'recipe/edit', data: recipeObject })
 		.then(() => { navigate('/'); })
 		.catch(console.error);
 	}
@@ -98,32 +91,32 @@ export default function NewEditRecipe () {
 		{
 			content: GeneralInfoPage,
 			props: {
-			newRecipe: !recipeId,
-			title,
-			setTitle,
-			description, 
-			setDescription,
+				newRecipe: !recipeId,
+				title: recipeObject.title,
+				setTitle,
+				description: recipeObject.description,
+				setDescription,
 			}
 		},
 		{ 
 			content: ImagePage,
 			props: {
-			image,
-			setImage,
+				image: recipeObject.image,
+				setImage,
 			}
 		},
 		{ 
 			content: IngredientPage,
 			props: {
-			ingredientList,
-			setIngredientList
+				ingredients: recipeObject.ingredients,
+				setIngredients
 			}
 		},
 		{ 
 			content: InstructionPage,
 			props: {
-			instructionList,
-			setInstructionList
+				instructions: recipeObject.instructions,
+				setInstructions
 			}
 		},
 		{
@@ -134,6 +127,9 @@ export default function NewEditRecipe () {
 			}
 		}
 	]
+
+	// don't load the actual page if content is being grabbed from the server
+	if (loadingContent) { return <LoadingPage /> }
 
 	// call notebook and give it pageList
 	return <Notebook pageList={pageList} />
@@ -194,17 +190,21 @@ function ImagePage ({image, setImage}: ImagePageProps) {
 
 
 interface IngredientPageProps { 
-	ingredientList: {id: number, content: IngredientObject}[];
-	setIngredientList: React.Dispatch<React.SetStateAction<{id: number, content: IngredientObject}[]>>;
+	ingredients: {id: number, content: IngredientObject}[];
+	setIngredients: React.Dispatch<React.SetStateAction<{id: number, content: IngredientObject}[]>>;
 }
 
-function IngredientPage ({ingredientList, setIngredientList}: IngredientPageProps) {
+function IngredientPage ({ingredients, setIngredients}: IngredientPageProps) {
 
-	// define useStates
+	const [ingredientList, setIngredientList] = useState<{id: number, content: IngredientObject}[]>(assignIds(ingredients));
 	const [newIngredient, setNewIngredient] = useState<IngredientObject>({foodId:"", label:"", foodDescription:"", portion: { measureId:"", measureDescription:"", amount: null } });
 	const [conversionFactorsAvailable, setConversionFactorsAvailable] = useState<{measureId: string, measureDescription: string, conversionFactorValue: number }[]>([{ measureId: '1489', measureDescription: 'g', conversionFactorValue: 1 }]);
 	const [ingredientsAvailable, setIngredientsAvailable] = useState<IngredientObject[]>([])
 	const [availableId, setAvailableId] = useState<number>(ingredientList.length)
+
+	useEffect(() => {
+		setIngredients(removeIds(ingredientList));
+	}, [ingredientList]);
 	
 	function updateNewIngredientName (value: string) {
 		setNewIngredient({...newIngredient, foodId:"", foodDescription: value});
@@ -310,24 +310,30 @@ function IngredientPage ({ingredientList, setIngredientList}: IngredientPageProp
 
 
 interface InstructionPageProps {
-	instructionList: {id: number, content: string}[];
-	setInstructionList: React.Dispatch<React.SetStateAction<{id: number, content: string}[]>>;
+	instructions: {id: number, content: string}[];
+	setInstructions: React.Dispatch<React.SetStateAction<{id: number, content: string}[]>>;
 }
 
-function InstructionPage ({instructionList, setInstructionList}: InstructionPageProps) {
-	const [newInstruction, setNewInstruction] = useState('')
-	const [availableId, setAvailableId] = useState(instructionList.length)
+function InstructionPage ({instructions, setInstructions}: InstructionPageProps) {
+
+	const [instructionList, setInstructionList] = useState<{id: number, content: string}[]>(assignIds(instructions));
+	const [availableId, setAvailableId] = useState(instructionList.length);
+	const [newInstruction, setNewInstruction] = useState('');
+
+	useEffect(() => {
+		setInstructions(removeIds(instructionList));
+	}, [instructionList]);
 
 	function addInstruction() {
-		if(newInstruction.length < 3) { return }
+		if(newInstruction.length < 3) { return; }
 
-		setInstructionList(list => [...list, {
+		setInstructionList((list) => [...list, {
 			id: availableId,
 			content: newInstruction
-		}])
+		}]);
 		
-		setAvailableId(availableId+1)
-		setNewInstruction('')
+		setAvailableId(availableId+1);
+		setNewInstruction('');
 	}
 
 	function removeInstruction(index: number){
