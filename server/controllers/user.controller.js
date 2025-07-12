@@ -13,8 +13,8 @@ returns a complete userObject depending on the parameters provided in the reques
 */
 exports.getObject = async (req, res) => {
    // get necessary data from request
-   const _id = req.user?._id;
-   const { userId = _id, relationship = false } = req.params;
+   const clientId = req.user?._id;
+   const { userId = clientId, relationship = false } = req.params;
    if (!userId) { return res.status(401).json({ error: "no user signed in and missing userId field in params" }); }
 
    try {
@@ -24,7 +24,7 @@ exports.getObject = async (req, res) => {
       userData = userData.toObject(); // convert userData to a plain object
 
       // attach current user as target if relationship is true
-      if (relationship) { userData.relationship = {target: _id}; }
+      if (relationship) { userData.relationship = {target: clientId}; }
 
       // create userObject from data in database
       const userObject = await userUtils.verifyObject(userData, true);
