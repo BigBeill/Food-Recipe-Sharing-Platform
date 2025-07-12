@@ -14,7 +14,10 @@ finds a recipeObject based of id provided
 exports.getObject = async (req, res) => {
 
    const userId = req.user?._id;
-   const { recipeId } = req.params;
+   const { recipeId, includeNutrition = false } = req.params;
+
+   if (includeNutrition) { console.log("includeNutrition is true, nutrition field will be attached to recipe object"); }
+   else { console.log("includeNutrition is false, nutrition field will not be attached to recipe object"); }
 
    const recipe = {
       _id: recipeId
@@ -23,7 +26,7 @@ exports.getObject = async (req, res) => {
    // get recipe object from recipeUtils
    let recipeObject;
    try {
-      recipeObject = await recipeUtils.verifyObject(recipe, true);
+      recipeObject = await recipeUtils.verifyObject(recipe, true, includeNutrition);
 
       // return recipe if client is the owner or the recipe is public
       if (recipe.visibility == "public") { return res.status(200).json({ message: "recipe object found", payload: recipeObject }); }
@@ -66,7 +69,7 @@ finds a list of recipes in the database that match the query parameters
 exports.find = async (req, res) => {
 
    // get query parameters from request
-   const { title, ingredients, limit, skip, count, category = 'public' } = req.query;
+   const { title, ingredients, limit, skip, count, category = 'public', includeNutrition = false } = req.query;
    const userId = req.user?._id;
 
    // make sure user is signed in if visibility is not public
@@ -108,7 +111,7 @@ exports.find = async (req, res) => {
    }
 
    try {
-      const recipeObjectArray = await Promise.all(recipeData.map((recipe) => { return recipeUtils.verifyObject(recipe); }));
+      const recipeObjectArray = await Promise.all(recipeData.map((recipe) => { return recipeUtils.verifyObject(recipe, true, includeNutrition); }));
       let payload = { recipeObjectArray };
 
       if (count) {

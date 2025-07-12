@@ -49,7 +49,7 @@ export default function PublicRecipes() {
 
    // handle fetching any content needed from the server
    function fetchRecipes(requestPage: number) {
-      axios({method: 'get', url: `recipe/find?category=${category}${recipeTitle? `&title=${recipeTitle }` : "" }&limit=${requestPage == 1 ? 1 : 2}&skip=${requestPage == 1 ? 0 : (((requestPage - 1) * 2) - 1)}&count=true`})
+      axios({method: 'get', url: `recipe/find?category=${category}${recipeTitle? `&title=${recipeTitle }` : "" }&limit=${requestPage == 1 ? 1 : 2}&skip=${requestPage == 1 ? 0 : (((requestPage - 1) * 2) - 1)}&count=true&includeNutrition=true`})
       .then((response) => {
          if (response.count == undefined) { 
             console.error("server failed to return count"); 
@@ -78,7 +78,7 @@ export default function PublicRecipes() {
       setRecipeTitle(titleParam || ""); // set the recipe title if it exists
       if(foodIdList) { 
          foodIdList?.forEach((foodId) => {
-            axios({method: 'get', url: `ingredient/getObject/${foodId}`})
+            axios({method: 'get', url: `ingredient/getObject/${foodId}/false`})
             .then(response => { setIngredientList((list: IngredientObject[]) => [...list, response]); });
          });
       }

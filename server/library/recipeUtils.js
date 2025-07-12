@@ -11,8 +11,11 @@ recipe: {
 optional input:
 insideDatabase: boolean (default: true) - if false, function will not check the database for missing fields or require _id
 */
-async function verifyObject (recipe, insideDatabase = true) {
+async function verifyObject (recipe, insideDatabase = true, includeNutrition = true) {
    console.log("function called: " + "\x1b[36m%s\x1b[0m", "server/library/recipeUtils.verifyObject");
+
+   if (includeNutrition) { console.log("includeNutrition is true, nutrition field will be attached to recipe object"); }
+   else { console.log("includeNutrition is false, nutrition field will not be attached to recipe object"); }
 
    let recipeObject = {};
    // set recipeObject to the recipe passed
@@ -77,6 +80,16 @@ async function verifyObject (recipe, insideDatabase = true) {
    // make sure all fields are present after searching the database
    invalidFields = await checkInvalidFields();
    if (invalidFields.length != 0) { throw new Error('missing fields in recipe object: ' + invalidFields.join(', ')); }
+
+   if (!includeNutrition) { return {
+      ...(insideDatabase ? { _id: recipeObject._id, } : {}),
+      owner: recipeObject.owner,
+      title: recipeObject.title,
+      description: recipeObject.description,
+      image: recipeObject.image,
+      ingredients: recipeObject.ingredients,
+      instructions: recipeObject.instructions,
+   } }
 
    // check if the nutrition field is present, if not attach it
    if (!recipeObject.nutrition) { recipeObject = await attachNutritionField(recipeObject); }

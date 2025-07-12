@@ -167,17 +167,19 @@ payload: foodGroupObject[]
 
 ## /recipe Routes
 
-### /getObject/:recipeId
+### /getObject/:recipeId/:includeNutrition?
 ```
 Type:
    GET - returns a completed recipe object
 
 Expects 1 argument from params:
    recipeId: integer
+   includeNutrition: boolean (optional, default false)
 
 Route description:
    - Builds a completed recipeObject using the recipeId provided
    - Checks to make sure the client has read access to the recipe
+   - If includeNutrition is true, attaches the nutrition field to the recipeObject
    - Returns the competed recipe object
 
 Returns:
@@ -195,24 +197,25 @@ Type:
    GET - returns a list of recipes from the database
 
 Expects 6 arguments from query:
-   category: enum["public", "private", "personal"] (optional, default "public")
+   category: enum["public", "friends", "personal"] (optional, default "public")
    title: string (optional)
    ingredients: number[] (optional)
    limit: number (optional, default 6)
    skip: number (optional, default 0)
    count: boolean (optional, default false)
-
+   includeNutrition: boolean (optional, default false)
 Route description:
    - Collect a list of recipeObjects based on title and ingredients provided
    - Skip the first {skip} number or recipeObjects found
    - Limit the list to {limit} number of recipeObjects
+   - If {includeNutrition} is true, attach the nutrition field to each recipeObject
    - Return the list to the client
    - If {count} is true, also return the total number of recipeObjects that match search criteria
 
 Returns:
    - 200 recipeObject array returned
    - 400 invalid or missing arguments
-   - 401 client is attempting to search for a private recipeObjects without an access token
+   - 401 client is attempting to use a category other than "all" without an access token
 
 payload: {
    recipeObjectArray: recipeObject[], 

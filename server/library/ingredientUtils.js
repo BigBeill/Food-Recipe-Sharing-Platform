@@ -22,7 +22,8 @@ async function verifyObject (ingredient, includeNutrition = true) {
    console.log("function called: " + "\x1b[36m%s\x1b[0m", "server/library/ingredientUtils.verifyObject");
 
    let ingredientObject = {};
-   // set ingredientObject to the ingredient passed
+
+   // set ingredientObject
    if (ingredient.toObject) { ingredientObject = ingredient.toObject(); }
    else { ingredientObject = ingredient; }
    
@@ -34,7 +35,7 @@ async function verifyObject (ingredient, includeNutrition = true) {
    }
 
    // check if food description is present
-   if (!ingredient.foodDescription) { 
+   if (!ingredient.foodDescription) {
       try {
          const query = `SELECT food_description FROM food_name WHERE food_id = $1 LIMIT 1`;
          const values = [ingredient.foodId];
@@ -197,7 +198,9 @@ async function attachNutritionField (ingredient) {
          const query = `SELECT conversion_factor_value FROM conversion_factor WHERE food_id = $1 AND measure_id = $2 LIMIT 1`;
          const values = [ingredient.foodId, ingredient.portion.measureId];
          const data = await postgresConnection.query(query, values);
-         const conversionFactorValue = parseInt(data.rows[0].conversion_factor_value);
+         let conversionFactorValue = 0;
+         if (data.rows.length == 0) { console.log("\x1b[31m%s\x1b[0m", "WARNING: no conversion factor found for ingredient: ", ingredient.foodId, " and measurement: ", ingredient.portion.measureId); }
+         else { conversionFactorValue = parseInt(data.rows[0]?.conversion_factor_value); }
 
          // apply conversionFactorValue to each item in nutrition
          Object.keys(nutrients).forEach((key) => { nutrients[key] *= conversionFactorValue; });

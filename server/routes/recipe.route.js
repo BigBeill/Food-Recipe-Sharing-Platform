@@ -12,10 +12,12 @@ Type:
 
 Expects 1 argument from params:
    recipeId: integer
+   includeNutrition: boolean (optional, default false)
 
 Route description:
    - Builds a completed recipeObject using the recipeId provided
    - Checks to make sure the client has read access to the recipe
+   - If includeNutrition is true, attaches the nutrition field to the recipeObject
    - Returns the competed recipe object
 
 Returns:
@@ -26,9 +28,10 @@ Returns:
 
 payload: recipeObject
 */
-router.get("/getObject/:recipeId",
+router.get("/getObject/:recipeId/:includeNutrition?",
    [
       param("recipeId").isString({ min: 24, max:24 }).withMessage("recipeId must be a positive integer"),
+      param("includeNutrition").optional().isBoolean().toBoolean().withMessage("includeNutrition must be a boolean"),
       checkExact()
    ],
    runValidation,
@@ -50,10 +53,12 @@ Expects 6 arguments from query:
    limit: number (optional, default 6)
    skip: number (optional, default 0)
    count: boolean (optional, default false)
+   includeNutrition: boolean (optional, default false)
 Route description:
    - Collect a list of recipeObjects based on title and ingredients provided
    - Skip the first {skip} number or recipeObjects found
    - Limit the list to {limit} number of recipeObjects
+   - If {includeNutrition} is true, attach the nutrition field to each recipeObject
    - Return the list to the client
    - If {count} is true, also return the total number of recipeObjects that match search criteria
 
@@ -81,6 +86,7 @@ router.get('/find',
       query("limit").optional().toInt().isInt({ min: 1, max: 90 }).withMessage("limit must be an integer between 1 and 90"),
       query("skip").optional().toInt().isInt({ min: 0, max: 900 }).withMessage("skip must be an integer between 0 and 900"),
       query("count").optional().isBoolean().withMessage("count must be a boolean"),
+      query("includeNutrition").optional().isBoolean().toBoolean().withMessage("includeNutrition must be a boolean"),
       checkExact()
    ],
    runValidation,
