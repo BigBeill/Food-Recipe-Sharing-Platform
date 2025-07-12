@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, useLocation, matchPath } from 'react-router-dom'
 
 import axios from './api/axios';
 import Layout from './Layout'
@@ -26,18 +26,30 @@ function App() {
       });
    }, []);
 
-   //don't load the main page until session startup has been complete
-   if (loading) { return <Loading /> }
+   function RouteWrapper () {
+      const location = useLocation();
+      const route = routes.find((route) => { matchPath(route.path, location.pathname) });
+
+      const requireUser = route?.requireUser
+
+      if (loading && requireUser) {
+         return <Loading />
+      }
+
+      return (
+         <Routes>
+            <Route element={<Layout userData={userData} />}>
+               {routes.map((route) => (
+                  <Route key={route.path} path={route.path} element={route.element} />
+               ))}
+            </Route>
+         </Routes>
+      )
+   }
 
    return (
       <BrowserRouter>
-         <Routes>
-         <Route element={<Layout userData={userData} />}>
-            {routes.map((route) => (
-               <Route key={route.path} path={route.path} element={route.element} />
-            ))}
-         </Route>
-         </Routes>
+         <RouteWrapper />
       </BrowserRouter>
    )
 }

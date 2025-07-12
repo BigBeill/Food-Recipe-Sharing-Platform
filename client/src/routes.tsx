@@ -25,46 +25,57 @@ export const routes = [
   {
     path: '/',
     element: withSuspense(LandingPage),
+    requireUser: false
   },
   {
     path: '/aboutMe',
     element: withSuspense(AboutMe),
+    requireUser: false
   },
   {
     path: '/editRecipe/:recipeId?',
     element: withSuspense(EditRecipe),
+    requireUser: true
   },
   {
     path: '/friendsList/:folderId?',
     element: withSuspense(FriendsList),
+    requireUser: true
   },
   {
     path: '/login',
     element: withSuspense(Login),
+    requireUser: false
   },
   {
     path: '/profile/:userId?',
     element: withSuspense(Profile),
+    requireUser: true
   },
   {
     path: '/searchRecipes/:category',
     element: withSuspense(SearchRecipes),
+    requireUser: false
   },
   {
     path: '/register',
     element: withSuspense(Register),
+    requireUser: false
   },
   {
     path: '/recipe/:recipeId?',
     element: withSuspense(Recipe),
+    requireUser: false
   },
   {
     path: 'searchUser',
     element: withSuspense(SearchUser),
+    requireUser: false
   },
   {
     path: '/ingredients/:groupID?/:ingredientID?',
     element: withSuspense(Ingredients),
+    requireUser: false
   },
   {
     path: '*',
