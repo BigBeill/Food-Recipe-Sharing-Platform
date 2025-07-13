@@ -222,7 +222,6 @@ function IngredientPage ({ingredients, setIngredients}: IngredientPageProps) {
 	}
 
 	function ingredientSelected (ingredient: IngredientObject) {
-		console.log("ingredient selected:", ingredient)
 		setNewIngredient((oldIngredient) => ({ ...oldIngredient, foodId: ingredient.foodId, foodDescription: ingredient.foodDescription }));
 		axios({ method: 'get', url:`ingredient/conversionOptions/${ingredient.foodId}` })
 		.then((response) => { setConversionFactorsAvailable(response); });
@@ -243,8 +242,6 @@ function IngredientPage ({ingredients, setIngredients}: IngredientPageProps) {
 				})()
 			} 
 		]);
-
-		console.log("ingredientList:", ingredientList);
 
 		setAvailableId( availableId+1 );
 		setNewIngredient({foodId: "", foodDescription: "", label:"", portion: { measureId: "", measureDescription: "", amount: null }});
@@ -320,6 +317,8 @@ function InstructionPage ({instructions, setInstructions}: InstructionPageProps)
 	const [availableId, setAvailableId] = useState(instructionList.length);
 	const [newInstruction, setNewInstruction] = useState('');
 
+	const [changingInstructionIndex, setChangingInstructionIndex] = useState<number | null>(null);
+
 	useEffect(() => {
 		setInstructions(removeIds(instructionList));
 	}, [instructionList]);
@@ -327,12 +326,20 @@ function InstructionPage ({instructions, setInstructions}: InstructionPageProps)
 	function addInstruction() {
 		if(newInstruction.length < 3) { return; }
 
-		setInstructionList((list) => [...list, {
-			id: availableId,
-			content: newInstruction
-		}]);
-		
-		setAvailableId(availableId+1);
+		if (changingInstructionIndex != null) {
+			let tempArray = instructionList;
+			tempArray[changingInstructionIndex].content = newInstruction;
+			setInstructionList(tempArray);
+			setChangingInstructionIndex(null);
+		}
+		else {
+			setInstructionList((list) => [...list, {
+				id: availableId,
+				content: newInstruction
+			}]);
+			setAvailableId(availableId+1);
+		}
+
 		setNewInstruction('');
 	}
 
@@ -342,29 +349,42 @@ function InstructionPage ({instructions, setInstructions}: InstructionPageProps)
 		setInstructionList(tempArray)
 	}
 
+	function updateInstruction(index: number, content: string) {
+		setChangingInstructionIndex(index);
+		setNewInstruction(content);
+	}
+
+	function cancelUpdateInstruction() {
+		setChangingInstructionIndex(null);
+		setNewInstruction('');
+	}
+
 	return (
 		<div className='standardContent'>
 			<h2>Recipe Instructions</h2>
 			<Reorder.Group className='displayList' axis='y' values={instructionList} onReorder={setInstructionList}>
-			{instructionList.map((item, index) => (
-				<Reorder.Item key={item.id} value={item} className='listItem'>
-					<div className='contents'>
-					<h4>Step {index + 1} </h4>
-					<p>{item.content}</p>
-					</div>
-					<div className='options'>
-					<FontAwesomeIcon icon={faTrash} style={{color: "#575757",}} onClick={() => removeInstruction(index)} />
-					<FontAwesomeIcon icon={faPen} style={{color: "#575757",}} />
-					</div>
-				</Reorder.Item>
-			))}
+				{instructionList.map((item, index) => (
+					<Reorder.Item key={item.id} value={item} className='listItem'>
+						<div className='contents'>
+							<h4>Step {index + 1} </h4>
+							<p>{item.content}</p>
+						</div>
+							<div className='options'>
+							<FontAwesomeIcon icon={faTrash} style={{color: "#575757",}} onClick={() => { removeInstruction(index) }} />
+							<FontAwesomeIcon icon={faPen} style={{color: "#575757",}} onClick={() => { updateInstruction(index, item.content) }} />
+						</div>
+					</Reorder.Item>
+				))}
 			</Reorder.Group>
 
 			<div className='textInput additionalMargin'>
-			<label htmlFor='newInstruction'>New Instruction</label>
-			<textarea id="newInstruction" rows={6} value={newInstruction} onChange={(event) => {setNewInstruction(event.target.value)}} placeholder='add a new instruction'/>
+				<label htmlFor='newInstruction'>New Instruction</label>
+				<textarea id="newInstruction" rows={6} value={newInstruction} onChange={(event) => {setNewInstruction(event.target.value)}} placeholder='add a new instruction'/>
 			</div>
-			<button className="darkText additionalMargin" onClick={() => addInstruction()}>Add Instruction</button>
+			<div className='devisableButton additionalMargin'>
+				<button onClick={() => { addInstruction(); }}>{changingInstructionIndex != null ? "Update" : "Add" } Instruction</button>
+				<button className={changingInstructionIndex != null ? 'showButton' : 'hideButton'} onClick={() => { cancelUpdateInstruction() }} >Revert Changes</button>
+			</div>
 		</div>
 	)
 }
