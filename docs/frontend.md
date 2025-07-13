@@ -1,14 +1,17 @@
-# Component Documentation
-On the client side, some components in this project can be a bit tricky to use at first. This section explains how to use them properly.
+# Frontend Design
+Framework used: **React Vite**
 
-## Notebook.tsx Documentation
+## Component Documentation
+The frontend has components setup for the developer to use for their pages, This section is dedicated to documenting those components
+
+### Notebook.tsx Documentation
 location: client/src/components/Notebook.jsx
 
 The Notebook component simulates a flip-book style UI for content you wish to display to the user.
 It will display two react components at a time, inside the notebook pages (each page sharing the screen space width wise).
 Any additional react components will be accessible through a pagination bar under the notebook.
 
-### Using Notebook.tsx
+#### Using Notebook.tsx
 
 Notebook accepts the following 4 props:
 - componentList
@@ -32,19 +35,19 @@ Notebook accepts the following 4 props:
 
 Note: looking at the naming conventions, you may notice that some props reference pages and others reference components, a page is just a set of 2 components. So the 5th and 6th components should be displayed on page 3.
 
-### componentList Structure
+#### componentList Structure
 ComponentList is an array of JSON objects. Two of these objects make up a single page. Each object consists of two fields:
  - content: the react component that will be displayed on the notebook page
  - props: an object containing the props being passed to the content component (field name is what the content component reads the prop as)
 
-### requestNewPage structure
+#### requestNewPage Structure
 This is a function that accepts one numerical prop. When the Notebook tries to display a page that it doesn't currently have access to the components for (like trying to display components 5 and 6 when only having access to 4 components) this function will be called, passing the page trying to be accessed as a numerical value prop. Its then this functions job to figure out how to handle accessing the page that's not currently accessible.
 
-### Example Code
+#### Example Code
 Some sample code for creating a paginated list while utilizing Notebook.jsx:
 
 Note: in this example RecipePreview.jsx is a regular react component that takes a recipe as a prop
-```js
+```tsx 
 import React, { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import Notebook from '../components/Notebook';

@@ -51,7 +51,7 @@ Start date: December 15th, 2023
 	<li>Run the `.bat` file (assuming your on windows)</li>
 </ol>
 
-### Setting up the databases
+#### Setting up the databases
 <ol>
 	<li>Create your own MongoDB cluster online.</li>
 	<li>Update the connection string in `server/config/connectMongo.js`.</li>

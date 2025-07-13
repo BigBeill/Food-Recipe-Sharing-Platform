@@ -1,0 +1,18 @@
+site_name: Big Beill's Greenhouse
+
+nav:
+  - Home: intro.md
+  - Frontend: frontend.md
+  - Backend: backend.md
+  - Database: database.md
+
+theme:
+  name: material
+  highlightjs: true
+
+markdown_extensions:
+  - pymdownx.highlight
+  - pymdownx.superfences
+  - toc:
+      permalink: true
+      toc_depth: 3

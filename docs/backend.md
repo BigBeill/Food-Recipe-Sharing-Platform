@@ -1,9 +1,115 @@
-# API Documentation
-This project uses REST API's for communication between client and server, this section of the documentation is dedicated to how to use them.
+# Backend Design
+Framework used: **Express JS**
 
-## /Authentication Routes
+This project uses RESTful API's for communication between client and server. Additionally, developers working on the backend are required to follow strict variable naming convention rules.
 
-### /register
+## Backend Objects Documentation
+The backend keeps data organized by requiring all variables ending with "Object" to match one of the following JSON structures. 
+
+### Allowed JSON Structures
+Any JSON object with one of the listed names must match the structure underneath
+
+#### foodGroupObject
+```js
+{
+   foodGroupId: number, //primary key
+   foodGroupName: string
+}
+```
+
+####  ingredientObject
+```js
+{
+   foodId: number, //primary key
+   foodDescription: string,
+   portion?: {
+      measureId: number,
+      measureDescription?: string,
+      amount: number
+   },
+   nutrition?: {
+      calories: number,
+      fat: number,
+      cholesterol: number,
+      sodium: number,
+      potassium: number,
+      carbohydrates: number,
+      fibre: number,
+      sugar: number,
+      protein: number
+   }
+}
+```
+
+#### conversionObject
+```js
+{
+   measureId: number,
+   measureDescription?: string,
+   conversionFactorValue: number,
+}
+```
+
+#### recipeObject
+```js
+{
+   _id: mongoose.SchemaTypes.ObjectId,
+   owner: mongoose.SchemaTypes.ObjectId,
+   title: string,
+   description: string,
+   image: string, // to be changed
+   ingredients: Array<ingredientObject>, // must include portion and nutrient field 
+   instructions: Array<string>,
+   nutrition: {
+      calories: number,
+      fat: number,
+      cholesterol: number,
+      sodium: number,
+      potassium: number,
+      carbohydrates: number,
+      fibre: number,
+      sugar: number,
+      protein: number
+   }
+}
+```
+
+#### userObject
+```js
+{
+   _id: mongoose.SchemaTypes.ObjectId,
+   username: string,
+   email: string,
+   bio: string,
+   relationship?: { // relationship with given target (usually current signed in user)
+      _id: mongoose.SchemaTypes.ObjectId,
+      target: mongoose.SchemaTypes.ObjectId,
+      type: number // 0 = no relationship, 1 = friends, 2 = received friend request, 3 sent friend request, 4 = self
+   }
+}
+```
+
+#### userFolderObject
+```js
+{
+   _id: mongoose.SchemaTypes.ObjectId,
+   folders: Array<userFolderObject | mongoose.SchemaTypes.ObjectId>,
+   users: Array<userObject | mongoose.SchemaTypes.ObjectId>
+}
+```
+
+## Router Documentation
+There are 4 routers the client can utilize:
+
+- Authentication router
+- Ingredient router
+- Recipe router
+- User router
+
+### /authentication Routes
+The authentication router is used for managing a clients access to a user token
+
+#### /register
 ```
 Type:
    POST - Registers a new user
@@ -25,7 +131,7 @@ Returns:
    - 409 username or email is already registered
 ```
 
-### /login
+#### /login
 ```
 Type:
    POST - Logs user in
@@ -47,7 +153,7 @@ Returns:
    - 401 username or password is incorrect
 ```
 
-### /refresh
+#### /refresh
 ```
 Type:
    POST - Issues a new user token
@@ -64,7 +170,7 @@ Returns:
    - 401 no valid refresh token was found
 ```
 
-### /logout
+#### /logout
 ```
 Type:
    POST - Logs the current user out
@@ -79,9 +185,10 @@ Returns:
    - 400 arguments were provided with this request
 ```
 
-## /ingredient Routes
+### /ingredient Routes
+The ingredient router is used to manage the clients access to any ingredient related objects inside the database
 
-### /getObject/:foodId/:measureId?/:amount?
+#### /getObject/:foodId/:measureId?/:amount?
 ```
 Type:
    GET - Returns a completed ingredient object
@@ -103,7 +210,7 @@ Returns:
 payload: IngredientObject
 ```
 
-### /list
+#### /list
 ```
 Type:
    GET - returns a list of ingredientObjects
@@ -130,7 +237,7 @@ payload: {
 }
 ```
 
-### /conversionOptions/:foodId
+#### /conversionOptions/:foodId
 ```
 Type:
    GET - returns a list of conversion options for a given foodId
@@ -148,7 +255,7 @@ Returns:
 payload: conversionObject[]
 ```
 
-### /groups
+#### /groups
 ```
 Type:
    GET - returns a list of all food groups inside postgres
@@ -165,9 +272,10 @@ Method 'GET' returns:
 payload: foodGroupObject[]
 ```
 
-## /recipe Routes
+### /recipe Routes
+The recipe router is used to manage the clients access to any recipe related objects inside the database
 
-### /getObject/:recipeId/:includeNutrition?
+#### /getObject/:recipeId/:includeNutrition?
 ```
 Type:
    GET - returns a completed recipe object
@@ -191,7 +299,7 @@ Returns:
 payload: recipeObject
 ```
 
-### /find
+#### /find
 ```
 Type: 
    GET - returns a list of recipes from the database
@@ -223,7 +331,7 @@ payload: {
 }
 ```
 
-### /edit
+#### /edit
 ```
 Type:
    POST - Creates a new recipe in the database
@@ -251,9 +359,10 @@ Returns:
    - 403 client does not have write access to the recipeObject
 ```
 
-## /user Routes
+### /user Routes
+The user router is used to manage the clients access to any user related objects inside the database
 
-### /getObject/:userId?/:relationship?
+#### /getObject/:userId?/:relationship?
 ```
 Type:
    GET - return a userObject from the database
@@ -276,7 +385,7 @@ Returns:
 payload: userObject
 ```
 
-### /find
+#### /find
 ```
 Type:
    GET - return a list of users from the database
@@ -309,7 +418,7 @@ payload: {
 }
 ```
 
-### /folder
+#### /folder
 ```
 Type: 
    GET - return a list of folders from the database
@@ -339,7 +448,7 @@ payload: {
 }
 ```
 
-### /updateAccount
+#### /updateAccount
 ```
 Type:
    POST - change the userObject saved in the database for current user
@@ -359,7 +468,7 @@ Returns:
    - 401 access token could not be found
 ```
 
-### /sendFriendRequest
+#### /sendFriendRequest
 ```
 Type:
    POST - creates a friend request in server database
@@ -379,7 +488,7 @@ Returns:
 payload: friendRequestObject
 ```
 
-### /processFriendRequest
+#### /processFriendRequest
 ```
 Type:
    POST - logs user out
@@ -405,7 +514,7 @@ Returns:
 payload: friendshipObject
 ```
 
-### /deleteFriendRequest
+#### /deleteFriendRequest
 ```
 Type:
    POST - deletes a friendship object from the database
