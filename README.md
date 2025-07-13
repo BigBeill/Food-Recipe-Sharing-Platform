@@ -3,6 +3,7 @@
 
 Big Beill's Greenhouse is a personalized project created by Mackenzie Neill, a graduate of Trent University's Computer Science program. This project serves as a platform to explore and refine skill's in web-development, networking, and cybersecurity. As an experimental project, it's a continuous work in progress and isn't being actively monitored for security vulnerabilities. Consequently, data protection is limited, and users should exercise caution when using the application.
 
+More in depth documentation can be found at [https://bigbeill.github.io/Food-Recipe-Sharing-Platform/](https://bigbeill.github.io/Food-Recipe-Sharing-Platform/) <br>
 A live demo can be found at: [www.big-beills-greenhouse.ca](https://www.big-beills-greenhouse.ca)
 
 ## General Overview
