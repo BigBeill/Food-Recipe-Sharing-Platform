@@ -1,7 +1,3 @@
----
-sidebar_position: 1
----
-
 # Big Beill's Greenhouse
 *A showcase project demonstrating web-development, networking, and cybersecurity skills.*
 
@@ -10,7 +6,7 @@ Big Beill's Greenhouse is a personalized project created by Mackenzie Neill, a g
 A live demo can be found at: [www.big-beills-greenhouse.ca](https://www.big-beills-greenhouse.ca)
 
 ## General Overview
-Author: Mackenzie Neill 
+Author: Mackenzie Neill <br>
 Start date: December 15th, 2023
 
 ### Features
