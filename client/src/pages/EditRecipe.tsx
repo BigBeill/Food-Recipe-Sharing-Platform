@@ -24,7 +24,7 @@ export default function NewEditRecipe () {
 	const [loadingContent, setLoadingContent] = useState<boolean>(false);
 
 	//define required useStates
-	const [recipeObject, setRecipeObject] = useState<RecipeObject>({_id: 'unassignedRecipe', title: '', description: '', image: '', ingredients: [], instructions: []});
+	const [recipeObject, setRecipeObject] = useState<RecipeObject>({_id: 'unsavedRecipe', title: '', description: '', image: '', ingredients: [], instructions: []});
 	function setTitle(title: string) { setRecipeObject((oldRecipe) => ({ ...oldRecipe, title })); }
 	function setDescription(description: string) { setRecipeObject((oldRecipe) => ({ ...oldRecipe, description })); }
 	function setImage(image: string) { setRecipeObject((oldRecipe) => ({ ...oldRecipe, image })); }
@@ -74,6 +74,9 @@ export default function NewEditRecipe () {
 			setErrorMessage("your recipe must have at least one instruction");
 			return; 
 		}
+
+		//remove recipeId if its unsaved
+		if (recipeObject._id == 'unsavedRecipe') { delete recipeObject._id }
 
 		//define what type of request is being sent to the server
 		let method: string;
@@ -212,11 +215,11 @@ function IngredientPage ({ingredients, setIngredients}: IngredientPageProps) {
 		else setIngredientsAvailable([]);
 	}
 
-	//fetch up to 10 ingredients from database that have similar names to value given
+	//fetch up to 12 ingredients from database that have similar names to value given
 	function searchIngredients (value: string) { 
-		axios({ method: 'get', url:`ingredient/list?foodDescription=${value}&limit=12` })
-		.then(response => {
-			setIngredientsAvailable(response);
+		axios({ method: 'get', url:`ingredient/find?foodDescription=${value}&limit=12` })
+		.then((response) => {
+			setIngredientsAvailable(response.ingredientObjectArray);
 		})
 		.catch(error => { console.error('unable to fetch ingredients:', error); });
 	}
@@ -292,7 +295,7 @@ function IngredientPage ({ingredients, setIngredients}: IngredientPageProps) {
 						<input type='text' className='mainInput' value={newIngredient.foodDescription} onChange={(event) => {updateNewIngredientName(event.target.value)}} placeholder='Ingredient Description'/>
 						<ul className={`${ingredientsAvailable.length == 0 ? 'hidden' : ''}`}>
 						{ingredientsAvailable.map((ingredient, index) => (
-								<li key={index} onClick={() => ingredientSelected(ingredient)}> {ingredient.foodDescription} </li>
+								<li key={index} onClick={() => ingredientSelected(ingredient)}> {ingredient.commonName ? ingredient.commonName : ingredient.foodDescription} </li>
 						))}
 						</ul>
 					</div>

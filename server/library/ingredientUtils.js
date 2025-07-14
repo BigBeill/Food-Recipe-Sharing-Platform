@@ -52,7 +52,9 @@ async function verifyObject (ingredient, includeNutrition = true) {
    if (!ingredientObject.portion) {
       return {
          foodId: ingredientObject.foodId,
-         foodDescription: ingredientObject.foodDescription
+         foodDescription: ingredientObject.foodDescription,
+         ...(ingredientObject.label && { label: ingredientObject.label }),
+         ...(ingredientObject.commonName && { commonName: ingredientObject.commonName }),
       }
    }
 
@@ -61,6 +63,10 @@ async function verifyObject (ingredient, includeNutrition = true) {
    if (typeof ingredientObject.portion.measureId != 'number') { throw new Error('measureId field in ingredientObject portion is not a number'); }
    if (!ingredientObject.portion.amount) { throw new Error('missing amount field in ingredientObject portion'); }
    if (typeof ingredientObject.portion.amount != 'number') { throw new Error('amount field in ingredientObject portion is not a number'); }
+
+   // check optional fields
+   if (ingredientObject.label && typeof ingredientObject.label != 'string') { throw new Error('label field in ingredientObject is not a string'); }
+   if (ingredientObject.commonName && typeof ingredientObject.commonName != 'string') { throw new Error('commonName field in ingredientObject is not a string'); }
 
    // check if measureDescription is present, if not attach it
    if (!ingredientObject.portion.measureDescription) {
@@ -81,8 +87,10 @@ async function verifyObject (ingredient, includeNutrition = true) {
    if (!includeNutrition) {
       return {
          foodId: ingredientObject.foodId,
-         ...(ingredientObject.label && { label: ingredientObject.label }),
          foodDescription: ingredientObject.foodDescription,
+         ...(ingredientObject.label && { label: ingredientObject.label }),
+         ...(ingredientObject.commonName && { commonName: ingredientObject.commonName }),
+
          portion: {
             measureId: ingredientObject.portion.measureId,
             measureDescription: ingredientObject.portion.measureDescription,
@@ -106,8 +114,9 @@ async function verifyObject (ingredient, includeNutrition = true) {
    // make sure no extra fields are present
    return {
       foodId: ingredientObject.foodId,
-      ...(ingredientObject.label && { label: ingredientObject.label }),
       foodDescription: ingredientObject.foodDescription,
+      ...(ingredientObject.label && { label: ingredientObject.label }),
+      ...(ingredientObject.commonName && { commonName: ingredientObject.commonName }),
       portion: {
          measureId: ingredientObject.portion.measureId,
          measureDescription: ingredientObject.portion.measureDescription,

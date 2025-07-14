@@ -22,6 +22,8 @@ Any JSON object with one of the listed names must match the structure underneath
 {
    foodId: number, //primary key
    foodDescription: string,
+   commonName?: string,
+   label?: string,
    portion?: {
       measureId: number,
       measureDescription?: string,
@@ -210,16 +212,18 @@ Returns:
 payload: IngredientObject
 ```
 
-#### /list
+#### /find
 ```
 Type:
    GET - returns a list of ingredientObjects
 
-Expects 4 arguments in query:
+Expects 4 arguments in params:
    foodDescription: string (optional)
    foodGroupId: string (optional)
    skip: number (optional, default 0)
    limit: number (optional, default 15)
+   includeCommonNames: boolean (optional, default true)
+   count: boolean (optional, default false)
 
 Route description:
    - Collects a list of ingredientObjects from the postgres database

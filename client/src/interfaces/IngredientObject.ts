@@ -1,7 +1,8 @@
 export default interface IngredientObject {
    foodId: string;
-   label?: string;
    foodDescription: string;
+   label?: string;
+   commonName?: string;
    portion?: {
       measureId: string;
       measureDescription: string;

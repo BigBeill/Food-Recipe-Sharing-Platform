@@ -1,6 +1,7 @@
 const postgresConnection = require('../config/postgres');
 const { conversionFactorList } = require('../library/canadianNutrientFileUtils');
 const ingredientUtils = require('../library/ingredientUtils');
+const { update } = require('./recipe.controller');
 
 
 /*
@@ -41,43 +42,115 @@ exports.getObject = async (req, res) => {
 
 /*
 returns a list of ingredients based on search criteria
-@route: GET /ingredient/list
+@route: GET /ingredient/find
 */
-exports.list = async (req, res) => {
-   const {foodDescription, foodGroupId, skip = 0, limit = 15} = req.query
+exports.find = async (req, res) => {
+   const {foodDescription, foodGroupId, skip = 0, limit = 15, includeCommonNames = true, count = false} = req.query
 
-   // collect ingredientsData from the database
+   // keep track of whats been grabbed from the database so far
+   let currentCount = 0
    let ingredientDataArray = [];
+
+   // ingredientObjectArray will be used to store the final results at the end
+   let ingredientObjectArray = [];
+
+   // function for adding the offset and limit to a query and values array
+   function attachQueryLimits(query, values) {
+
+      // add the offset field if applicable
+      const updatedSkip = skip - currentCount;
+      if (skip > 0) {
+         query += ` OFFSET $${values.length + 1}`;
+         values.push(updatedSkip);
+      }
+
+      // add the limit field if applicable
+      const updatedLimit = limit - currentCount;
+      query += ` LIMIT $${values.length + 1}`;
+      if (updatedLimit > 0) { values.push(updatedLimit); }
+      else { values.push(0); }
+
+      // only query must be returned functions send arrays to functions as pointers but not strings
+      return query;
+   }
+
+   // this try block collects all ingredients matching the search criteria inside the common_food_names table
+   // this only gets used if includeCommonNames is true and foodGroupId is not provided
    try {
-      // find all ingredients
-      let query = 'SELECT food_id, Food_description FROM food_name ';
-      let values = [];
-      
-      // add foodDescription restriction
-      if (foodDescription) {
-         values = foodDescription.split(" ");
-         values = values.map(substring => `%${substring}%`);
-         query += 'WHERE food_description ILIKE $1 ';
-         for (let i = 2; i <= values.length; i++) { query += `AND food_description ILIKE $${i} `; }
+      if (includeCommonNames && !foodGroupId && currentCount < limit) { 
+         
+         let queryFilter = ''
+         let values = [];
+
+         // create the foodDescription portion of the query filter
+         if (foodDescription) {
+            const foodDescriptionArray = foodDescription.split(" ");
+            queryFilter += ' WHERE common_name ILIKE $1';
+            for (let i = 2; i <= foodDescriptionArray.length; i++) { queryFilter += ` AND food_description ILIKE $${i}`; }
+            values = foodDescriptionArray.map((substring) => { return `%${substring}%` });
+         }
+
+         // get a count of all results that match search criteria
+         let query = 'SELECT COUNT(*) FROM common_food_names' + queryFilter;
+         const countData = await postgresConnection.query(query, values);
+
+         // collect the actual data from the common_food_names table
+         query = 'SELECT food_id, common_name FROM common_food_names' + queryFilter;
+         query = attachQueryLimits(query, values);
+         const ingredientData = await postgresConnection.query(query, values);
+
+         // send the collected variables to the parent function
+         currentCount += parseInt(countData.rows[0].count);
+         ingredientDataArray = ingredientData.rows;
       }
+   }
+   catch (error) {
+      console.log("\x1b[31m%s\x1b[0m", "ingredient.controller.find failed... unable to collect common ingredient names from database");
+      console.error(error);
+      return res.status(500).json({ error: 'server failed to collect ingredient list from database' });
+   }
 
-      // add foodGroup restriction
-      if (foodGroupId) {
-         if (values.length == 0) { query += 'WHERE '; }
-         else { query += 'AND '; }
-         values.push(foodGroupId);
-         query += `food_group_id=$${values.length} `;
+   // this try block collects all ingredients matching the search criteria inside the food_name table
+   // this only gets used if ingredientDataArray has not yet reached its limit
+   try {
+      if (currentCount < limit) {
+
+         let queryFilter = '';
+         let values = [];
+
+         // create the foodDescription portion of the query filter
+         if (foodDescription) {
+            const foodDescriptionArray = foodDescription.split(" ");
+            queryFilter += ' WHERE food_description ILIKE $1';
+            for (let i = 2; i <= foodDescriptionArray.length; i++) { queryFilter += ` AND food_description ILIKE $${i}`; }
+            values = foodDescriptionArray.map((substring) => { return `%${substring}%` });
+         }
+
+         // create the foodGroupId portion of the query filter
+         if (foodGroupId) {
+            if (filterValues.length == 0) { queryFilter += ' WHERE'; }
+            else { queryFilter += ' AND'; }
+            queryFilter += ` food_group_id=$${filterValues.length + 1}`;
+            values.push(foodGroupId);
+         }
+
+         // if count is true, get the count of all results that match search criteria
+         let countData;
+         if (count) {
+            query = 'SELECT COUNT(*) FROM food_name' + queryFilter;
+            values = filterValues;
+            countData = await postgresConnection.query(query, values);
+         }
+
+         // collect the actual data from the food_name table and add it to ingredientDataArray
+         let query = 'SELECT food_id, Food_description FROM food_name' + queryFilter;
+         query = attachQueryLimits(query, values);
+         const ingredientData = await postgresConnection.query(query, values);
+
+         // send the collected variables to the parent function
+         if(countData) { currentCount += parseInt(countData.rows[0].count); } 
+         ingredientDataArray = [...ingredientDataArray, ...ingredientData.rows];
       }
-
-      // tag the skip on to the end of the query
-      values.push(skip);
-      query += ` OFFSET $${values.length}`;
-
-      // tag the limit on to the end of the query
-      values.push(limit);
-      query += ` LIMIT $${values.length}`;
-
-      ingredientDataArray = await postgresConnection.query(query, values);
    }
    catch (error) {
       console.log("\x1b[31m%s\x1b[0m", "ingredient.controller.list failed... unable to collect ingredient list from database");
@@ -85,12 +158,10 @@ exports.list = async (req, res) => {
       return res.status(500).json({ error: 'server failed to collect ingredient list from database' });
    }
 
-   // format ingredientDataArray into usable objects
-   let ingredientObjectArray = [];
+   // This try block formats ingredientDataArray into usable objects
    try {
-      // change the data to make it usable by the client
-      ingredientObjectArray = await Promise.all( ingredientDataArray.rows.map(async (ingredientData) => {
-         const formattedIngredient = { foodId: ingredientData.food_id, foodDescription: ingredientData.food_description };
+      ingredientObjectArray = await Promise.all( ingredientDataArray.map(async (ingredientData) => {
+         const formattedIngredient = { foodId: ingredientData.food_id, foodDescription: ingredientData.food_description, commonName: ingredientData.common_name };
          const ingredientObject = await ingredientUtils.verifyObject(formattedIngredient, false);
          return ingredientObject;
       }));
@@ -101,7 +172,10 @@ exports.list = async (req, res) => {
       return res.status(500).json({ error: 'server failed to convert ingredient list into usable objects' });
    }
 
-   return res.status(200).json({ message: "ingredient list collected from server", payload: ingredientObjectArray });
+   payload = { ingredientObjectArray }
+   if (count) { payload.count = currentCount; }
+
+   return res.status(200).json({ message: "ingredient list collected from server", payload });
 }
 
 

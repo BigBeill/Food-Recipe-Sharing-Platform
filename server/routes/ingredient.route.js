@@ -42,7 +42,7 @@ router.get('/getObject/:foodId/:measureId?/:amount?',
 
 
 /*
------------- /list route ------------
+------------ /find route ------------
 
 Type:
    GET - returns a list of ingredientObjects
@@ -52,6 +52,8 @@ Expects 4 arguments in params:
    foodGroupId: string (optional)
    skip: number (optional, default 0)
    limit: number (optional, default 15)
+   includeCommonNames: boolean (optional, default true)
+   count: boolean (optional, default false)
 
 Route description:
    - Collects a list of ingredientObjects from the postgres database
@@ -68,16 +70,18 @@ payload: {
    count: number
 }
 */
-router.get('/list',
+router.get('/find',
    [
       query("foodDescription").optional().isString().trim().escape().withMessage("foodDescription must be a string"),
       query("foodGroupId").optional().isString().trim().escape().withMessage("foodGroupId must be a string"),
       query("skip").optional().toInt().isInt({ min: 0 }).withMessage("skip must be a positive integer"),
       query("limit").optional().toInt().isInt({ min: 1, max: 60 }).withMessage("limit must be a positive integer between 1 and 60"),
+      query("includeCommonNames").optional().isBoolean().toBoolean().withMessage("skipCommonNames must be a boolean"),
+      query("count").optional().isBoolean().toBoolean().withMessage("count must be a boolean"),
       checkExact()
    ],
    runValidation,
-   ingredientController.list
+   ingredientController.find
 );
 
 

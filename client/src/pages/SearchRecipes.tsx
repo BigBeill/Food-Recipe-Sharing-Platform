@@ -43,7 +43,6 @@ export default function PublicRecipes() {
          const foodIdList: string[] = ingredients.map((ingredient) => { return ingredient.foodId;  }); // get a list of food ids
          newParams.foodIdList = foodIdList.join(','); // save them in the url as a comma separated string
       }
-      console.log("newParams:", newParams);
       setSearchParams(newParams); // update the url with the new params
    }
 
@@ -115,7 +114,6 @@ export default function PublicRecipes() {
       })
 
       setPageList(newPageList);
-      console.log("useEffect 3 finished");
    }, [recipeList]);
    
    return <Notebook pageList={pageList} parentPageNumber={pageNumber} requestNewPage={handlePageChange} pageCount={recipeCount + 1}/>
@@ -146,8 +144,8 @@ function MainPage({parentTitle, parentIngredientList, handleSubmit}: MainPagePro
          return; 
       }
 
-      axios({method: 'get', url: `ingredient/list?foodDescription=${value}&limit=12`})
-      .then(response => { setIngredientsAvailable(response); })
+      axios({method: 'get', url: `ingredient/find?foodDescription=${value}&limit=12`})
+      .then(response => { setIngredientsAvailable(response.ingredientObjectArray); })
       .catch(error => { console.error('unable to fetch ingredients:', error); });
    }
 
@@ -189,9 +187,9 @@ function MainPage({parentTitle, parentIngredientList, handleSubmit}: MainPagePro
             <div className='activeSearchBar bottom'> {/* ingredient search bar */}
                <input type='text' value={newIngredient.foodDescription} onChange={handleIngredientInputChange} placeholder='Ingredient Name'/>
                <ul className={`${ingredientsAvailable.length == 0 ? 'hidden' : ''}`}>
-               {ingredientsAvailable.map((ingredient, index) => (
-                  <li key={index} onClick={() => selectIngredient(ingredient)}> {ingredient.foodDescription} </li>
-               ))}
+                  {ingredientsAvailable.map((ingredient, index) => (
+                     <li key={index} onClick={() => selectIngredient(ingredient)}> {ingredient.commonName ? ingredient.commonName : ingredient.foodDescription} </li>
+                  ))}
                </ul>
             </div>
             <div className='svgButtonContainer'>
@@ -206,7 +204,7 @@ function MainPage({parentTitle, parentIngredientList, handleSubmit}: MainPagePro
                      <FontAwesomeIcon icon={faCircleXmark} style={{color: "#575757",}} onClick={() => removeIngredient(index)} />
                   </div>
                   <div className='listItem'> 
-                     <p>{ingredient.foodDescription}</p>
+                     <p>[{ingredient.foodDescription}]</p>
                   </div>
                </li>
             ))}
