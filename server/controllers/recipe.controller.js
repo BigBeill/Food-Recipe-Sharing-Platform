@@ -133,6 +133,7 @@ exports.find = async (req, res) => {
 
 
 
+
 /*
 packages the data from the incoming request into a recipe schema
 @route: n/a
@@ -214,5 +215,44 @@ exports.update = async (req, res) => {
       console.log("\x1b[31m%s\x1b[0m", "recipe.controller.update failed... unable to save recipeObject to database");
       console.error(error);
       return res.status(500).json({ error: 'server failed to update recipe' });
+   }
+}
+
+
+
+
+
+
+/*
+deletes a recipe from the database
+@route: DELETE /recipe/edit
+*/
+exports.delete = async (req, res) => {
+
+   const userId = req.user?._id;
+   const { recipeId } = req.params;
+
+   if (!userId) { return res.status(401).json({ error: "user must be signed in to delete a recipe" }); }
+
+   // make sure client as access to the recipe being deleted
+   try {
+      const recipe = await recipeUtils.verifyObject({ _id: recipeId }, true);
+      if (recipe.owner != userId) { return res.status(403).json({ error: "current user does not have write access to this recipe" }); }
+   }
+   catch (error) {
+      console.log("\x1b[31m%s\x1b[0m", "recipe.controller.deleteRecipe failed... unable to verify recipe object");
+      console.error(error);
+      return res.status(500).json({ error: 'server failed to verify recipe object' });
+   }
+
+   // delete the recipe from the database
+   try {
+      await recipes.deleteOne({ _id: recipeId });
+      return res.status(200).json({ message: 'recipe deleted successfully' });
+   }
+   catch (error) {
+      console.log("\x1b[31m%s\x1b[0m", "recipe.controller.deleteRecipe failed... unable to delete recipe from database");
+      console.error(error);
+      return res.status(500).json({ error: 'server failed to delete recipe' });
    }
 }

@@ -363,6 +363,25 @@ Returns:
    - 403 client does not have write access to the recipeObject
 ```
 
+#### /delete/:recipeId
+```
+Type:
+   DELETE - Deletes a recipe from the database
+
+Expects 1 argument from params:
+   recipeId: mongoose.SchemaTypes.ObjectId
+
+Route Description:
+   - Checks to make sure the client has write access to the recipe being deleted
+   - Deletes the recipe from the database
+
+Returns:
+   - 200 recipe was deleted from the database
+   - 400 invalid or missing arguments
+   - 401 client did not provide a valid access token
+   - 403 client does not have write access to the recipeObject
+```
+
 ### /user Routes
 The user router is used to manage the clients access to any user related objects inside the database
 

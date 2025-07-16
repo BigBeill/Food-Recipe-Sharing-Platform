@@ -14,9 +14,6 @@ insideDatabase: boolean (default: true) - if false, function will not check the 
 async function verifyObject (recipe, insideDatabase = true, includeNutrition = true) {
    console.log("function called: " + "\x1b[36m%s\x1b[0m", "server/library/recipeUtils.verifyObject");
 
-   if (includeNutrition) { console.log("includeNutrition is true, nutrition field will be attached to recipe object"); }
-   else { console.log("includeNutrition is false, nutrition field will not be attached to recipe object"); }
-
    let recipeObject = {};
    // set recipeObject to the recipe passed
    if (recipe.toObject) { recipeObject = recipe.toObject(); }
@@ -56,6 +53,7 @@ async function verifyObject (recipe, insideDatabase = true, includeNutrition = t
             console.error(error); 
          }
       }
+      if (!recipeObject.visibility || typeof recipeObject.visibility != 'string' || !['public', 'private', 'personal'].includes(recipeObject.visibility)) { found.push('visibility'); }
       return found;
    }
 
@@ -89,6 +87,7 @@ async function verifyObject (recipe, insideDatabase = true, includeNutrition = t
       image: recipeObject.image,
       ingredients: recipeObject.ingredients,
       instructions: recipeObject.instructions,
+      visibility: recipeObject.visibility
    } }
 
    // check if the nutrition field is present, if not attach it
@@ -122,7 +121,8 @@ async function verifyObject (recipe, insideDatabase = true, includeNutrition = t
          fibre: recipeObject.nutrition.fibre,
          sugar: recipeObject.nutrition.sugar,
          protein: recipeObject.nutrition.protein
-      }
+      },
+      visibility: recipeObject.visibility
    }
 }
 

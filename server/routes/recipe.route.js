@@ -131,6 +131,7 @@ Returns:
 router.route('/edit')
 .all(
    [
+      body("_id").optional().isString().isLength({ min: 24, max: 24 }).withMessage("_id must be a string of 24 characters"),
       body("title").isString().isLength({ min: 3, max: 900 }).withMessage("Your recipe must contain a title between 1 and 900 characters long"),
       body("description").isString().isLength({ min: 3, max: 90000 }).withMessage("description must be a string between 3 and 90000 characters"),
       body("image").isString().isLength({ min: 0, max: 90 }).withMessage("image must be a string"),
@@ -146,16 +147,15 @@ router.route('/edit')
       body("instructions").isArray().withMessage("instructions must be an array"),
       body("instructions.*").isString().isLength({ min: 3, max: 10000 }).withMessage("instructions must be an array of strings"),
       body("visibility").optional().isString().isIn(["public", "private", "personal"]).withMessage("visibility must be one of the following: public, private, personal"),
-      body("_id").optional().isString().isLength({ min: 24, max: 24 }).withMessage("_id must be a string of 24 characters"),
       checkExact(),
       advancedCheckExact({
+         _id: true,
          title: true,
          description: true,
          image: true,
          ingredients: [{foodId: true, label: true, foodDescription: true, portion: {measureId: true, measureDescription: true, amount: true}}],
          instructions: [],
-         visibility: true,
-         _id: true
+         visibility: true
       }, "body" )
    ],
    runValidation,
@@ -163,6 +163,38 @@ router.route('/edit')
 )
 .post(recipeController.add)
 .put(recipeController.update);
+
+
+
+
+
+
+/*
+------------ /delete route ------------
+Type:
+   DELETE - Deletes a recipe from the database
+
+Expects 1 argument from params:
+   recipeId: mongoose.SchemaTypes.ObjectId
+
+Route Description:
+   - Checks to make sure the client has write access to the recipe being deleted
+   - Deletes the recipe from the database
+
+Returns:
+   - 200 recipe was deleted from the database
+   - 400 invalid or missing arguments
+   - 401 client did not provide a valid access token
+   - 403 client does not have write access to the recipeObject
+*/
+router.delete('/delete/:recipeId',
+   [
+      param("recipeId").isString({ min: 24, max: 24 }).withMessage("recipeId must be a string of 24 characters"),
+      checkExact()
+   ],
+   runValidation,
+   recipeController.delete
+);
 
 
 

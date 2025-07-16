@@ -24,12 +24,13 @@ export default function NewEditRecipe () {
 	const [loadingContent, setLoadingContent] = useState<boolean>(false);
 
 	//define required useStates
-	const [recipeObject, setRecipeObject] = useState<RecipeObject>({_id: 'unsavedRecipe', title: '', description: '', image: '', ingredients: [], instructions: []});
+	const [recipeObject, setRecipeObject] = useState<RecipeObject>({_id: 'unsavedRecipe', title: '', description: '', image: '', ingredients: [], instructions: [], visibility: 'public'});
 	function setTitle(title: string) { setRecipeObject((oldRecipe) => ({ ...oldRecipe, title })); }
 	function setDescription(description: string) { setRecipeObject((oldRecipe) => ({ ...oldRecipe, description })); }
 	function setImage(image: string) { setRecipeObject((oldRecipe) => ({ ...oldRecipe, image })); }
 	function setIngredients(ingredients: IngredientObject[]) { setRecipeObject((oldRecipe) => ({ ...oldRecipe, ingredients })); }
 	function setInstructions(instructions: string[]) { setRecipeObject((oldRecipe) => ({ ...oldRecipe, instructions })); }
+	function setVisibility(visibility: 'public' | 'private' | 'personal') { setRecipeObject((oldRecipe) => ({ ...oldRecipe, visibility })); }
 
 	const [errorMessage, setErrorMessage] = useState<string>("");
 
@@ -48,7 +49,7 @@ export default function NewEditRecipe () {
 			})
 			.catch(console.error);
 		}
-	},[])
+	},[]);
 
 	//function for sending recipe changes to server
 	function submitRecipe(){
@@ -83,10 +84,42 @@ export default function NewEditRecipe () {
 		if (!recipeId) method = 'post';
 		else method = 'put';
 
+		const requestBody = {
+			_id: recipeObject._id != 'unsavedRecipe' ? recipeObject._id : undefined,
+			title: recipeObject.title,
+			description: recipeObject.description,
+			image: recipeObject.image,
+			ingredients: recipeObject.ingredients,
+			instructions: recipeObject.instructions,
+			visibility: recipeObject.visibility
+		}
+
 		//send request to the server
-		axios({ method:method, url:'recipe/edit', data: recipeObject })
+		axios({ method:method, url:'recipe/edit', data: requestBody })
 		.then(() => { navigate('/'); })
 		.catch(console.error);
+	}
+
+	function deleteRecipe() {
+
+		// if recipeId doesn't exist, don't delete
+		if (!recipeId) { 
+			navigate('/');
+			return;
+		}
+
+		axios({ method: 'delete', url: `recipe/delete/${recipeId}` })
+		.then(() => {
+			navigate('/');
+		})
+		.catch((error) => {
+			console.error('Error deleting recipe:', error);
+			setErrorMessage('Failed to delete recipe. Please try again later.');
+		});
+	}
+
+	function revertChanges() {
+		window.location.reload();
 	}
 
 	// create pageList, a list of all function (plus associated variables) that are apart of the edit recipe page.
@@ -102,10 +135,12 @@ export default function NewEditRecipe () {
 			}
 		},
 		{ 
-			content: ImagePage,
+			content: AdditionalInfoPage,
 			props: {
 				image: recipeObject.image,
 				setImage,
+				visibility: recipeObject.visibility,
+				setVisibility
 			}
 		},
 		{ 
@@ -123,10 +158,12 @@ export default function NewEditRecipe () {
 			}
 		},
 		{
-			content: SubmissionPage,
+			content: FinalizeChangesPage,
 			props: {
 				errorMessage,
-				submitRecipe
+				submitRecipe,
+				revertChanges: recipeId ? revertChanges : undefined,
+				deleteRecipe
 			}
 		}
 	]
@@ -140,6 +177,10 @@ export default function NewEditRecipe () {
 
 
 
+
+
+
+//  ------------ GENERAL INFORMATION PAGE ------------
 
 interface GeneralInfoPageProps {
 	newRecipe: boolean;
@@ -170,27 +211,57 @@ function GeneralInfoPage ({newRecipe, title, setTitle, description, setDescripti
 
 
 
-interface ImagePageProps {
+
+
+//  ------------ ADDITIONAL INFORMATION PAGE ------------
+interface AdditionalInfoPageProps {
 	image: string;
 	setImage: React.Dispatch<React.SetStateAction<string>>;
+	visibility: 'public' | 'private' | 'personal';
+	setVisibility: React.Dispatch<React.SetStateAction<'public' | 'private' | 'personal'>>;
 }
 
-function ImagePage ({image, setImage}: ImagePageProps) {
+function AdditionalInfoPage ({image, setImage, visibility, setVisibility}: AdditionalInfoPageProps) {
 	const imageOptions = ['🧀', '🥞', '🍗', '🍔','🍞', '🥯', '🥐','🥨','🍗','🥓','🥩','🍟','🍕','🌭','🥪','🌮','🌯','🥙','🥚','🍳','🥘','🥣','🥗','🍿','🧂','🥫']
 	return (
 		<div className='standardContent'>
-			<p>page two</p>
-			<label htmlFor='image'>image</label>
-			<select id='image' value={image} onChange={(event) => setImage(event.target.value)}>
-			<option value="" disabled hidden>choose image</option>
-			{imageOptions.map((option, index) => ( <option key={index}>{option}</option> ))}
-			</select>
+			<h2>Additional Information</h2>
+			
+			<div className='imageInput'>
+				<label htmlFor='image'>Recipe Image</label>
+				<select id='image' value={image} onChange={(event) => setImage(event.target.value)}>
+					<option value="" disabled hidden>choose image</option>
+					{imageOptions.map((option, index) => ( <option key={index}>{option}</option> ))}
+				</select>
+			</div>
+
+			<div className='textInput center additionalMargin'>
+				<div className='radioButtonInput'>
+					<label>Recipe Visibility</label>
+					<div className='radioOption'>
+						<input type='radio' id='public' name='visibility' value='public' checked={visibility == 'public'} onChange={() => { setVisibility('public'); }}/>
+						<label htmlFor='public'>Public - Anyone can view this recipe</label>
+					</div>
+					<div className='radioOption'>
+						<input type='radio' id='private' name='visibility' value='private' checked={visibility == 'private'} onChange={() => { setVisibility('private'); }}/>
+						<label htmlFor='private'>Private - You and friends can view this recipe</label>
+					</div>
+					<div className='radioOption'>
+						<input type='radio' id='personal' name='visibility' value='personal' checked={visibility == 'personal'} onChange={() => { setVisibility('personal') }}/>
+						<label htmlFor='personal'>Personal - Only you can view this recipe</label>
+					</div>
+				</div>
+			</div>
 		</div>
 	)
 }
 
 
 
+
+
+
+// ------------ INGREDIENTS PAGE ------------
 
 interface IngredientPageProps { 
 	ingredients: {id: number, content: IngredientObject}[];
@@ -309,6 +380,11 @@ function IngredientPage ({ingredients, setIngredients}: IngredientPageProps) {
 
 
 
+
+
+
+// ------------ INSTRUCTIONS PAGE ------------
+
 interface InstructionPageProps {
 	instructions: {id: number, content: string}[];
 	setInstructions: React.Dispatch<React.SetStateAction<{id: number, content: string}[]>>;
@@ -395,17 +471,56 @@ function InstructionPage ({instructions, setInstructions}: InstructionPageProps)
 
 
 
-interface SubmissionPageProps {
+
+
+//  ------------ FINALIZE CHANGES PAGE ------------
+
+interface FinalizeChangesPageProps {
 	errorMessage: string;
   	submitRecipe: () => void;
+	revertChanges?: () => void;
+	deleteRecipe: () => void;
 }
 
-function SubmissionPage({errorMessage, submitRecipe}: SubmissionPageProps) {
+function FinalizeChangesPage({errorMessage, submitRecipe, deleteRecipe, revertChanges}: FinalizeChangesPageProps) {
+
+	const [revertChangesConfirmation, setRevertConfirmation] = useState<boolean>(false);
+	const [deleteConfirmation, setDeleteConfirmation] = useState<boolean>(false);
+
+	function attemptRevertChanges() {
+		if (!revertChangesConfirmation) {
+			setRevertConfirmation(true);
+			return;
+		}
+
+		// Call the revertChanges function if it exists
+		if (revertChanges) { revertChanges(); } 
+	}
+
+	function attemptDeleteRecipe() {
+		if (!deleteConfirmation) {
+			setDeleteConfirmation(true);
+			return;
+		}
+
+		deleteRecipe();
+	}
+
 	return (
 		<div className='standardContent'>
-			<h2>Save Recipe</h2>
+			<h2>Finalize Recipe Changes</h2>
 			<button className="darkText additionalMargin" onClick={() => submitRecipe()}>Save recipe</button>
 			<p className={errorMessage ? "error" : "hidden"} area-live="assertive">{errorMessage}</p>
+			{ revertChanges ? (
+				<div className='devisableButton additionalMargin'>
+					<button onClick={() => attemptRevertChanges()}>{!revertChangesConfirmation ? "Revert Changes" : "Confirm Revert"}</button>
+					<button className={revertChangesConfirmation ? 'showButton' : 'hideButton'} onClick={() => setRevertConfirmation(false)}>Cancel</button>
+				</div>
+			) : null}
+			<div className='devisableButton additionalMargin'>
+				<button onClick={() => attemptDeleteRecipe()}>{!deleteConfirmation? "Delete Recipe" : "Confirm Delete"}</button>
+				<button className={deleteConfirmation ? 'showButton' : 'hideButton'} onClick={() => { setDeleteConfirmation(false); }}>Cancel</button>
+			</div>
 		</div>
 	)
 }

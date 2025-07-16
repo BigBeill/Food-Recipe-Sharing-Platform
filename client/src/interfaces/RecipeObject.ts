@@ -19,4 +19,5 @@ export default interface RecipeObject {
       sugar: number;
       protein: number;
    }
+   visibility: 'public' | 'private' | 'personal';
 }

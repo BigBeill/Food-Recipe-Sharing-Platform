@@ -226,3 +226,35 @@ button{
       resize: none;
    }
 }
+
+.radioButtonInput {
+   display: flex;
+   flex-direction: column;
+   gap: 0.3rem;
+
+   > label {
+      margin-bottom: 0.3rem;
+      font-weight: bold;
+   }
+
+   .radioOption {
+      display: flex;
+      gap: 0.3rem;
+
+      input {
+         flex: 0 0 fit-content;
+         margin: 0rem 0.3rem;
+         cursor: pointer;
+      }
+
+      label {
+         flex: 0 0 fit-content;
+         margin: 0rem;
+         cursor: pointer;
+      }
+   }
+}
+
+.imageInput {
+   margin-bottom: 6rem;
+}
