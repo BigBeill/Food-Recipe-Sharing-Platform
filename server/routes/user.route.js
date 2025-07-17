@@ -178,10 +178,10 @@ Type:
    POST - creates a friend request in server database
 
 Expects 1 arguments from body:
-   receiverId: mongoose object id
+   targetId: mongoose object id
 
 Route description:
-   creates a friend request in the database, setting the current user as the sender and the {userId} as the receiver
+   creates a friend request in the database, setting the current user as the sender and the {targetId} as the target of the friend request
 
 Returns:
    - 201 friendRequestObject created and saved in the database
@@ -193,7 +193,7 @@ payload: friendRequestObject
 */
 router.post("/sendFriendRequest", 
    [
-      body("receiverId").isString().isLength({ min: 24, max: 24 }).withMessage("userId must be a string of 24 characters"),
+      body("targetId").isString().isLength({ min: 24, max: 24 }).withMessage("userId must be a string of 24 characters"),
       checkExact()
    ],
    runValidation,

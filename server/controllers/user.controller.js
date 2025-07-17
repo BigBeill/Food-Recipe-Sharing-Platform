@@ -208,12 +208,12 @@ exports.sendFriendRequest = async (req, res) => {
    if (!req.user) return res.status(401).json({ error: "user not signed in" });
 
    const userId = req.user._id;
-   const { receiverId } = req.body;
+   const { targetId } = req.body;
 
    // find receiver in the database
    try {
-      const receiverData = await User.findOne({ _id: receiverId });
-      if (!receiverData) { return res.status(404).json({ error: "user receiving friend request not found" }); }
+      const targetData = await User.findOne({ _id: targetId });
+      if (!targetData) { return res.status(404).json({ error: "user receiving friend request not found" }); }
    }
    catch (error) {
       console.log("\x1b[31m%s\x1b[0m", "user.controller.sendFriendRequest failed... unable to find receiver in database");
@@ -223,14 +223,14 @@ exports.sendFriendRequest = async (req, res) => {
 
    // check if friend request or friendship already exist inside the database
    try {
-      const sentRequest = await FriendRequest.findOne({ senderId: userId, receiverId: receiverId });
+      const sentRequest = await FriendRequest.findOne({ senderId: userId, receiverId: targetId });
       if (sentRequest) return res.status(409).json({ error: "friend request already sent to this user" });
 
-      const receivedRequest = await FriendRequest.findOne({ senderId: receiverId, receiverId: userId });
+      const receivedRequest = await FriendRequest.findOne({ senderId: targetId, receiverId: userId });
       if (receivedRequest) return res.status(409).json({ error: "friend request already received from this user" });
 
       // make sure friendship doesn't already exist in database
-      const existingFriendship = await Friendship.findOne({ friendIds: { $all: [receiverId, userId] } });
+      const existingFriendship = await Friendship.findOne({ friendIds: { $all: [targetId, userId] } });
       if (existingFriendship) return res.status(409).json({ error: "friendship already created with this user" });
    }
    catch (error) {
@@ -241,7 +241,7 @@ exports.sendFriendRequest = async (req, res) => {
 
    // create the friend request and save to the database
    try {
-      const newRequest = { senderId: userId, receiverId: receiverId };
+      const newRequest = { senderId: userId, receiverId: targetId };
       const friendship = await new FriendRequest(newRequest)
       .save();
 

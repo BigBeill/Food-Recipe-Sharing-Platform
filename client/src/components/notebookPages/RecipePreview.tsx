@@ -3,7 +3,6 @@ import { useRef, useState } from "react";
 import { useNavigate, useOutletContext } from "react-router-dom";
 
 import RecipeObject from "../../interfaces/RecipeObject";
-import UserObject from "../../interfaces/UserObject";
 import GrowingText from "../GrowingText";
 import Popup from "../Popup";
 import Recipe from "../../pages/Recipe";
@@ -14,7 +13,7 @@ interface RecipePreviewProps {
 
 export default function RecipePreview({ recipe }: RecipePreviewProps) {
    const navigate = useNavigate();
-   const { userData } = useOutletContext<{userData: UserObject}>();
+   const { userId } = useOutletContext<{userId: string}>();
 
    const titleRef = useRef(null);
    const [showRecipe, setShowRecipe] = useState<boolean>(false);
@@ -67,7 +66,7 @@ export default function RecipePreview({ recipe }: RecipePreviewProps) {
 
          <div className="bottomButtons splitSpace">
             <button onClick={displayRecipe}> View Recipe </button>
-            { recipe.owner == userData?._id ? 
+            { recipe.owner == userId ? 
                <button onClick={() => {navigate(`/editRecipe/${recipe._id}`)}}>Edit Recipe</button>
                : null
             }

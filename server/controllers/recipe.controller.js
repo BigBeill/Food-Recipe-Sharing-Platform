@@ -78,6 +78,11 @@ exports.find = async (req, res) => {
    let recipeData = [];
    let query = {};
 
+   if (category == "public") {
+      // only return public recipes
+      query.visibility = "public";
+   }
+
    // if searching the friends category, get an array of all friends and attach them to the query
    if (category == "friends") {
       try {
@@ -86,6 +91,7 @@ exports.find = async (req, res) => {
 
          // add the friend _ids to the query
          query.owner = { $in: friendList };
+         query.visibility = { $in: ["public", "friends"] }; // only return public and friends recipes
       }
       catch (error) {
          console.log("\x1b[31m%s\x1b[0m", "recipe.controller.find failed... unable to define valid user _ids for query");

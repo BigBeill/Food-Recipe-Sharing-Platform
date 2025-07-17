@@ -50,7 +50,7 @@ export default function Profile() {
 
    function sendFriendRequest () {
       if (!userObject) { return; }
-      axios({ method: 'post', url: 'user/sendFriendRequest', data: {userId: userObject._id} })
+      axios({ method: 'post', url: 'user/sendFriendRequest', data: {targetId: userObject._id} })
       .then((response) => { setUserObject((currentUserObject) => ({ ...currentUserObject, relationship: { _id: response._id, target: userId, type: "requestReceived" } })); });
    }
 
