@@ -69,9 +69,8 @@ export default function UserPin({ userObject: parentUserObject }: UserPinProps) 
          <div className='styleDiv'></div>
 
          <div className='contactInformation'>
-         <p>email: {userObject.email}</p>
          <p>
-            relationship: {
+            Relationship: {
             !userObject.relationship ? 'none' :
             userObject.relationship.type == 'none' ? 'none' : 
             userObject.relationship.type == 'friend' ? 'friends' : 
