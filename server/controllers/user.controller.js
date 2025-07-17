@@ -178,7 +178,7 @@ exports.updateAccount = async (req, res) => {
       if (foundEmail && foundEmail._id != req.user._id) { return res.status(400).json({ error: "email already taken" }); }
 
       // save user to database
-      await users.updateOne(
+      await User.updateOne(
          { _id: req.user._id },
          { $set: {
             email: email,
