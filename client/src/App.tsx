@@ -6,22 +6,20 @@ import Layout from './Layout'
 import Loading from './components/Loading'
 import { routes } from './routes'
 
-import UserObject from './interfaces/UserObject';
-
 function App() {
    // userData is passed down to all children
-   const [userData, setUserData] = useState<UserObject | null>(null);
+   const [userId, setUserId] = useState<string | null>(null);
    const [loading, setLoading] = useState(true);
 
    // get necessary information for the database to run application
    useEffect(() => {
-      axios({ method: 'get', url: `user/getObject` })
+      axios({ method: 'get', url: `authentication/status` })
       .then((response) => { 
-         setUserData(response);
+         setUserId(response);
          setLoading(false);
       })
       .catch(() => { 
-         setUserData(null);
+         setUserId(null);
          setLoading(false);
       });
    }, []);
@@ -38,7 +36,7 @@ function App() {
 
       return (
          <Routes>
-            <Route element={<Layout userData={userData} />}>
+            <Route element={<Layout userId={userId} />}>
                {routes.map((route) => (
                   <Route key={route.path} path={route.path} element={route.element} />
                ))}

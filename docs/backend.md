@@ -86,7 +86,7 @@ Any JSON object with one of the listed names must match the structure underneath
    relationship?: { // relationship with given target (usually current signed in user)
       _id: mongoose.SchemaTypes.ObjectId,
       target: mongoose.SchemaTypes.ObjectId,
-      type: number // 0 = no relationship, 1 = friends, 2 = received friend request, 3 sent friend request, 4 = self
+      type: 'none' | 'friend' | 'requestSent' | 'requestReceived' | 'self'
    }
 }
 ```
@@ -418,13 +418,12 @@ Expects 6 arguments from query:
    email: string (optional)
    limit: number (optional, default 6)
    skip: number (optional, default 0)
-   relationship: number (optional)
+   category: "friends" | "requests" | "all" (optional, default "all")
    count: boolean (optional, default false)
 
 Route description:
    - Collects a list of all users in the database that contain {username} and {email}
-   - If relationship field exists, only include userObjects that the current user has the given relationship with
-   - Reminder: 1 = friends, 2 = received friend requests, 3 = sent friend requests
+   - If category field exists, only include userObjects that the current user has the given relationship with
    - Skip over the first {skip} number of results found
    - Limit the list size to the {limit} number of objects
    - Return the list to the client

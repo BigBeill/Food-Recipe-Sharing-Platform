@@ -20,10 +20,12 @@ Route description:
    - If logged in, returns user data
 
 Returns:
-   - 200 User is logged in, returns user data
+   - 200 User is logged in, returns user Id
    - 401 User is not logged in
 */
-
+router.get("/status",
+   authenticationController.status
+);
 
 
 

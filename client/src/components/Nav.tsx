@@ -5,14 +5,11 @@ import { useState, useEffect, useRef} from 'react'
 import '../styles/componentSpecific/nav.scss'
 import { NavLink, useNavigate } from "react-router-dom";
 
-import UserObject from '../interfaces/UserObject'
-
-
 interface NavProps {
-    userData: UserObject | null;
+    userId: string | null;
 }
 
-function Nav({userData}: NavProps) {
+function Nav({userId}: NavProps) {
     const [open, setOpen] = useState<boolean>(false);
     const navRef = useRef<HTMLDivElement>(null);
     const navigate = useNavigate();
@@ -45,7 +42,7 @@ function Nav({userData}: NavProps) {
             <h3>Find Recipes</h3>
             <NavLink className="navLink" to="/searchRecipes/public" onClick={() => setOpen(false)}>Public Recipes</NavLink>
 
-            { userData ?
+            { userId ?
                 <>
                     <NavLink className="navLink" to="/searchRecipes/friends" onClick={() => setOpen(false)}>Friends Recipes</NavLink>
 
@@ -55,8 +52,8 @@ function Nav({userData}: NavProps) {
                     <NavLink className="navLink" to="/editRecipe" onClick={() => setOpen(false)}>Create Recipe</NavLink>
 
                     <h3>Social</h3>
-                    <NavLink className="navLink" to="/friendsList" onClick={() => setOpen(false)}>My Friends</NavLink>
-                    <NavLink className="navLink" to="/searchUser" onClick={() => setOpen(false)}>Search Users</NavLink>
+                    <NavLink className="navLink" to="/searchUser/friends" onClick={() => setOpen(false)}>My Friends</NavLink>
+                    <NavLink className="navLink" to="/searchUser/all" onClick={() => setOpen(false)}>Search Users</NavLink>
 
                     <h3>Account</h3>
                     <NavLink className="navLink" to="/profile" onClick={() => setOpen(false)}>Profile</NavLink>

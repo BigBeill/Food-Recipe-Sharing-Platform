@@ -9,5 +9,5 @@ type:
 export default interface RelationshipObject {
    _id: string;
    target: string;
-   type: number;
+   type: "none" | "friend" | "requestReceived" | "requestSent" | "self";
 }

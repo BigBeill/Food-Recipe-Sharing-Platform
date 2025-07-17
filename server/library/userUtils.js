@@ -30,6 +30,13 @@ async function verifyObject (user, insideDatabase = true) {
       return found;
    }
 
+   function checkInvalidRelationshipFields() {
+      if (!userObject.relationship.target) { throw new Error('relationship field passed, but no target was given'); }
+      if (!userObject.relationship._id || typeof userObject.relationship._id != 'string') { return true; }
+      if (!userObject.relationship.type || !['none', 'friend', 'requestSent', 'requestReceived', 'self'].includes(userObject.relationship.type)) { return true; }
+      return false;
+   }
+
    // check for any missing fields in the user object
    let invalidFields = checkInvalidFields();
 
@@ -66,8 +73,8 @@ async function verifyObject (user, insideDatabase = true) {
    }
 
    if (!insideDatabase) { throw new Error('no relationship field should exist for userObject not inside the database'); }
-   if (!userObject.relationship.target) { throw new Error('relationship field passed, but no target was given'); }
-   if (!userObject.relationship._id || !userObject.relationship.type) { userObject = await attachRelationshipField(userObject, userObject.relationship.target); }
+
+   if (checkInvalidRelationshipFields) { userObject = await attachRelationshipField(userObject, userObject.relationship.target); }
 
    return {
       _id: userObject._id,
@@ -100,28 +107,29 @@ async function attachRelationshipField (user, targetId) {
    console.log("function called: " + "\x1b[36m%s\x1b[0m", "server/library/userUtils.getRelationship");
 
    // make sure both userId and targetId are provided
-   if (!user || !user._id) { throw new Error('no user was provided to attachRelationshipFiled'); }
-   if (!targetId) { return { ...user, relationship: { _id: "0", target: "0", type: 0 } }; } // no targetId provided
+   if (!user?._id) { throw new Error('no user was provided to attachRelationshipFiled'); }
+   // make sure an empty relationship field is being passed if no targetId is provided (this makes sure controllers don't need to hardcode the relationship field)
+   if (!targetId) { return { ...user, relationship: { _id: '0', target: '0', type: 'none' } }; }
 
    // make sure user and target are not the same
-   if (user._id == targetId) { return { ...user, relationship: { _id: 0, target: targetId, type: 4 } }; }
+   if (user._id == targetId) { return { ...user, relationship: { _id: '0', target: targetId, type: 'self' } }; }
 
    try {
       let relationship;
 
       // check if users are friends
       relationship = await Friendship.findOne({ friendIds: { $all: [user._id, targetId] } });
-      if (relationship) { return { ...user, relationship: { _id: relationship._id, target: targetId,  type: 1 } }; }
+      if (relationship) { return { ...user, relationship: { _id: relationship._id, target: targetId,  type: 'friend' } }; }
 
       // check if friend request has been received
       relationship = await FriendRequest.findOne({ senderId: targetId, receiverId: user._id });
-      if (relationship) { return {...user, relationship: { _id: relationship._id, target: targetId, type: 2 } }; }
+      if (relationship) { return {...user, relationship: { _id: relationship._id, target: targetId, type: 'requestReceived' } }; }
 
       // check if friend request has been sent
       relationship = await FriendRequest.findOne({ senderId: user._id, receiverId: targetId });
-      if (relationship) { return { ...user, relationship: { _id: relationship._id, target: targetId, type: 3 } };}
+      if (relationship) { return { ...user, relationship: { _id: relationship._id, target: targetId, type: 'requestSent' } };}
 
-      return { ...user, relationship: { _id: 0, target: targetId, type: 0 } }; // no relationship found
+      return { ...user, relationship: { _id: '0', target: targetId, type: 'none' } }; // no relationship found
    }
    catch (error) {
       console.log("filed to get relationship between user:", user, "and target:", targetId);

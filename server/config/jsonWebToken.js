@@ -5,7 +5,6 @@ function createToken(user) {
   const accessToken = sign(
     {
       _id: user._id,
-      username: user.username,
     },
     process.env.SESSION_SECRET,
     { expiresIn: "15m" }
@@ -13,7 +12,6 @@ function createToken(user) {
   const refreshToken = sign(
     {
       _id: user._id,
-      username: user.username,
     },
     process.env.SESSION_SECRET
   );

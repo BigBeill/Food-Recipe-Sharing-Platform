@@ -1,25 +1,79 @@
 import {useState, useEffect } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useParams } from "react-router-dom";
 
 import axios from "../api/axios.js";
 import UserPin from "../components/UserPin.js";
+import Folder from "../components/Folder.js";
 import PaginationBar from "../components/PaginationBar.tsx";
 import UserObject from "../interfaces/UserObject.ts";
+import FolderObject from "../interfaces/FolderObject.ts";
+import Loading from "../components/Loading.tsx";
 
 export default function SearchUser() {
+   // get all search params from the url
    const [searchParams, setSearchParams] = useSearchParams();
+   const { category, folderId } = useParams<{ category: string, folderId?: string }>();
+   const [_id, set_id] = useState<string | null>(searchParams.get("_id"));
+   const [username, setUsername] = useState<string | null>(searchParams.get("username"));
+   const [email, setEmail] = useState<string | null>(searchParams.get("email"));
 
+   // save the page size and current page number
    const pageSize: number = 15;
    const currentPage: number = Number(searchParams.get("pageNumber")) || 1;
 
-   // get the search params from the url
-   const [_id, set_id] = useState<string>(searchParams.get("_id") || "");
-   const [username, setUsername] = useState<string>(searchParams.get("username") || "");
-   const [email, setEmail] = useState<string>(searchParams.get("email") || "");
+   // state variables for variables collected from the server
+   const [folderList, setFolderList] = useState<FolderObject[]>([]);
+   const [folderCount, setFolderCount] = useState<number>(0);
+   const [userList, setUserList] = useState<UserObject[]>([]);
+   const [userCount, setUserCount] = useState<number>(0);
 
-   // get users from the server
-   const [users, setUsers] = useState<UserObject[]>([]);
-   const [totalCount, setTotalCount] = useState<number>(0);
+   // useState to avoid unnecessary renders
+   const [loadingPage, setLoadingPage] = useState<boolean>(true);
+
+   function fetchObjectsFromDatabase() {
+      // reset object variables
+      setFolderList([]);
+      setFolderCount(0);
+      setUserList([]);
+      setUserCount(0);
+
+      // logic for collecting a list of user objects from the database
+      // the function will be called after folderList has been fetched
+      function fetchUsers(totalFolders: number, foldersGrabbed: number) {
+         let url = '/user/find?';
+         if (_id) { url += `_id=${_id}&`; }
+         if (username) { url += `username=${username}&`; }
+         if (email) { url += `email=${email}&`; }
+         if (category) { url += `category=${category}&`; }
+         const skip = (currentPage - 1) * pageSize - totalFolders;
+         if (skip > 0) { url += `skip=${skip}&`; }
+         url += `limit=${pageSize - foldersGrabbed}&count=true`
+         axios({ method: 'get', url})
+         .then((response) => {
+            setUserList(response.userObjectList);
+            setUserCount(response.count);
+            setLoadingPage(false);
+         });
+      }
+
+      // logic for collecting folders from the database if needed
+      if (category == 'friends') {
+         let initialFolderList: FolderObject[] = [];
+         let initialFolderCount: number = 0;
+
+         if (!folderId && currentPage == 1) {
+            initialFolderList = [{ _id: 'requests', title: 'Friend Requests', content: [] }];
+            initialFolderCount = 1;
+         }
+         axios({ method: 'get', url: `/user/folder?limit=${pageSize}&skip=${(currentPage - 1) * pageSize}&count=true` })
+         .then((response) => {
+            setFolderList([ ...initialFolderList, ...response.folders ]);
+            setFolderCount( initialFolderCount + response.count);
+            fetchUsers(response.count, response.folders.length);
+         });
+      }
+      else { fetchUsers(0, 0); }
+   }
 
    // handler for when the search button is clicked
    function submitSearch() {
@@ -38,11 +92,9 @@ export default function SearchUser() {
 
    // handler for when new page is requested by the pagination bar
    function requestNewPage(page: number) {
-      // scroll to the top of the page
-      document.getElementById("root")?.scrollTo({ top: 0, behavior: "auto" });
-
       // empty the current array of users
-      setUsers([]);
+      setLoadingPage(true);
+      setUserList([]);
 
       // update the page number in the url
       setSearchParams(searchParams => ({...searchParams, pageNumber: page}));
@@ -51,24 +103,11 @@ export default function SearchUser() {
 
    // use effect for handling url changes
    useEffect (() => {
+      setLoadingPage(true);
+      fetchObjectsFromDatabase();
+   },[searchParams, category, folderId]);
 
-      // create the url for the axios call (skip users already displayed in earlier pages)
-      let url: string = `user/find?skip=${(currentPage - 1) * pageSize}&limit=${pageSize}&count=true`;
-
-      // add username and email fields to url
-      if (username) { url += `&username=${username}`; }
-      if (email) { url += `&email=${email}`; }
-
-      // make axios call
-      axios({
-         method: 'get',
-         url
-      })
-      .then((response) => {
-         setUsers(response.userObjectList);
-         setTotalCount(response.count);
-      })
-   },[searchParams]);
+   if (loadingPage) { return <Loading />; }
 
    return (
       <div>
@@ -82,7 +121,7 @@ export default function SearchUser() {
                   id="searchId" 
                   type="text"
                   placeholder="Search by ID (exact match)"
-                  value={_id}
+                  value={_id || ''}
                   onChange={(event) => set_id(event.target.value)}
                   onKeyDown={ (event) => { if(event.key == "Enter") submitSearch(); } }
                   />
@@ -93,7 +132,7 @@ export default function SearchUser() {
                   id="searchUsername" 
                   type="text"
                   placeholder="Search by username"
-                  value={username}
+                  value={username || ''}
                   onChange={(event) => setUsername(event.target.value)}
                   onKeyDown={ (event) => { if(event.key == "Enter") submitSearch(); } }
                   />
@@ -104,7 +143,7 @@ export default function SearchUser() {
                   id="searchEmail" 
                   type="text"
                   placeholder="Search by email"
-                  value={email}
+                  value={email || ''}
                   onChange={(event) => setEmail(event.target.value)}
                   onKeyDown={ (event) => { if(event.key == "Enter") submitSearch(); } }
                   />
@@ -117,13 +156,17 @@ export default function SearchUser() {
                </button>
             </div>
 
+            { folderList.map((folder, index) => (
+               <Folder key={index} folderDetails={folder} />
+            ))}
+
             {/* create a user pin for each user given by the database */}
-            { users.map((userData, index) => (
+            { userList.map((userData, index) => (
                <UserPin key={index} userObject={userData} />
             ))}
          </div>
 
-         <PaginationBar currentPage={currentPage} totalPages={Math.ceil(totalCount/pageSize)} requestNewPage={requestNewPage} />
+         <PaginationBar currentPage={currentPage} totalPages={Math.ceil((folderCount + userCount)/pageSize)} requestNewPage={requestNewPage} />
       </div>
    );
 }

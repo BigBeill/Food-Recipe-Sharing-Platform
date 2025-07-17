@@ -3,7 +3,6 @@ const RefreshToken = require("../models/refreshToken");
 const passwordUtils = require("../library/passwordUtils");
 const userUtils = require("../library/userUtils");
 const { verify } = require("jsonwebtoken");
-const { validationResult } = require("express-validator");
 const createToken = require("../config/jsonWebToken");
 require("dotenv").config();
 
@@ -17,7 +16,7 @@ const cookieAge = 1000 * 60 * 60 * 24 * 30; // 30 days in milliseconds
 
 exports.status = async (req, res) => {
    // check if user is logged in
-   if (req.user?._id) { return res.status(200).json({ message: "user is logged in", user: req.user }); }
+   if (req.user?._id) { return res.status(200).json({ message: "user is logged in", payload: req.user._id }); }
    else { return res.status(401).json({ error: "user is not logged in" }); }
 }
 
@@ -133,22 +132,20 @@ exports.login = async (req, res) => {
 
 exports.refresh = async (req, res) => {
 
-   if (!req.cookies) { return res.status(401).json({ error: "no cookies found" }); }
+   if (!req.cookies?.refreshToken) { return res.status(401).json({ error: "Refresh token not found" }); }
    const refreshToken = req.cookies.refreshToken;
-   if (!refreshToken) { return res.status(401).json({ error: "no refresh token found" }); }
    
    try {
       // make sure refresh token exists in database
       const databaseToken = await RefreshToken.findOne({ token: refreshToken });
-      if (!databaseToken)
+      if (!databaseToken) {
          return res.status(401).json({ error: "invalid refresh token" });
-   
+      }
       // validate the refresh token and send a new access token
       const validToken = verify(refreshToken, process.env.SESSION_SECRET);
       if (validToken && validToken._id == databaseToken.user) {
          const tokens = createToken({
             _id: validToken._id,
-            username: validToken.username,
          });
          res.cookie("accessToken", tokens.accessToken, { maxAge: cookieAge });
          return res.status(200).json({ message: "new access token sent" });

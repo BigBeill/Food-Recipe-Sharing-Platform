@@ -8,10 +8,9 @@ function validateToken(req, res, next) {
 
   try {
     const validToken = verify(accessToken, process.env.SESSION_SECRET);
-    if (validToken && typeof validToken._id === "string" && typeof validToken.username === "string") {
+    if (validToken && typeof validToken._id === "string") {
       req.user = {
         _id: validToken._id,
-        username: validToken.username,
       };
     }
     else {

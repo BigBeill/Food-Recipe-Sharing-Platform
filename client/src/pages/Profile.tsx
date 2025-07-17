@@ -9,29 +9,30 @@ import UserObject from '../interfaces/UserObject';
 export default function Profile() {
    const titleParent = useRef(null);
    const navigate = useNavigate();
-   const {userData} = useOutletContext<{userData: UserObject}>();
-   const { userId } = useParams();
+   const { userId } = useOutletContext<{userId: string }>();
+   const { targetId = userId } = useParams();
 
-   const [userObject, setUserObject] = useState<UserObject>();
+   const [userObject, setUserObject] = useState<UserObject>({_id: '', username: '', email: '', bio: '', relationship: undefined });
+   const [fetchingUserData, setFetchingUserData] = useState<boolean>(true);
    const [editMode, setEditMode] = useState<boolean>(false);
 
    const [buttonSafety, setButtonSafety] = useState<boolean>(true);
 
+   function resetUserObject() {
+      axios({ method: 'get', url: `user/getObject/${targetId}/true` })
+      .then((response) => { 
+         setUserObject(response);
+         setFetchingUserData(false);
+      });
+   }
+
    useEffect(() => {
       setEditMode(false);
-      
-      if (!userId){
-         if (!userData) { navigate('/login'); }
 
-         axios({ method: 'get', url: `user/getObject/${userData._id}/true` })
-         .then((response) => { setUserObject(response); });
-      }
-      else {
-         axios({ method: 'get', url: `user/getObject/${userId}/true` })
-         .then((response) => { setUserObject(response); });
-      }
-
-   }, [userId]);
+      setFetchingUserData(true);
+      if (!targetId) { navigate('/login'); }
+      resetUserObject();
+   }, [targetId]);
 
    function exitEditMode(saveChanges: boolean) {
       if (!userObject) { return; }
@@ -43,31 +44,25 @@ export default function Profile() {
          }
          axios({ method: 'post', url: 'user/updateAccount', data: requestData })
       }
-      else {
-         let url;
-         if (!userId) { url = `user/getObject/${userData._id}/true`; }
-         else { url = `user/getObject/${userId}/true`; }
-         axios({ method: 'get', url })
-         .then((response) => { setUserObject(response); });
-      }
+      else { resetUserObject(); }
       setEditMode(false);
    }
 
    function sendFriendRequest () {
       if (!userObject) { return; }
       axios({ method: 'post', url: 'user/sendFriendRequest', data: {userId: userObject._id} })
-      .then((response) => { setUserObject((oldObject) => ( oldObject ? { ...oldObject, relationship: { _id: response._id, target: userData._id, type: 2 } } : undefined )); });
+      .then((response) => { setUserObject((currentUserObject) => ({ ...currentUserObject, relationship: { _id: response._id, target: userId, type: "requestReceived" } })); });
    }
 
    function processFriendRequest(accept: boolean) {
       if (!userObject?.relationship) { return; }
       if (accept) {
          axios({ method: 'post', url: 'user/processFriendRequest', data: { requestId: userObject.relationship._id, accept: true } })
-         .then((response) => { setUserObject((oldObject) => ( oldObject ? { ...oldObject, relationship: { _id: response._id, target: userObject._id, type: 1 } } : undefined )); });
+         .then((response) => { setUserObject((currentUserObject) => ({ ...currentUserObject, relationship: { _id: response._id, target: userId, type: "friend" } })); });
       }
       else {
          axios({ method: 'post', url: 'user/processFriendRequest', data: { requestId: userObject.relationship._id, accept: false } })
-         .then(() => { setUserObject((oldObject) => ( oldObject ? { ...oldObject, relationship: { _id: '0', target: userObject._id, type: 0 } } : undefined )); });
+         .then(() => { setUserObject((currentUserObject) => ({ ...currentUserObject, relationship: { _id: '0', target: userId, type: "none" } })); });
       }
    }
 
@@ -78,7 +73,7 @@ export default function Profile() {
          return;
       }
       axios({ method: 'post', url: 'user/deleteFriend', data: { relationshipId: userObject.relationship._id } })
-      .then(() => { setUserObject((oldObject) => ( oldObject ? { ...oldObject, relationship: { _id: '0', target: userObject._id, type: 0 } } : undefined )); });
+      .then(() => { setUserObject((currentUserObject) => ({ ...currentUserObject, relationship: { _id: '0', target: userId, type: "none" } })); });
    }
 
    // handle logout function
@@ -88,7 +83,7 @@ export default function Profile() {
    }
 
    // don'd load page until data is fetched
-   if (!userObject) { return <Loading /> }
+   if (fetchingUserData) { return <Loading /> }
 
    return (
       <div className='displayUserData'>
@@ -129,12 +124,12 @@ export default function Profile() {
                   <button onClick={ () => { exitEditMode(true); } }>Save Changes</button>
                   <button onClick={ () => { exitEditMode(false); } }>Delete Changes</button>
                </>
-            ) : userObject.relationship.type == 0 ? (
+            ) : userObject.relationship.type == "none" ? (
                <>
                   <div></div>
                   <button onClick={ () => { sendFriendRequest(); } }>Send friend request</button>
                </>
-            ) : userObject.relationship.type == 1 ? (
+            ) : userObject.relationship.type == "friend" ? (
                <>
                   <div></div>
                   <div className='devisableButton'>
@@ -142,17 +137,17 @@ export default function Profile() {
                      <button className={buttonSafety ? 'hideButton' : 'showButton'} onClick={() => { setButtonSafety(true); }} >Cancel</button>
                   </div>
                </>
-            ) : userObject.relationship.type == 2 ? (
+            ) : userObject.relationship.type == "requestReceived" ? (
                <>
                   <div></div>
                   <button onClick={ () => { processFriendRequest(false); } }>Cancel friend request</button>
                </>
-            ) : userObject.relationship.type == 3 ? (
+            ) : userObject.relationship.type == "requestSent" ? (
                <>
                   <button onClick={ () => { processFriendRequest(true); } }>Accept friend request</button>
                   <button onClick={ () => { processFriendRequest(false); } }>Reject friend request</button>
                </>
-            ) : userObject.relationship.type == 4 ? (
+            ) : userObject.relationship.type == "self" ? (
                <>
                   <button onClick={ () => { setEditMode(true); } }> edit account </button>
                   <button onClick={ () => { handleLogout(); } }> logout </button>

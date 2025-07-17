@@ -11,14 +11,13 @@ import { assignIds, removeIds } from '../tools/general'
 import LoadingPage from '../components/Loading';
 
 import RecipeObject from '../interfaces/RecipeObject';
-import UserObject from '../interfaces/UserObject';
 import IngredientObject from '../interfaces/IngredientObject';
 
 export default function NewEditRecipe () {
 
 	// define react hooks
 	const navigate = useNavigate();
-	const { userData } = useOutletContext<{userData: UserObject}>();
+	const { userId } = useOutletContext<{userId: string}>();
 	const { recipeId } = useParams(); //get recipeId if in url
 
 	const [loadingContent, setLoadingContent] = useState<boolean>(false);
@@ -37,7 +36,7 @@ export default function NewEditRecipe () {
 	//run useEffect on page start
 	useEffect (() => {
 		// make sure current user is signed in, otherwise redirect to login
-		if (!userData) { navigate('/login'); }
+		if (!userId) { navigate('/login'); }
 
 		// if recipeId exists, populate the page with data from server for associated recipe
 		if (recipeId) {

@@ -22,7 +22,7 @@ export default function Folder({ folderDetails }: FolderProps) {
    useEffect(() => {
       // fetch the first 3 users in the folder from server
       if (folderDetails._id == "requests") {
-         axios({ method: 'get', url: `/user/find?limit=3&relationship=2` })
+         axios({ method: 'get', url: `/user/find?category=requests&limit=3` })
          .then((response) => { setDisplayUsers(response.userObjectList) })
          .catch((error) => { console.error(error) });
       }
@@ -36,7 +36,8 @@ export default function Folder({ folderDetails }: FolderProps) {
    }, []);
 
    function openFolder() {
-      navigate(`/friendsList/${folderDetails._id}`);
+      if (folderDetails._id == "requests") { navigate('/searchUser/requests'); }
+      else { navigate(`/searchUser/friends/${folderDetails._id}`); }
    }
    
    return (

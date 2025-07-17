@@ -49,10 +49,10 @@ exports.find = async (req, res) => {
 
    // define variables for the request
    const _id = req.user?._id;
-   const { username, email, limit, skip, relationship, count } = req.query;
+   const { category, username, email, limit, skip, count } = req.query;
 
    // make sure no required fields are missing
-   if (relationship != 0 && !_id) { return res.status(401).json({ error: "user not signed in" }); };
+   if (category != 'all' && !_id) { return res.status(401).json({ error: "user not signed in" }); };
 
    let userList = []; // create empty array to hold user objects
    let query = {}; // create query for searching the database with required user fields
@@ -62,7 +62,7 @@ exports.find = async (req, res) => {
       if (username) query.username = { $regex: new RegExp(username, 'i') };
       if (email) query.email = { $regex: new RegExp(email, 'i') };
 
-      if (relationship == 1) {
+      if (category == 'friends') {
          // collect a list of friendship relationships user is involved in
          const friendshipList = await Friendship.find({ friendIds: _id });
          // extract the _ids of each non-signed in user
@@ -71,20 +71,11 @@ exports.find = async (req, res) => {
          query._id = { $in: friendsList };
       }
 
-      else if (relationship == 2) {
+      else if (category == 'requests') {
          // collect a list of friend requests user has received
          const receivedRequests = await FriendRequest.find({ receiverId: _id });
          // extract the _ids of each non-signed in user
          const requestList = receivedRequests.map((request) => request.senderId);
-         // add the _ids to the query
-         query._id = { $in: requestList };
-      }
-
-      else if (relationship == 3) {
-         // collect a list of friend requests user has sent
-         const sentRequests = await FriendRequest.find({ senderId: _id });
-         // extract the _ids of each non-signed in user
-         const requestList = sentRequests.map((request) => request.receiverId);
          // add the _ids to the query
          query._id = { $in: requestList };
       }

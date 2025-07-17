@@ -3,7 +3,6 @@ import React, { Suspense, lazy } from 'react'
 const LandingPage = lazy(() => import('./pages/LandingPage.tsx'))
 const AboutMe = lazy(() => import('./pages/AboutMe.tsx'))
 const EditRecipe = lazy(() => import('./pages/EditRecipe.tsx'))
-const FriendsList = lazy(() => import('./pages/FriendsList.tsx'))
 const Ingredients = lazy(() => import('./pages/Ingredients.tsx'))
 const Login = lazy(() => import('./pages/Login.tsx'))
 const Profile = lazy(() => import('./pages/Profile.tsx'))
@@ -38,17 +37,12 @@ export const routes = [
     requireUser: true
   },
   {
-    path: '/friendsList/:folderId?',
-    element: withSuspense(FriendsList),
-    requireUser: true
-  },
-  {
     path: '/login',
     element: withSuspense(Login),
     requireUser: false
   },
   {
-    path: '/profile/:userId?',
+    path: '/profile/:targetId?',
     element: withSuspense(Profile),
     requireUser: true
   },
@@ -68,7 +62,7 @@ export const routes = [
     requireUser: false
   },
   {
-    path: 'searchUser',
+    path: 'searchUser/:category/:folderId?', // category can be 'friends', 'requests', or 'all'
     element: withSuspense(SearchUser),
     requireUser: false
   },

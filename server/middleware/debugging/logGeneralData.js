@@ -12,7 +12,6 @@ function logGeneralData (req, res, next) {
   console.log("time of request: "+ "\x1b[35m%s\x1b[0m", formattedTime);
   console.log("active user:", !!req.user);
   if (req.user) { 
-    console.log("   username = " + "\x1b[32m%s\x1b[0m", req.user.username);
     console.log("        _id = " + "\x1b[32m%s\x1b[0m", req.user._id);
   }
   console.log("requested url: " + "\x1b[36m%s\x1b[0m", req.url);

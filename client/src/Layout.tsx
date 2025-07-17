@@ -4,19 +4,17 @@ import {Outlet} from 'react-router-dom'
 // internal imports
 import Nav from './components/Nav'
 
-import UserObject from './interfaces/UserObject'
-
 interface LayoutProps {
-  userData: UserObject | null;
+  userId: string | null;
 }
 
-export default function Layout({userData}: LayoutProps) {
+export default function Layout({userId}: LayoutProps) {
   return(
     <>
       <header />
-      <Nav userData={userData}/>
+      <Nav userId={userId}/>
       <main>
-        <Outlet context={{ userData }}/>
+        <Outlet context={{ userId }}/>
       </main>
     </>
   )

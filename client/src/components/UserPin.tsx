@@ -6,37 +6,33 @@ import { faBan, faCheck, faUser, faUserPlus, faX } from '@fortawesome/free-solid
 import axios from '../api/axios';
 import GrowingText from './GrowingText';
 import UserObject from '../interfaces/UserObject';
-import RelationshipObject from '../interfaces/RelationshipObject';
 
 interface UserPinProps {
    userObject: UserObject;
 }
 
-export default function UserPin({ userObject }: UserPinProps) {
+export default function UserPin({ userObject: parentUserObject }: UserPinProps) {
   
    const navigate = useNavigate();
    const titleRef = useRef(null);
 
+   const [userObject, setUserObject] = useState<UserObject>(parentUserObject);
    const [iconsHidden, setIconsHidden] = useState<boolean>(false);
-   const [relationship, setRelationship] = useState<RelationshipObject>({ _id: '0', target: '0', type: 0 });
 
    // useEffect for handling new a userObject
    useEffect(() => {
-      // check if relationship is already defined in the userObject
-      if (userObject.relationship) { setRelationship(userObject.relationship); }
-      else {
-         // if not, get the relationship from the server
+      // make sure userObject has a relationship defined
+      if(!userObject.relationship) {
          axios({ method: 'get', url: `user/defineRelationship/${userObject._id}` })
-         .then((response) => { setRelationship(response); });
+         .then((response) => { setUserObject((currentUserObject) => ({ ...currentUserObject, relationship: response })); });
       }
    }, [userObject]);
 
    // useEffect for handling changes in the relationship
    useEffect(() => { 
       setIconsHidden(false);
-   }, [relationship]);
+   }, [userObject.relationship]);
    
-
    function viewProfile() {
       navigate(`/profile/${userObject._id}`);
    }
@@ -44,25 +40,21 @@ export default function UserPin({ userObject }: UserPinProps) {
    function sendFriendRequest () {
       setIconsHidden(true);
       axios({ method: 'post', url: 'user/sendFriendRequest', data: {receiverId: userObject._id} })
-      .then((response) => {
-         setRelationship({ _id: response._id, target: userObject._id, type: 2 });
-      });
+      .then((response) => { setUserObject((currentUserObject) => ({ ...currentUserObject, relationship: { _id: response._id, target: userObject._id, type: "requestReceived" } })); });
    }
    
    function acceptFriendRequest () {
+      if (!userObject.relationship) { return; }
       setIconsHidden(true);
-      axios({ method: 'post', url: 'user/processFriendRequest', data: { requestId: relationship._id, accept: true } })
-      .then((response) => {
-         setRelationship({ _id: response._id, target: userObject._id, type: 1 });
-      });
+      axios({ method: 'post', url: 'user/processFriendRequest', data: { requestId: userObject.relationship._id , accept: true } })
+      .then((response) => { setUserObject((currentUserObject) => ({ ...currentUserObject, relationship: { _id: response._id, target: userObject._id, type: "friend" } })); });
    }
 
    function rejectFriendRequest () {
+      if (!userObject.relationship) { return; }
       setIconsHidden(true);
-      axios({ method: 'post', url: 'user/processFriendRequest', data: { requestId: relationship._id, accept: false } })
-      .then(() => {
-         setRelationship({ _id: '0', target: '0', type: 0 });
-      });
+      axios({ method: 'post', url: 'user/processFriendRequest', data: { requestId: userObject.relationship._id, accept: false } })
+      .then(() => { setUserObject((currentUserObject) => ({ ...currentUserObject, relationship: { _id: '0', target: '0', type: "none" } })); });
    }
 
    return (
@@ -80,25 +72,27 @@ export default function UserPin({ userObject }: UserPinProps) {
          <p>email: {userObject.email}</p>
          <p>
             relationship: {
-            relationship.type == 0 ? 'none' : 
-            relationship.type == 1 ? 'friends' : 
-            relationship.type == 4 ? 'your account' : 
+            !userObject.relationship ? 'none' :
+            userObject.relationship.type == 'none' ? 'none' : 
+            userObject.relationship.type == 'friend' ? 'friends' : 
+            userObject.relationship.type == 'self' ? 'your account' : 
             'friendship pending'}
          </p>
          </div>
          <div className={`icons ${iconsHidden ? 'hidden' : ''}`}>
-         { relationship.type == 0 ? (
+         { !userObject.relationship ? null 
+         : userObject.relationship.type == 'none' ? (
             <FontAwesomeIcon icon={faUserPlus} onClick={() => { sendFriendRequest() } } />
-         ) : relationship.type == 1 ? (
+         ) : userObject.relationship.type == 'friend' ? (
             <FontAwesomeIcon icon={faUser} onClick={ () => { viewProfile() } } />
-         ) : relationship.type == 2 ? (
+         ) : userObject.relationship.type == 'requestReceived' ? (
             <FontAwesomeIcon icon={faBan} onClick={ () => { rejectFriendRequest() } } />
-         ) : relationship.type == 3 ? (
+         ) : userObject.relationship.type == 'requestSent' ? (
             <>
                <FontAwesomeIcon icon={faCheck} onClick={ () => { acceptFriendRequest() } } />
                <FontAwesomeIcon icon={faX} onClick={ () => { rejectFriendRequest() } } />
             </>
-         ) : relationship.type == 4 ? (
+         ) : userObject.relationship.type == 'self' ? (
             <FontAwesomeIcon icon={faUser} onClick={ () => { viewProfile() } } />
          ) : null }
          </div>

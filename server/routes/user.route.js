@@ -51,13 +51,12 @@ Expects 6 arguments from query:
    email: string (optional)
    limit: number (optional, default 6)
    skip: number (optional, default 0)
-   relationship: number (optional)
+   category: "friends" | "requests" | "all" (optional, default "all")
    count: boolean (optional, default false)
 
 Route description:
    - Collects a list of all users in the database that contain {username} and {email}
-   - If relationship field exists, only include userObjects that the current user has the given relationship with
-   - Reminder: 1 = friends, 2 = received friend requests, 3 = sent friend requests
+   - If category field exists, only include userObjects that the current user has the given relationship with
    - Skip over the first {skip} number of results found
    - Limit the list size to the {limit} number of objects
    - Return the list to the client
@@ -79,7 +78,7 @@ router.get("/find",
       query("email").optional().isString().isEmail().withMessage("email must be a valid email address"),
       query("limit").optional().isInt({ min: 1, max: 90 }).toInt().withMessage("limit must be an integer between 1 and 90"),
       query("skip").optional().isInt({ min: 0, max: 900 }).toInt().withMessage("skip must be an integer between 0 and 900"),
-      query("relationship").optional().isInt({ min: 0, max: 4 }).toInt().withMessage("relationship must be an integer between 0 and 4"),
+      query("category").optional().isIn(["friends", "requests", "all"]).withMessage("category must be one of: friends, requests, all, any"),
       query("count").optional().isBoolean().withMessage("count must be a boolean"),
       checkExact()
    ],

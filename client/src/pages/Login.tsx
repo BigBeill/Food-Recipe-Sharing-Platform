@@ -2,12 +2,11 @@ import { useRef, useState, useEffect } from 'react'
 import { useNavigate, useOutletContext } from 'react-router-dom';
 
 import axios from '../api/axios';
-import UserObject from '../interfaces/UserObject';
 
 function Login() {
    const errorRef = useRef(null);
    const navigate = useNavigate();
-   const { userData } = useOutletContext<{userData: UserObject}>();
+   const { userId } = useOutletContext<{userId: string}>();
 
    const [username, setUsername] = useState<string>("");
    const [password, setPassword] = useState<string>("");
@@ -15,7 +14,7 @@ function Login() {
    const [errorMessage, setErrorMessage] = useState<string>("");
 
    useEffect(() => {
-      if (userData) navigate('/profile');
+      if (userId) navigate('/profile');
       document.body.classList.add('loginBackground');
       return () => { document.body.classList.remove('loginBackground'); }
    }, []);
