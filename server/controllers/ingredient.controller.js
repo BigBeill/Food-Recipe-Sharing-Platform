@@ -86,12 +86,14 @@ exports.find = async (req, res) => {
          if (foodDescription) {
             const foodDescriptionArray = foodDescription.split(" ");
             queryFilter += ' WHERE common_name ILIKE $1';
-            for (let i = 2; i <= foodDescriptionArray.length; i++) { queryFilter += ` AND food_description ILIKE $${i}`; }
+            for (let i = 2; i <= foodDescriptionArray.length; i++) { queryFilter += ` AND common_name ILIKE $${i}`; }
             values = foodDescriptionArray.map((substring) => { return `%${substring}%` });
          }
 
          // get a count of all results that match search criteria
          let query = 'SELECT COUNT(*) FROM common_food_names' + queryFilter;
+         console.log("query: ", query);
+         console.log("values: ", values);
          const countData = await postgresConnection.query(query, values);
 
          // collect the actual data from the common_food_names table

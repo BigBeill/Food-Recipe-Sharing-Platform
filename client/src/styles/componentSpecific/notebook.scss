@@ -15,9 +15,10 @@
       color: var(--text-color-main);
 
       flex: 1;
+      min-height: 0;
       width: 100%;
       min-width: 75rem;
-      height: 100%;
+      overflow: hidden;
       position: relative;
       display: flex;
       gap: .6rem;

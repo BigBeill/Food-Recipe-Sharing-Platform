@@ -52,6 +52,7 @@ export default function NewEditRecipe () {
 
 	//function for sending recipe changes to server
 	function submitRecipe(){
+		setErrorMessage("");
 
 		// check for any empty fields
 		if (!recipeObject.title) { 
