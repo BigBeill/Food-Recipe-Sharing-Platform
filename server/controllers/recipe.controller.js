@@ -69,7 +69,7 @@ finds a list of recipes in the database that match the query parameters
 exports.find = async (req, res) => {
 
    // get query parameters from request
-   const { title, ingredients, limit, skip, count, category = 'public', includeNutrition = false } = req.query;
+   const { title, foodIdList, limit, skip, count, category = 'public', includeNutrition = false } = req.query;
    const userId = req.user?._id;
 
    // make sure user is signed in if visibility is not public
@@ -105,7 +105,8 @@ exports.find = async (req, res) => {
 
    try {
       if (title) { query.title = { $regex: new RegExp(title, 'i') } }
-      if (ingredients) { query.ingredients = { $all: ingredients.split(',') } }
+      if (foodIdList) { query["ingredients.foodId"] = { $all: foodIdList }; }
+      console.log("Query: ", query);
       recipeData = await recipes.find(query)
       .limit(limit)
       .skip(skip);

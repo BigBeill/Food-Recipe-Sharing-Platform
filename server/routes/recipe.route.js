@@ -49,7 +49,7 @@ Type:
 Expects 6 arguments from query:
    category: enum["public", "friends", "personal"] (optional, default "public")
    title: string (optional)
-   ingredients: number[] (optional)
+   foodIdList: number[] (optional)
    limit: number (optional, default 6)
    skip: number (optional, default 0)
    count: boolean (optional, default false)
@@ -77,12 +77,8 @@ router.get('/find',
    [
       query("category").optional().isString().isIn(["public", "friends", "personal"]).withMessage("category must be one of the following: all, friends, personal"),
       query("title").optional().isString().isLength({ min: 3, max: 90 }).withMessage("title must be a string between 3 and 100 characters"),
-      query("ingredients").optional().isArray().withMessage("ingredients must be an array")
-      .custom((ingredients) => {
-         ingredients.map((ingredient) => { return Number(ingredient); })
-         if (!ingredients.every((ingredient) => { return Number.isInteger(ingredient); })) { throw new Error("ingredients must be an array of integers"); }
-         else { return true; }
-      }),
+      query("foodIdList").optional().isArray().withMessage("ingredientIdList must be an array"),
+      query("foodIdList.*").toInt().isInt().withMessage("All ingredientIds must be an integer"),
       query("limit").optional().toInt().isInt({ min: 1, max: 90 }).withMessage("limit must be an integer between 1 and 90"),
       query("skip").optional().toInt().isInt({ min: 0, max: 900 }).withMessage("skip must be an integer between 0 and 900"),
       query("count").optional().isBoolean().withMessage("count must be a boolean"),
