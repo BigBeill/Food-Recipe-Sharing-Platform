@@ -58,12 +58,12 @@ export default function UserPin({ userObject: parentUserObject }: UserPinProps) 
    }
 
    return (
-      <div className='userPin'>
+      <div className='userObjectView pin'>
          <div className="centredVertically" ref={titleRef} onClick={ () => { viewProfile() } }>
-         <GrowingText text={userObject.username} parentDiv={titleRef} />
+            <GrowingText text={userObject.username} parentDiv={titleRef} />
          </div>
          <div onClick={ () => { viewProfile() } }>
-         <img src='/profile-photo.png' alt='profile picture' />
+            <img src='/profile-photo.png' alt='profile picture' />
          </div>
 
          <div className='styleDiv'></div>

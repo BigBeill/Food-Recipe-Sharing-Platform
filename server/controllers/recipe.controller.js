@@ -16,9 +16,6 @@ exports.getObject = async (req, res) => {
    const userId = req.user?._id;
    const { recipeId, includeNutrition = false } = req.params;
 
-   if (includeNutrition) { console.log("includeNutrition is true, nutrition field will be attached to recipe object"); }
-   else { console.log("includeNutrition is false, nutrition field will not be attached to recipe object"); }
-
    const recipe = {
       _id: recipeId
    }
@@ -106,7 +103,6 @@ exports.find = async (req, res) => {
    try {
       if (title) { query.title = { $regex: new RegExp(title, 'i') } }
       if (foodIdList) { query["ingredients.foodId"] = { $all: foodIdList }; }
-      console.log("Query: ", query);
       recipeData = await recipes.find(query)
       .limit(limit)
       .skip(skip);

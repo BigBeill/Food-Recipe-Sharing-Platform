@@ -1,4 +1,3 @@
-import "../../styles/pageSpecific/recipePreview.scss";
 import { useRef, useState } from "react";
 import { useNavigate, useOutletContext } from "react-router-dom";
 
@@ -32,7 +31,7 @@ export default function RecipePreview({ recipe }: RecipePreviewProps) {
 
    return (
       <>
-      <div className="recipePreviewPage">
+      <div className="recipeObjectView previewPage">
          <div className="titleContainer" ref={titleRef}>
             <GrowingText text={recipe.title} parentDiv={titleRef}/>
          </div>
@@ -48,18 +47,18 @@ export default function RecipePreview({ recipe }: RecipePreviewProps) {
                ))}
             </ul>
          </div>
-         <div className="nutritionInformation">
+         <div className="displayNutritionalInformation">
             { recipe.nutrition ? 
             <>
-               <p>Calories: {recipe.nutrition.calories}</p>
-               <p>Fat: {recipe.nutrition.fat}</p>
-               <p>Cholesterol: {recipe.nutrition.cholesterol}</p>
-               <p>Sodium: {recipe.nutrition.sodium}</p>
-               <p>Potassium: {recipe.nutrition.potassium}</p>
-               <p>Carbohydrates: {recipe.nutrition.carbohydrates}</p>
-               <p>Fibre: {recipe.nutrition.fibre}</p>
-               <p>Sugar: {recipe.nutrition.sugar}</p>
-               <p>Protein: {recipe.nutrition.protein}</p>
+               <p>Calories: {recipe.nutrition.calories.toFixed(2)}</p>
+               <p>Fat: {recipe.nutrition.fat.toFixed(2)}</p>
+               <p>Cholesterol: {recipe.nutrition.cholesterol.toFixed(2)}</p>
+               <p>Sodium: {recipe.nutrition.sodium.toFixed(2)}</p>
+               <p>Potassium: {recipe.nutrition.potassium.toFixed(2)}</p>
+               <p>Carbohydrates: {recipe.nutrition.carbohydrates.toFixed(2)}</p>
+               <p>Fibre: {recipe.nutrition.fibre.toFixed(2)}</p>
+               <p>Sugar: {recipe.nutrition.sugar.toFixed(2)}</p>
+               <p>Protein: {recipe.nutrition.protein.toFixed(2)}</p>
             </>
             : null }
          </div>

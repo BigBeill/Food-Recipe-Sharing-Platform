@@ -35,22 +35,22 @@ export default function Recipe({recipe}: RecipeParams) {
    }
 
    return (
-      <div className="standardPage">
+      <div className="recipeObjectView fullViewPage">
          <h1>{recipeObject.title}</h1>
          <p>{recipeObject.image}</p>
          <h2>Nutrition</h2>
          <ul>
             { recipeObject.nutrition ? 
             <>
-               <li>Calories: {recipeObject.nutrition.calories}</li>
-               <li>Fat: {recipeObject.nutrition.fat}</li>
-               <li>Cholesterol: {recipeObject.nutrition.cholesterol}</li>
-               <li>Sodium: {recipeObject.nutrition.sodium}</li>
-               <li>Potassium: {recipeObject.nutrition.potassium}</li>
-               <li>Carbohydrates: {recipeObject.nutrition.carbohydrates}</li>
-               <li>Fibre: {recipeObject.nutrition.fibre}</li>
-               <li>Sugar: {recipeObject.nutrition.sugar}</li>
-               <li>Protein: {recipeObject.nutrition.protein}</li>
+               <li>Calories: {recipeObject.nutrition.calories.toFixed(2)}</li>
+               <li>Fat: {recipeObject.nutrition.fat.toFixed(2)}</li>
+               <li>Cholesterol: {recipeObject.nutrition.cholesterol.toFixed(2)}</li>
+               <li>Sodium: {recipeObject.nutrition.sodium.toFixed(2)}</li>
+               <li>Potassium: {recipeObject.nutrition.potassium.toFixed(2)}</li>
+               <li>Carbohydrates: {recipeObject.nutrition.carbohydrates.toFixed(2)}</li>
+               <li>Fibre: {recipeObject.nutrition.fibre.toFixed(2)}</li>
+               <li>Sugar: {recipeObject.nutrition.sugar.toFixed(2)}</li>
+               <li>Protein: {recipeObject.nutrition.protein.toFixed(2)}</li>
             </>
             : null }
          </ul>

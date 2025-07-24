@@ -86,7 +86,7 @@ export default function Profile() {
    if (fetchingUserData) { return <Loading /> }
 
    return (
-      <div className='displayUserData'>
+      <div className='userObjectView fullViewPage'>
          <div ref={titleParent} className='centredVertically'>
             <GrowingText text={userObject.username} parentDiv={titleParent} />
          </div>

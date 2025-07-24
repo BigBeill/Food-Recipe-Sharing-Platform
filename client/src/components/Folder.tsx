@@ -41,7 +41,7 @@ export default function Folder({ folderDetails }: FolderProps) {
    }
    
    return (
-      <div className="displayFolder">
+      <div className="folderObjectView">
 
          <div className="userCards shielded">
          { displayUsers[2] ? (

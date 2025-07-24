@@ -60,24 +60,25 @@ async function verifyObject (recipe, insideDatabase = true, includeNutrition = t
    // check for any missing fields in the recipe object
    let invalidFields = await checkInvalidFields();
 
-   if (invalidFields.length == 0) { return recipeObject; } // no missing fields return object
-   if (!insideDatabase) { throw new Error('missing fields in recipe object: ' + invalidFields.join(', ')); } // return error if insideDatabase is false
+   if (invalidFields.length != 0) {  
+      if (!insideDatabase) { throw new Error('missing fields in recipe object: ' + invalidFields.join(', ')); } // return error if insideDatabase is false
 
-   // search the database for any missing fields
-   try {
-      const updatedRecipe = await recipes.findOne({ _id: recipe._id }, invalidFields.join(' '));
-      if (!updatedRecipe) { throw new Error('recipe not found in database'); }
-      invalidFields.forEach((field) => { recipeObject[field] = updatedRecipe[field]; });
-   }
-   catch (error) {
-      console.log("failed to search database for missing fields belonging to recipe:", recipe);
-      console.error(error);
-      throw new Error('failed to search database for missing fields');
-   }
+      // search the database for any missing fields
+      try {
+         const updatedRecipe = await recipes.findOne({ _id: recipe._id }, invalidFields.join(' '));
+         if (!updatedRecipe) { throw new Error('recipe not found in database'); }
+         invalidFields.forEach((field) => { recipeObject[field] = updatedRecipe[field]; });
+      }
+      catch (error) {
+         console.log("failed to search database for missing fields belonging to recipe:", recipe);
+         console.error(error);
+         throw new Error('failed to search database for missing fields');
+      }
 
-   // make sure all fields are present after searching the database
-   invalidFields = await checkInvalidFields();
-   if (invalidFields.length != 0) { throw new Error('missing fields in recipe object: ' + invalidFields.join(', ')); }
+      // make sure all fields are present after searching the database
+      invalidFields = await checkInvalidFields();
+      if (invalidFields.length != 0) { throw new Error('missing fields in recipe object: ' + invalidFields.join(', ')); }
+   }
 
    if (!includeNutrition) { return {
       ...(insideDatabase ? { _id: recipeObject._id, } : {}),
@@ -147,9 +148,21 @@ async function attachNutritionField (recipe) {
    let totalNutrients = { calories: 0, fat: 0, cholesterol: 0, sodium: 0, potassium: 0, carbohydrates: 0, fibre: 0, sugar: 0, protein: 0 };
 
    try {
-      for (let ingredient of recipe.ingredients) {
-         if (!ingredient.nutrition) { ingredient = await ingredientUtils.attachNutritionField(ingredient); }
+      recipe.ingredients = await Promise.all(
+         recipe.ingredients.map(async (ingredient) => {
+            if (!ingredient.nutrition) { ingredient = await ingredientUtils.attachNutritionField(ingredient); }
+            return ingredient;
+         })
+      );
+   }
+   catch (error) {
+      console.log('failed to attach nutrition field to all ingredients');
+      console.error(error);
+      throw new Error ('failed to attach nutrition field to all ingredients');
+   }
 
+   try {
+      for (let ingredient of recipe.ingredients) {
          totalNutrients.calories += ingredient.nutrition.calories || 0;
          totalNutrients.fat += ingredient.nutrition.fat || 0;
          totalNutrients.cholesterol += ingredient.nutrition.cholesterol || 0;
@@ -159,13 +172,12 @@ async function attachNutritionField (recipe) {
          totalNutrients.fibre += ingredient.nutrition.fibre || 0;
          totalNutrients.sugar += ingredient.nutrition.sugar || 0;
          totalNutrients.protein += ingredient.nutrition.protein || 0;
-
       }
    }
    catch (error) {
-      console.log('failed to collect nutrient data for recipe:', recipe);
+      console.log('failed to apply nutrition data from ingredients to recipe');
       console.error(error);
-      throw new Error ('failed to collect nutrient data from database');
+      throw new Error ('failed to apply nutrition data from ingredients to recipe');
    }
 
    return { ...recipe, nutrition: totalNutrients };

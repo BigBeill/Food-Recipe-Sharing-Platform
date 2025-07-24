@@ -166,17 +166,15 @@ async function attachNutritionField (ingredient) {
       let nutritionData = data.rows;
 
       // if any data is missing, set it to 0
-      {
-         if (nutritionData[0].nutrient_id != 203) nutritionData.splice(0, 0, { nutrient_id: '203', nutrient_value: '0' } );
-         if (nutritionData[1].nutrient_id != 204) nutritionData.splice(1, 0, { nutrient_id: '204', nutrient_value: '0' } );
-         if (nutritionData[2].nutrient_id != 205) nutritionData.splice(2, 0, { nutrient_id: '205', nutrient_value: '0' } );
-         if (nutritionData[3].nutrient_id != 208) nutritionData.splice(3, 0, { nutrient_id: '208', nutrient_value: '0' } );
-         if (nutritionData[4].nutrient_id != 269) nutritionData.splice(4, 0, { nutrient_id: '269', nutrient_value: '0' } );
-         if (nutritionData[5].nutrient_id != 291) nutritionData.splice(5, 0, { nutrient_id: '291', nutrient_value: '0' } );
-         if (nutritionData[6].nutrient_id != 306) nutritionData.splice(6, 0, { nutrient_id: '306', nutrient_value: '0' } );
-         if (nutritionData[7].nutrient_id != 307) nutritionData.splice(7, 0, { nutrient_id: '307', nutrient_value: '0' } );
-         if (!nutritionData[8]) nutritionData.splice(8, 0, { nutrient_id: '601', nutrient_value: '0' } );
-      }
+      if (nutritionData[0].nutrient_id != 203) nutritionData.splice(0, 0, { nutrient_id: '203', nutrient_value: '0' } );
+      if (nutritionData[1].nutrient_id != 204) nutritionData.splice(1, 0, { nutrient_id: '204', nutrient_value: '0' } );
+      if (nutritionData[2].nutrient_id != 205) nutritionData.splice(2, 0, { nutrient_id: '205', nutrient_value: '0' } );
+      if (nutritionData[3].nutrient_id != 208) nutritionData.splice(3, 0, { nutrient_id: '208', nutrient_value: '0' } );
+      if (nutritionData[4].nutrient_id != 269) nutritionData.splice(4, 0, { nutrient_id: '269', nutrient_value: '0' } );
+      if (nutritionData[5].nutrient_id != 291) nutritionData.splice(5, 0, { nutrient_id: '291', nutrient_value: '0' } );
+      if (nutritionData[6].nutrient_id != 306) nutritionData.splice(6, 0, { nutrient_id: '306', nutrient_value: '0' } );
+      if (nutritionData[7].nutrient_id != 307) nutritionData.splice(7, 0, { nutrient_id: '307', nutrient_value: '0' } );
+      if (!nutritionData[8]) nutritionData.splice(8, 0, { nutrient_id: '601', nutrient_value: '0' } );
 
       // put all values into a json file as parseInts
       nutrients = {
@@ -190,55 +188,52 @@ async function attachNutritionField (ingredient) {
          sugar: parseInt(nutritionData[4].nutrient_value),
          protein: parseInt(nutritionData[0].nutrient_value)
       }
-
-      // convert all nutrients to per 1g
-      Object.keys(nutrients).forEach((key) => { nutrients[key] /= 100 });
    }
    catch (error) {
       console.log('failed to collect nutritional data from database for ingredient:', ingredient);
       console.error(error);
       throw new Error('failed to collect nutrient data from database');
    }
+   
+   // apply the conversionFactorValue
+   try {
+      //get the conversionFactorValue
+      const query = `SELECT conversion_factor_value FROM conversion_factor WHERE food_id = $1 AND measure_id = $2 LIMIT 1`;
+      const values = [ingredient.foodId, ingredient.portion.measureId];
+      const data = await postgresConnection.query(query, values);
+      let conversionFactorValue = 1;
+      if (data.rows.length == 0) { console.log("\x1b[31m%s\x1b[0m", "WARNING: no conversion factor found for ingredient: ", ingredient.foodId, " and measurement: ", ingredient.portion.measureId); }
+      else { conversionFactorValue = data.rows[0]?.conversion_factor_value; }
 
-   if (ingredient.portion.measureId != 1489) { // measureId 1489 is "g" (grams) and does not require conversion
-      // apply the conversionFactorValue
-      try {
-         //get the conversionFactorValue
-         const query = `SELECT conversion_factor_value FROM conversion_factor WHERE food_id = $1 AND measure_id = $2 LIMIT 1`;
-         const values = [ingredient.foodId, ingredient.portion.measureId];
-         const data = await postgresConnection.query(query, values);
-         let conversionFactorValue = 0;
-         if (data.rows.length == 0) { console.log("\x1b[31m%s\x1b[0m", "WARNING: no conversion factor found for ingredient: ", ingredient.foodId, " and measurement: ", ingredient.portion.measureId); }
-         else { conversionFactorValue = parseInt(data.rows[0]?.conversion_factor_value); }
-
-         // apply conversionFactorValue to each item in nutrition
-         Object.keys(nutrients).forEach((key) => { nutrients[key] *= conversionFactorValue; });
-      }
-      catch (error) {
-         console.log('failed to collect conversionFactorValue for ingredient:', ingredient);
-         console.error(error);
-         throw new Error('failed to collect conversionFactorValue for ingredient');
-      }
-
-      // divide by number of items in measureDescription
-      try {
-         //get the number of items in the measureDescription
-         const query = `SELECT measure_description FROM measure_name WHERE measure_id = $1 LIMIT 1`;
-         const values = [ingredient.portion.measureId];
-         const data = await postgresConnection.query(query, values);
-         const brokenMeasureDescription = breakupMeasureDescription(data.rows[0].measure_description);
-
-         // divide the nutrients by the number of items in the measureDescription
-         Object.keys(nutrients).forEach((key) => { nutrients[key] /= brokenMeasureDescription.integer });
-      }
-      catch (error) {
-         console.log('failed to apply conversion factor to ingredient:', ingredient);
-         console.error(error);
-         throw new Error('failed to apply conversion factor to ingredient');
-      }
+      // apply conversionFactorValue to each item in nutrition
+      Object.keys(nutrients).forEach((key) => { nutrients[key] *= conversionFactorValue; });
+   }
+   catch (error) {
+      console.log('failed to collect conversionFactorValue for ingredient:', ingredient);
+      console.error(error);
+      throw new Error('failed to collect conversionFactorValue for ingredient');
    }
 
-   // multiply by the amount
+   // divide by number of items in measureDescription
+   try {
+      //get the number of items in the measureDescription
+      const query = `SELECT measure_description FROM measure_name WHERE measure_id = $1 LIMIT 1`;
+      const values = [ingredient.portion.measureId];
+      const data = await postgresConnection.query(query, values);
+      const brokenMeasureDescription = breakupMeasureDescription(data.rows[0].measure_description);
+
+      // divide the nutrients by the number of items in the measureDescription
+      Object.keys(nutrients).forEach((key) => { nutrients[key] /= brokenMeasureDescription.integer });
+   }
+   catch (error) {
+      console.log('failed to apply conversion factor to ingredient:', ingredient);
+      console.error(error);
+      throw new Error('failed to apply conversion factor to ingredient');
+   }
+
+   // multiply by the ingredient amount
+   Object.keys(nutrients).forEach((key) => { nutrients[key] *= ingredient.portion.amount; });
+
    return {...ingredient, nutrition: nutrients};
 };
 
