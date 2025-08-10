@@ -19,9 +19,12 @@ export default function LandingPage() {
             <p>The person I made that list for knows who they are</p>
             <p>please enjoy, and if your interested in understanding how any of this is done check out https://github.com/BigBeill/food-website</p>
 
-            <a href="/publicRecipes" className="button">Explore Recipes</a>
-            <a href="/login" className="button">Login</a>
-            <a href="/register" className="button">Register</a>
+            <ul>
+               <li><a href="/publicRecipes" className="button">Explore Recipes</a></li>
+               <li><a href="/login" className="button">Login</a></li>
+               <li><a href="/register" className="button">Register</a></li>
+               <li><a href="/aboutMe" className="button">Learn About Me</a></li>
+            </ul>
          </div>
       </>
    );
