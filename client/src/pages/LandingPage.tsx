@@ -20,7 +20,7 @@ export default function LandingPage() {
             <p>please enjoy, and if your interested in understanding how any of this is done check out https://github.com/BigBeill/food-website</p>
 
             <ul>
-               <li><a href="/publicRecipes" className="button">Explore Recipes</a></li>
+               <li><a href="/searchRecipes/public" className="button">Explore Recipes</a></li>
                <li><a href="/login" className="button">Login</a></li>
                <li><a href="/register" className="button">Register</a></li>
                <li><a href="/aboutMe" className="button">Learn About Me</a></li>
