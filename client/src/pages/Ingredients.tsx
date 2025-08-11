@@ -78,8 +78,8 @@ function IngredientList({groupID, clickHandler}: IngredientListProps) {
 	const [ingredientList, setIngredientList] = useState<IngredientObject[]>([])
 
 	useEffect(() => {
-		axios({ method: 'get', url:`ingredient/list?foodGroupId=${groupID}` })
-		.then(setIngredientList)
+		axios({ method: 'get', url:`ingredient/find?foodGroupId=${groupID}` })
+		.then((response) => { setIngredientList(response.ingredientObjectArray) })
 		.catch(error => console.error(error));
 	},[])
 

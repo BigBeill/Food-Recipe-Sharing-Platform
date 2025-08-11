@@ -130,9 +130,9 @@ exports.find = async (req, res) => {
 
          // create the foodGroupId portion of the query filter
          if (foodGroupId) {
-            if (filterValues.length == 0) { queryFilter += ' WHERE'; }
+            if (values.length == 0) { queryFilter += ' WHERE'; }
             else { queryFilter += ' AND'; }
-            queryFilter += ` food_group_id=$${filterValues.length + 1}`;
+            queryFilter += ` food_group_id=$${values.length + 1}`;
             values.push(foodGroupId);
          }
 
@@ -140,7 +140,6 @@ exports.find = async (req, res) => {
          let countData;
          if (count) {
             query = 'SELECT COUNT(*) FROM food_name' + queryFilter;
-            values = filterValues;
             countData = await postgresConnection.query(query, values);
          }
 
